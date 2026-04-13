@@ -1,0 +1,17 @@
+Function get_db_session:
+- pull session_factory from request.app.state
+- yield a managed SQLAlchemy Session per request
+
+Service getter functions:
+- expose StorageService, AuthService, DataVersionService, CatalogService, SessionService
+- expose CacheService, LeaderboardService, EventStreamService, MetricsService, BenchmarkService
+- expose AIRunService and AdminJobService from app.state
+
+Function get_current_user:
+- decode backend bearer token and set request.state.user_id when authentication succeeds
+
+Function get_required_user:
+- enforce authenticated access for protected routes
+
+Function get_admin_user:
+- validate HTTP Basic credentials against ADMIN_USERNAME and ADMIN_PASSWORD

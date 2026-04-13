@@ -1,0 +1,5 @@
+Class BenchmarkService:
+- load local JSON benchmark datasets into benchmark_datasets and benchmark_cases tables
+- convert stored case payloads into MatchContext plus ResponsePreferences for execution
+- grade results using score thresholds, required items, summary keywords, and exact slot expectations
+- keep benchmark dataset loading and grading logic separate from the admin job runner

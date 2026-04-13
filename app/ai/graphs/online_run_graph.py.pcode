@@ -1,0 +1,5 @@
+Class OnlineRunGraph:
+- build a small LangGraph state machine
+- run prepare_context -> generate_result -> validate_result
+- keep orchestration linear and inspectable for v1
+- expose invoke() so the service layer can reuse the same pipeline for online runs and offline jobs

@@ -1,0 +1,28 @@
+Constant JSONType:
+- use JSONB on PostgreSQL and generic JSON elsewhere
+
+Class User:
+- store Clerk identity plus profile/preferences
+
+Class DataVersion:
+- store version metadata, source_root, manifest path, and active flag
+
+Class SessionRecord:
+- store persistent session index rows and transcript metadata
+
+Class AIRun:
+- store run metadata, canonical hashes, cache state, and structured result
+
+Class BaselineBuild:
+- store one default build/rune baseline per game + data_version + champion
+
+Class CachedContextResult:
+- store strong-cache results keyed by response_variant_hash
+
+Class LeaderboardEntry:
+- store current top score rows for one leaderboard scope
+
+Indexes:
+- enforce active data_version uniqueness
+- support common listing, cache, and leaderboard query patterns
+- use an expression unique index to treat NULL enemy_champion_slug as one shared scope

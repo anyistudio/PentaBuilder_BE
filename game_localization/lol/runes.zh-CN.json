@@ -1,0 +1,852 @@
+[
+  {
+    "slug": "lol-absolute-focus",
+    "source_slug": "lol-absolute-focus",
+    "zh_official_name": "绝对专注",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Absolute Focus",
+      "zh-CN": "绝对专注"
+    }
+  },
+  {
+    "slug": "lol-absorb-life",
+    "source_slug": "lol-absorb-life",
+    "zh_official_name": "吸收生命力",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Absorb Life",
+      "zh-CN": "吸收生命力"
+    }
+  },
+  {
+    "slug": "lol-aftershock",
+    "source_slug": "lol-aftershock",
+    "zh_official_name": "余震",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Aftershock",
+      "zh-CN": "余震"
+    }
+  },
+  {
+    "slug": "lol-approach-velocity",
+    "source_slug": "lol-approach-velocity",
+    "zh_official_name": "行近速率",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Approach Velocity",
+      "zh-CN": "行近速率"
+    }
+  },
+  {
+    "slug": "lol-arcane-comet",
+    "source_slug": "lol-arcane-comet",
+    "zh_official_name": "奥术彗星",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Arcane Comet",
+      "zh-CN": "奥术彗星"
+    }
+  },
+  {
+    "slug": "lol-axiom-arcanist",
+    "source_slug": "lol-axiom-arcanist",
+    "zh_official_name": "公理秘术",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Axiom Arcanist",
+      "zh-CN": "公理秘术"
+    }
+  },
+  {
+    "slug": "lol-biscuit-delivery",
+    "source_slug": "lol-biscuit-delivery",
+    "zh_official_name": "饼干配送",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Biscuit Delivery",
+      "zh-CN": "饼干配送"
+    }
+  },
+  {
+    "slug": "lol-bone-plating",
+    "source_slug": "lol-bone-plating",
+    "zh_official_name": "骸骨镀层",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Bone Plating",
+      "zh-CN": "骸骨镀层"
+    }
+  },
+  {
+    "slug": "lol-cash-back",
+    "source_slug": "lol-cash-back",
+    "zh_official_name": "返现",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Cash Back",
+      "zh-CN": "返现"
+    }
+  },
+  {
+    "slug": "lol-celerity",
+    "source_slug": "lol-celerity",
+    "zh_official_name": "迅捷",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Celerity",
+      "zh-CN": "迅捷"
+    }
+  },
+  {
+    "slug": "lol-celestial-body",
+    "source_slug": "lol-celestial-body",
+    "zh_official_name": "星界躯体",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Celestial Body",
+      "zh-CN": "星界躯体"
+    }
+  },
+  {
+    "slug": "lol-cheap-shot",
+    "source_slug": "lol-cheap-shot",
+    "zh_official_name": "恶意中伤",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Cheap Shot",
+      "zh-CN": "恶意中伤"
+    }
+  },
+  {
+    "slug": "lol-chrysalis",
+    "source_slug": "lol-chrysalis",
+    "zh_official_name": "蛹化",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Chrysalis",
+      "zh-CN": "蛹化"
+    }
+  },
+  {
+    "slug": "lol-conditioning",
+    "source_slug": "lol-conditioning",
+    "zh_official_name": "调节",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Conditioning",
+      "zh-CN": "调节"
+    }
+  },
+  {
+    "slug": "lol-conqueror",
+    "source_slug": "lol-conqueror",
+    "zh_official_name": "征服者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Conqueror",
+      "zh-CN": "征服者"
+    }
+  },
+  {
+    "slug": "lol-cosmic-insight",
+    "source_slug": "lol-cosmic-insight",
+    "zh_official_name": "星界洞悉",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Cosmic Insight",
+      "zh-CN": "星界洞悉"
+    }
+  },
+  {
+    "slug": "lol-coup-de-grace",
+    "source_slug": "lol-coup-de-grace",
+    "zh_official_name": "致命一击",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Coup de Grace",
+      "zh-CN": "致命一击"
+    }
+  },
+  {
+    "slug": "lol-cut-down",
+    "source_slug": "lol-cut-down",
+    "zh_official_name": "砍倒",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Cut Down",
+      "zh-CN": "砍倒"
+    }
+  },
+  {
+    "slug": "lol-dark-harvest",
+    "source_slug": "lol-dark-harvest",
+    "zh_official_name": "黑暗收割",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Dark Harvest",
+      "zh-CN": "黑暗收割"
+    }
+  },
+  {
+    "slug": "lol-deep-ward",
+    "source_slug": "lol-deep-ward",
+    "zh_official_name": "深入守卫",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Deep Ward",
+      "zh-CN": "深入守卫"
+    }
+  },
+  {
+    "slug": "lol-demolish",
+    "source_slug": "lol-demolish",
+    "zh_official_name": "爆破",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Demolish",
+      "zh-CN": "爆破"
+    }
+  },
+  {
+    "slug": "lol-electrocute",
+    "source_slug": "lol-electrocute",
+    "zh_official_name": "电刑",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Electrocute",
+      "zh-CN": "电刑"
+    }
+  },
+  {
+    "slug": "lol-eyeball-collection",
+    "source_slug": "lol-eyeball-collection",
+    "zh_official_name": "眼球收集器",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Eyeball Collection",
+      "zh-CN": "眼球收集器"
+    }
+  },
+  {
+    "slug": "lol-first-strike",
+    "source_slug": "lol-first-strike",
+    "zh_official_name": "先攻",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "First Strike",
+      "zh-CN": "先攻"
+    }
+  },
+  {
+    "slug": "lol-fleet-footwork",
+    "source_slug": "lol-fleet-footwork",
+    "zh_official_name": "迅捷步法",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Fleet Footwork",
+      "zh-CN": "迅捷步法"
+    }
+  },
+  {
+    "slug": "lol-font-of-life",
+    "source_slug": "lol-font-of-life",
+    "zh_official_name": "生命源泉",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Font of Life",
+      "zh-CN": "生命源泉"
+    }
+  },
+  {
+    "slug": "lol-future-s-market",
+    "source_slug": "lol-future-s-market",
+    "zh_official_name": "未来市场",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Future's Market",
+      "zh-CN": "未来市场"
+    }
+  },
+  {
+    "slug": "lol-gathering-storm",
+    "source_slug": "lol-gathering-storm",
+    "zh_official_name": "风暴聚集",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Gathering Storm",
+      "zh-CN": "风暴聚集"
+    }
+  },
+  {
+    "slug": "lol-ghost-poro",
+    "source_slug": "lol-ghost-poro",
+    "zh_official_name": "幽灵魄罗",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ghost Poro",
+      "zh-CN": "幽灵魄罗"
+    }
+  },
+  {
+    "slug": "lol-glacial-augment",
+    "source_slug": "lol-glacial-augment",
+    "zh_official_name": "冰川增幅",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Glacial Augment",
+      "zh-CN": "冰川增幅"
+    }
+  },
+  {
+    "slug": "lol-grasp-of-the-undying",
+    "source_slug": "lol-grasp-of-the-undying",
+    "zh_official_name": "不灭之握",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Grasp of the Undying",
+      "zh-CN": "不灭之握"
+    }
+  },
+  {
+    "slug": "lol-grisly-mementos",
+    "source_slug": "lol-grisly-mementos",
+    "zh_official_name": "可怖纪念品",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Grisly Mementos",
+      "zh-CN": "可怖纪念品"
+    }
+  },
+  {
+    "slug": "lol-guardian",
+    "source_slug": "lol-guardian",
+    "zh_official_name": "守护者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Guardian",
+      "zh-CN": "守护者"
+    }
+  },
+  {
+    "slug": "lol-hail-of-blades",
+    "source_slug": "lol-hail-of-blades",
+    "zh_official_name": "丛刃",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hail of Blades",
+      "zh-CN": "丛刃"
+    }
+  },
+  {
+    "slug": "lol-hextech-flashtraption",
+    "source_slug": "lol-hextech-flashtraption",
+    "zh_official_name": "海克斯科技闪现罗网",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech Flashtraption",
+      "zh-CN": "海克斯科技闪现罗网"
+    }
+  },
+  {
+    "slug": "lol-ingenious-hunter",
+    "source_slug": "lol-ingenious-hunter",
+    "zh_official_name": "灵性猎手",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ingenious Hunter",
+      "zh-CN": "灵性猎手"
+    }
+  },
+  {
+    "slug": "lol-iron-skin",
+    "source_slug": "lol-iron-skin",
+    "zh_official_name": "钢铁皮肤",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Iron Skin",
+      "zh-CN": "钢铁皮肤"
+    }
+  },
+  {
+    "slug": "lol-jack-of-all-trades",
+    "source_slug": "lol-jack-of-all-trades",
+    "zh_official_name": "多面手",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Jack of All Trades",
+      "zh-CN": "多面手"
+    }
+  },
+  {
+    "slug": "lol-kleptomancy",
+    "source_slug": "lol-kleptomancy",
+    "zh_official_name": "行窃预兆",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Kleptomancy",
+      "zh-CN": "行窃预兆"
+    }
+  },
+  {
+    "slug": "lol-last-stand",
+    "source_slug": "lol-last-stand",
+    "zh_official_name": "坚毅不倒",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Last Stand",
+      "zh-CN": "坚毅不倒"
+    }
+  },
+  {
+    "slug": "lol-legend-alacrity",
+    "source_slug": "lol-legend-alacrity",
+    "zh_official_name": "传说：欢欣",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Legend: Alacrity",
+      "zh-CN": "传说：欢欣"
+    }
+  },
+  {
+    "slug": "lol-legend-bloodline",
+    "source_slug": "lol-legend-bloodline",
+    "zh_official_name": "传说：血统",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Legend: Bloodline",
+      "zh-CN": "传说：血统"
+    }
+  },
+  {
+    "slug": "lol-legend-haste",
+    "source_slug": "lol-legend-haste",
+    "zh_official_name": "传说：急速",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Legend: Haste",
+      "zh-CN": "传说：急速"
+    }
+  },
+  {
+    "slug": "lol-legend-tenacity",
+    "source_slug": "lol-legend-tenacity",
+    "zh_official_name": "传说：韧性",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Legend: Tenacity",
+      "zh-CN": "传说：韧性"
+    }
+  },
+  {
+    "slug": "lol-lethal-tempo",
+    "source_slug": "lol-lethal-tempo",
+    "zh_official_name": "致命节奏",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Lethal Tempo",
+      "zh-CN": "致命节奏"
+    }
+  },
+  {
+    "slug": "lol-magical-footwear",
+    "source_slug": "lol-magical-footwear",
+    "zh_official_name": "神奇之鞋",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Magical Footwear",
+      "zh-CN": "神奇之鞋"
+    }
+  },
+  {
+    "slug": "lol-manaflow-band",
+    "source_slug": "lol-manaflow-band",
+    "zh_official_name": "法力流系带",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Manaflow Band",
+      "zh-CN": "法力流系带"
+    }
+  },
+  {
+    "slug": "lol-minion-dematerializer",
+    "source_slug": "lol-minion-dematerializer",
+    "zh_official_name": "小兵去质器",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Minion Dematerializer",
+      "zh-CN": "小兵去质器"
+    }
+  },
+  {
+    "slug": "lol-mirror-shell",
+    "source_slug": "lol-mirror-shell",
+    "zh_official_name": "镜之壳",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Mirror Shell",
+      "zh-CN": "镜之壳"
+    }
+  },
+  {
+    "slug": "lol-nimbus-cloak",
+    "source_slug": "lol-nimbus-cloak",
+    "zh_official_name": "灵光披风",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Nimbus Cloak",
+      "zh-CN": "灵光披风"
+    }
+  },
+  {
+    "slug": "lol-nullifying-orb",
+    "source_slug": "lol-nullifying-orb",
+    "zh_official_name": "无效化之法球",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Nullifying Orb",
+      "zh-CN": "无效化之法球"
+    }
+  },
+  {
+    "slug": "lol-overgrowth",
+    "source_slug": "lol-overgrowth",
+    "zh_official_name": "过度生长",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Overgrowth",
+      "zh-CN": "过度生长"
+    }
+  },
+  {
+    "slug": "lol-overheal",
+    "source_slug": "lol-overheal",
+    "zh_official_name": "过量治疗",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Overheal",
+      "zh-CN": "过量治疗"
+    }
+  },
+  {
+    "slug": "lol-perfect-timing",
+    "source_slug": "lol-perfect-timing",
+    "zh_official_name": "完美时机",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Perfect Timing",
+      "zh-CN": "完美时机"
+    }
+  },
+  {
+    "slug": "lol-phase-rush",
+    "source_slug": "lol-phase-rush",
+    "zh_official_name": "相位猛冲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Phase Rush",
+      "zh-CN": "相位猛冲"
+    }
+  },
+  {
+    "slug": "lol-predator",
+    "source_slug": "lol-predator",
+    "zh_official_name": "掠食者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Predator",
+      "zh-CN": "掠食者"
+    }
+  },
+  {
+    "slug": "lol-presence-of-mind",
+    "source_slug": "lol-presence-of-mind",
+    "zh_official_name": "气定神闲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Presence of Mind",
+      "zh-CN": "气定神闲"
+    }
+  },
+  {
+    "slug": "lol-press-the-attack",
+    "source_slug": "lol-press-the-attack",
+    "zh_official_name": "强攻",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Press the Attack",
+      "zh-CN": "强攻"
+    }
+  },
+  {
+    "slug": "lol-prototype-omnistone",
+    "source_slug": "lol-prototype-omnistone",
+    "zh_official_name": "全能石",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Prototype: Omnistone",
+      "zh-CN": "全能石"
+    }
+  },
+  {
+    "slug": "lol-ravenous-hunter",
+    "source_slug": "lol-ravenous-hunter",
+    "zh_official_name": "贪欲猎手",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ravenous Hunter",
+      "zh-CN": "贪欲猎手"
+    }
+  },
+  {
+    "slug": "lol-relentless-hunter",
+    "source_slug": "lol-relentless-hunter",
+    "zh_official_name": "无情猎手",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Relentless Hunter",
+      "zh-CN": "无情猎手"
+    }
+  },
+  {
+    "slug": "lol-revitalize",
+    "source_slug": "lol-revitalize",
+    "zh_official_name": "复苏",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Revitalize",
+      "zh-CN": "复苏"
+    }
+  },
+  {
+    "slug": "lol-scorch",
+    "source_slug": "lol-scorch",
+    "zh_official_name": "焦灼",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Scorch",
+      "zh-CN": "焦灼"
+    }
+  },
+  {
+    "slug": "lol-second-wind",
+    "source_slug": "lol-second-wind",
+    "zh_official_name": "复苏之风",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Second Wind",
+      "zh-CN": "复苏之风"
+    }
+  },
+  {
+    "slug": "lol-shield-bash",
+    "source_slug": "lol-shield-bash",
+    "zh_official_name": "护盾猛击",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Shield Bash",
+      "zh-CN": "护盾猛击"
+    }
+  },
+  {
+    "slug": "lol-sixth-sense",
+    "source_slug": "lol-sixth-sense",
+    "zh_official_name": "第六感",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Sixth Sense",
+      "zh-CN": "第六感"
+    }
+  },
+  {
+    "slug": "lol-sudden-impact",
+    "source_slug": "lol-sudden-impact",
+    "zh_official_name": "猛然冲击",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Sudden Impact",
+      "zh-CN": "猛然冲击"
+    }
+  },
+  {
+    "slug": "lol-summon-aery",
+    "source_slug": "lol-summon-aery",
+    "zh_official_name": "召唤：艾黎",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Summon Aery",
+      "zh-CN": "召唤：艾黎"
+    }
+  },
+  {
+    "slug": "lol-taste-of-blood",
+    "source_slug": "lol-taste-of-blood",
+    "zh_official_name": "血之滋味",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Taste of Blood",
+      "zh-CN": "血之滋味"
+    }
+  },
+  {
+    "slug": "lol-the-ultimate-hat",
+    "source_slug": "lol-the-ultimate-hat",
+    "zh_official_name": "终极技能帽",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "The Ultimate Hat",
+      "zh-CN": "终极技能帽"
+    }
+  },
+  {
+    "slug": "lol-time-warp-tonic",
+    "source_slug": "lol-time-warp-tonic",
+    "zh_official_name": "时间扭曲补药",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Time Warp Tonic",
+      "zh-CN": "时间扭曲补药"
+    }
+  },
+  {
+    "slug": "lol-trait-domination",
+    "source_slug": "lol-trait-domination",
+    "zh_official_name": "主宰",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Trait: Domination",
+      "zh-CN": "主宰"
+    }
+  },
+  {
+    "slug": "lol-trait-inspiration",
+    "source_slug": "lol-trait-inspiration",
+    "zh_official_name": "启迪",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Trait: Inspiration",
+      "zh-CN": "启迪"
+    }
+  },
+  {
+    "slug": "lol-trait-precision",
+    "source_slug": "lol-trait-precision",
+    "zh_official_name": "精密",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Trait: Precision",
+      "zh-CN": "精密"
+    }
+  },
+  {
+    "slug": "lol-trait-resolve",
+    "source_slug": "lol-trait-resolve",
+    "zh_official_name": "坚决",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Trait: Resolve",
+      "zh-CN": "坚决"
+    }
+  },
+  {
+    "slug": "lol-trait-sorcery",
+    "source_slug": "lol-trait-sorcery",
+    "zh_official_name": "巫术",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Trait: Sorcery",
+      "zh-CN": "巫术"
+    }
+  },
+  {
+    "slug": "lol-transcendence",
+    "source_slug": "lol-transcendence",
+    "zh_official_name": "超然",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Transcendence",
+      "zh-CN": "超然"
+    }
+  },
+  {
+    "slug": "lol-treasure-hunter",
+    "source_slug": "lol-treasure-hunter",
+    "zh_official_name": "寻宝猎人",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Treasure Hunter",
+      "zh-CN": "寻宝猎人"
+    }
+  },
+  {
+    "slug": "lol-triple-tonic",
+    "source_slug": "lol-triple-tonic",
+    "zh_official_name": "三重补药",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Triple Tonic",
+      "zh-CN": "三重补药"
+    }
+  },
+  {
+    "slug": "lol-triumph",
+    "source_slug": "lol-triumph",
+    "zh_official_name": "凯旋",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Triumph",
+      "zh-CN": "凯旋"
+    }
+  },
+  {
+    "slug": "lol-ultimate-hunter",
+    "source_slug": "lol-ultimate-hunter",
+    "zh_official_name": "终极猎人",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ultimate Hunter",
+      "zh-CN": "终极猎人"
+    }
+  },
+  {
+    "slug": "lol-unflinching",
+    "source_slug": "lol-unflinching",
+    "zh_official_name": "坚定",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Unflinching",
+      "zh-CN": "坚定"
+    }
+  },
+  {
+    "slug": "lol-unsealed-spellbook",
+    "source_slug": "lol-unsealed-spellbook",
+    "zh_official_name": "启封的秘籍",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Unsealed Spellbook",
+      "zh-CN": "启封的秘籍"
+    }
+  },
+  {
+    "slug": "lol-waterwalking",
+    "source_slug": "lol-waterwalking",
+    "zh_official_name": "水上行走",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Waterwalking",
+      "zh-CN": "水上行走"
+    }
+  },
+  {
+    "slug": "lol-zombie-ward",
+    "source_slug": "lol-zombie-ward",
+    "zh_official_name": "僵尸守卫",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Zombie Ward",
+      "zh-CN": "僵尸守卫"
+    }
+  }
+]

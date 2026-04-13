@@ -1,0 +1,29 @@
+Class ErrorType:
+- distinguish domain_error, integration_error, and api_error
+
+Class ErrorDetail:
+- serialize machine-readable error metadata
+
+Class ErrorResponse:
+- include ErrorDetail plus request_id
+
+Class AppError:
+- shared base class for intentional app exceptions
+
+Class DomainError:
+- 400-level domain validation failures
+
+Class IntegrationError:
+- 502-style downstream/storage/provider failures
+
+Class ApiError:
+- generic request/contract errors
+
+Function _request_id_from_request:
+- pull request_id from Request.state or contextvar fallback
+
+Function _build_error_response:
+- build JSONResponse payload and mirror X-Request-ID header
+
+Function register_exception_handlers:
+- install handlers for AppError, RequestValidationError, and unexpected Exception

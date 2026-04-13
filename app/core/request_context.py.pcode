@@ -1,0 +1,8 @@
+Function get_request_id:
+- read the current request_id from the contextvar
+
+Function set_request_id:
+- set request_id for the current logical context
+
+Function reset_request_id:
+- restore the previous contextvar token after request completion

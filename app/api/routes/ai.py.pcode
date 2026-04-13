@@ -1,0 +1,10 @@
+Route create_ai_run:
+- create a run record
+- return cached results immediately when strong cache applies
+- otherwise execute non-stream runs inline or queue stream runs in background
+
+Route get_ai_run:
+- fetch final run metadata/result with owner checks for user-bound runs
+
+Route stream_ai_run_events:
+- expose SSE events for long-text run types only

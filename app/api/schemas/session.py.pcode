@@ -1,0 +1,17 @@
+Class SessionSummarySchema:
+- compact session row for history pages
+
+Class SessionCreateRequest:
+- create a persistent session from client_session_id and initial MatchContext
+
+Class SessionCreatePayload:
+- wrap the created SessionSummarySchema
+
+Class SessionDetailPayload:
+- return summary plus transcript object payload
+
+Class SessionClaimRequest:
+- submit local buffered SessionEvent records for claim
+
+Class SessionClaimPayload:
+- return claimed_event_count after save/claim

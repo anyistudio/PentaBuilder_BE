@@ -1,0 +1,9 @@
+Class AIRunSummarySchema:
+- lightweight metadata for one ai_run row
+
+Class AIRunCreateRequest:
+- generic POST /ai/runs request shape
+- includes MatchContext, ResponsePreferences, stream flag, session_id, operation_context
+
+Class AIRunPayload:
+- wrap AIRunSummarySchema plus optional structured result

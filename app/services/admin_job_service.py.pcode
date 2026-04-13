@@ -1,0 +1,6 @@
+Class AdminJobService:
+- create admin job records with request payloads
+- execute jobs in a fresh database session so background tasks stay isolated
+- update status from pending -> running -> completed/failed
+- dispatch activate_version, clear_cache, baseline, calibration, and benchmark workflows
+- persist job summary artifacts and expose a schema formatter for admin APIs

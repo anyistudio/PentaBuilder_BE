@@ -1,0 +1,4 @@
+Class CatalogToolset:
+- expose bounded read-only catalog helpers for champions, items, runes, batch lookups, and search
+- route all slug lookups through the in-memory catalog snapshot
+- keep tool behavior deterministic and side-effect free

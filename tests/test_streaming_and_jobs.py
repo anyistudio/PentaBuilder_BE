@@ -1,0 +1,190 @@
+from fastapi.testclient import TestClient
+
+from app.ai.providers.base import LLMResult, LLMUsage
+
+
+class FakeLLMClient:
+    provider_name = "google"
+    model_name = "gemini-test"
+
+    def generate_text(self, *, prompt: str, system_prompt: str | None = None) -> LLMResult:
+        del prompt, system_prompt
+        return LLMResult(
+            text="这件装备能更稳地顶住爆发，然后把中期团战接起来。",
+            usage=LLMUsage(input_tokens=10, output_tokens=12, latency_ms=5, cost_usd=0.001),
+            provider_name=self.provider_name,
+            model_name=self.model_name,
+        )
+
+
+def _exchange_access_token(client: TestClient) -> str:
+    response = client.post(
+        "/api/v1/auth/exchange",
+        json={
+            "provider": "clerk",
+            "provider_token": "dev-clerk:user_2:test2@example.com:BenchFox",
+        },
+    )
+    assert response.status_code == 200
+    return response.json()["data"]["access_token"]
+
+
+def test_streaming_explain_slot_uses_sse(configured_client: TestClient, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "app.services.ai_run_service.create_llm_client",
+        lambda **kwargs: FakeLLMClient(),
+    )
+    access_token = _exchange_access_token(configured_client)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    data_version = configured_client.get("/api/v1/catalog/versions/current").json()["data"][
+        "data_version"
+    ]
+    context = {
+        "game": "lol",
+        "data_version": data_version,
+        "own_champion_slug": "lol-ahri",
+        "enemy_team": [
+            {
+                "champion_slug": "lol-zed",
+                "build": [None, None, None, None, None, None],
+                "runes": {"primary": [], "secondary": []},
+            }
+        ],
+        "own_build": ["lol-luden-s-companion", None, None, None, None, None],
+        "own_runes": {"primary": [], "secondary": []},
+        "environment": {"tags": ["assassin-heavy", "ranked"], "free_text": ""},
+    }
+
+    response = configured_client.post(
+        "/api/v1/ai/runs",
+        headers=headers,
+        json={
+            "run_type": "explain_slot",
+            "context": context,
+            "response_preferences": {"language": "zh-CN", "terminology_style": "official"},
+            "stream": True,
+            "payload": {"slot_index": 1},
+        },
+    )
+    assert response.status_code == 200
+    stream_url = response.json()["data"]["stream_url"]
+
+    with configured_client.stream("GET", stream_url, headers=headers) as stream_response:
+        body = "".join(
+            chunk.decode("utf-8") if isinstance(chunk, bytes) else chunk
+            for chunk in stream_response.iter_text()
+        )
+
+    assert "event: run_started" in body
+    assert "event: tool_event" in body
+    assert "event: message_delta" in body
+    assert "event: run_completed" in body
+    assert "gemini-test" not in body
+
+
+def test_admin_jobs_cover_baselines_calibrations_benchmarks_and_cache(
+    configured_app,
+    configured_client: TestClient,
+) -> None:
+    access_token = _exchange_access_token(configured_client)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    admin_auth = ("admin", "secret")
+    data_version = configured_client.get("/api/v1/catalog/versions/current").json()["data"][
+        "data_version"
+    ]
+
+    context = {
+        "game": "lol",
+        "data_version": data_version,
+        "own_champion_slug": "lol-ahri",
+        "enemy_team": [],
+        "own_build": [None, None, None, None, None, None],
+        "own_runes": {"primary": [], "secondary": []},
+        "environment": {"tags": ["ranked"], "free_text": ""},
+    }
+    configured_client.post(
+        "/api/v1/ai/runs",
+        headers=headers,
+        json={
+            "run_type": "recommend_full_build",
+            "context": context,
+            "response_preferences": {"language": "zh-CN", "terminology_style": "official"},
+            "payload": {},
+        },
+    )
+
+    cache_job_response = configured_client.post(
+        "/api/v1/admin/cache/clear",
+        auth=admin_auth,
+        json={"data_version": data_version, "game": "lol"},
+    )
+    assert cache_job_response.status_code == 202
+    cache_job_id = cache_job_response.json()["data"]["job_id"]
+    cache_job_detail = configured_client.get(f"/api/v1/admin/jobs/{cache_job_id}", auth=admin_auth)
+    assert cache_job_detail.status_code == 200
+    assert cache_job_detail.json()["data"]["job"]["status"] == "completed"
+
+    baseline_job_response = configured_client.post(
+        "/api/v1/admin/jobs/precompute-baselines",
+        auth=admin_auth,
+        json={
+            "data_version": data_version,
+            "game": "lol",
+            "provider_name": "google",
+            "model_name": "gemini-3.1-pro",
+        },
+    )
+    assert baseline_job_response.status_code == 202
+    baseline_job_id = baseline_job_response.json()["data"]["job_id"]
+    baseline_job_detail = configured_client.get(
+        f"/api/v1/admin/jobs/{baseline_job_id}", auth=admin_auth
+    )
+    assert baseline_job_detail.status_code == 200
+    assert baseline_job_detail.json()["data"]["job"]["status"] == "completed"
+
+    calibration_job_response = configured_client.post(
+        "/api/v1/admin/jobs/generate-calibrations",
+        auth=admin_auth,
+        json={
+            "data_version": data_version,
+            "games": ["lol"],
+            "models": [{"provider_name": "google", "model_name": "gemini-3.1-pro"}],
+        },
+    )
+    assert calibration_job_response.status_code == 202
+    calibration_job_id = calibration_job_response.json()["data"]["job_id"]
+    calibration_job_detail = configured_client.get(
+        f"/api/v1/admin/jobs/{calibration_job_id}",
+        auth=admin_auth,
+    )
+    assert calibration_job_detail.status_code == 200
+    assert calibration_job_detail.json()["data"]["job"]["status"] == "completed"
+
+    session = configured_app.state.session_factory()
+    try:
+        datasets = configured_app.state.benchmark_service.sync_local_datasets(session)
+        assert datasets
+        dataset_id = str(datasets[0].id)
+    finally:
+        session.close()
+
+    benchmark_job_response = configured_client.post(
+        "/api/v1/admin/jobs/run-benchmarks",
+        auth=admin_auth,
+        json={
+            "dataset_id": dataset_id,
+            "models": [{"provider_name": "google", "model_name": "gemini-3.1-pro"}],
+        },
+    )
+    assert benchmark_job_response.status_code == 202
+    benchmark_job_id = benchmark_job_response.json()["data"]["job_id"]
+    benchmark_job_detail = configured_client.get(
+        f"/api/v1/admin/jobs/{benchmark_job_id}",
+        auth=admin_auth,
+    )
+    assert benchmark_job_detail.status_code == 200
+    assert benchmark_job_detail.json()["data"]["job"]["status"] == "completed"
+
+    metrics_response = configured_client.get("/api/v1/admin/metrics", auth=admin_auth)
+    assert metrics_response.status_code == 200
+    assert "requests_total" in metrics_response.json()["data"]["counters"]

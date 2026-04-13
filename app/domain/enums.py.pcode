@@ -1,0 +1,14 @@
+Class Game:
+- enumerate lol and wild_rift
+
+Class RunType:
+- enumerate all supported AI run types
+
+Class Language:
+- enumerate en and zh-CN
+
+Class TerminologyStyle:
+- enumerate official and slang_zh
+
+Class RunStatus:
+- enumerate accepted, streaming, completed, failed, cancelled

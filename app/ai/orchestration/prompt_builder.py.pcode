@@ -1,0 +1,5 @@
+Function build_prompt:
+- inject run type, target game label, target language, terminology style, data version, and structured context
+- include baseline/reference/calibration summaries when available
+- explicitly tell the model not to mix LoL PC and Wild Rift
+- keep generation in the user's selected language

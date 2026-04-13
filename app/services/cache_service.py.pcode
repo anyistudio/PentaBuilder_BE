@@ -1,0 +1,8 @@
+Constants:
+- CACHEABLE_RUN_TYPES lists the run types eligible for strong/reference cache behavior
+
+Class CacheService:
+- look up strong cache by response_variant_hash
+- look up reference cache by semantic_context_hash
+- upsert cached structured results and artifact metadata
+- clear cache rows by optional data_version and game filters

@@ -1,0 +1,7 @@
+Function generate_assets:
+- walk lol and wild_rift game_data JSON files
+- create editable zh-CN localization skeletons for champions, items, and runes
+- preserve canonical slugs and source slugs while leaving Chinese fields blank for manual review
+
+Function main:
+- write the generated assets into the repo-local game_localization directory

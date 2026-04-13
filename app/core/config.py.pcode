@@ -1,0 +1,11 @@
+Constant BASE_DIR:
+- anchor local file roots to the backend repo
+
+Class Settings:
+- load .env and process environment variables
+- expose app, database, S3, auth, model-routing, and benchmark-local-root config
+- keep secrets as SecretStr
+- provide is_local helper for reload behavior
+
+Function get_settings:
+- cache one Settings instance per process

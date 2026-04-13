@@ -1,0 +1,4 @@
+Class GeminiClient:
+- call the Google Generative Language REST endpoint
+- normalize the response into LLMResult and LLMUsage
+- keep provider-specific logic out of the service layer

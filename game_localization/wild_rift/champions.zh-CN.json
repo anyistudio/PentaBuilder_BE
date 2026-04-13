@@ -1,0 +1,1502 @@
+[
+  {
+    "slug": "wr-aatrox",
+    "source_slug": "wild-rift-aatrox",
+    "zh_official_name": "暗裔剑魔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Aatrox",
+      "zh-CN": "暗裔剑魔"
+    }
+  },
+  {
+    "slug": "wr-ahri",
+    "source_slug": "wild-rift-ahri",
+    "zh_official_name": "九尾妖狐",
+    "zh_aliases": [
+      "狐狸",
+      "刮痧师傅"
+    ],
+    "localized_display_names": {
+      "en": "Ahri",
+      "zh-CN": "九尾妖狐"
+    }
+  },
+  {
+    "slug": "wr-akali",
+    "source_slug": "wild-rift-akali",
+    "zh_official_name": "离群之刺",
+    "zh_aliases": [
+      "阿卡丽"
+    ],
+    "localized_display_names": {
+      "en": "Akali",
+      "zh-CN": "离群之刺"
+    }
+  },
+  {
+    "slug": "wr-akshan",
+    "source_slug": "wild-rift-akshan",
+    "zh_official_name": "影哨",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Akshan",
+      "zh-CN": "影哨"
+    }
+  },
+  {
+    "slug": "wr-alistar",
+    "source_slug": "wild-rift-alistar",
+    "zh_official_name": "牛头酋长",
+    "zh_aliases": [
+      "牛头"
+    ],
+    "localized_display_names": {
+      "en": "Alistar",
+      "zh-CN": "牛头酋长"
+    }
+  },
+  {
+    "slug": "wr-ambessa",
+    "source_slug": "wild-rift-ambessa",
+    "zh_official_name": "铁血狼母",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ambessa",
+      "zh-CN": "铁血狼母"
+    }
+  },
+  {
+    "slug": "wr-amumu",
+    "source_slug": "wild-rift-amumu",
+    "zh_official_name": "殇之木乃伊",
+    "zh_aliases": [
+      "木木"
+    ],
+    "localized_display_names": {
+      "en": "Amumu",
+      "zh-CN": "殇之木乃伊"
+    }
+  },
+  {
+    "slug": "wr-annie",
+    "source_slug": "wild-rift-annie",
+    "zh_official_name": "黑暗之女",
+    "zh_aliases": [
+      "火女"
+    ],
+    "localized_display_names": {
+      "en": "Annie",
+      "zh-CN": "黑暗之女"
+    }
+  },
+  {
+    "slug": "wr-ashe",
+    "source_slug": "wild-rift-ashe",
+    "zh_official_name": "寒冰射手",
+    "zh_aliases": [
+      "寒冰"
+    ],
+    "localized_display_names": {
+      "en": "Ashe",
+      "zh-CN": "寒冰射手"
+    }
+  },
+  {
+    "slug": "wr-aurelion-sol",
+    "source_slug": "wild-rift-aurelion-sol",
+    "zh_official_name": "铸星龙王",
+    "zh_aliases": [
+      "龙王"
+    ],
+    "localized_display_names": {
+      "en": "Aurelion Sol",
+      "zh-CN": "铸星龙王"
+    }
+  },
+  {
+    "slug": "wr-aurora",
+    "source_slug": "wild-rift-aurora",
+    "zh_official_name": "双界灵兔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Aurora",
+      "zh-CN": "双界灵兔"
+    }
+  },
+  {
+    "slug": "wr-blitzcrank",
+    "source_slug": "wild-rift-blitzcrank",
+    "zh_official_name": "蒸汽机器人",
+    "zh_aliases": [
+      "机器人"
+    ],
+    "localized_display_names": {
+      "en": "Blitzcrank",
+      "zh-CN": "蒸汽机器人"
+    }
+  },
+  {
+    "slug": "wr-brand",
+    "source_slug": "wild-rift-brand",
+    "zh_official_name": "复仇焰魂",
+    "zh_aliases": [
+      "火男"
+    ],
+    "localized_display_names": {
+      "en": "Brand",
+      "zh-CN": "复仇焰魂"
+    }
+  },
+  {
+    "slug": "wr-braum",
+    "source_slug": "wild-rift-braum",
+    "zh_official_name": "弗雷尔卓德之心",
+    "zh_aliases": [
+      "布隆",
+      "防盗门"
+    ],
+    "localized_display_names": {
+      "en": "Braum",
+      "zh-CN": "弗雷尔卓德之心"
+    }
+  },
+  {
+    "slug": "wr-caitlyn",
+    "source_slug": "wild-rift-caitlyn",
+    "zh_official_name": "皮城女警",
+    "zh_aliases": [
+      "女警"
+    ],
+    "localized_display_names": {
+      "en": "Caitlyn",
+      "zh-CN": "皮城女警"
+    }
+  },
+  {
+    "slug": "wr-camille",
+    "source_slug": "wild-rift-camille",
+    "zh_official_name": "青钢影",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Camille",
+      "zh-CN": "青钢影"
+    }
+  },
+  {
+    "slug": "wr-corki",
+    "source_slug": "wild-rift-corki",
+    "zh_official_name": "英勇投弹手",
+    "zh_aliases": [
+      "飞机"
+    ],
+    "localized_display_names": {
+      "en": "Corki",
+      "zh-CN": "英勇投弹手"
+    }
+  },
+  {
+    "slug": "wr-darius",
+    "source_slug": "wild-rift-darius",
+    "zh_official_name": "诺克萨斯之手",
+    "zh_aliases": [
+      "诺手"
+    ],
+    "localized_display_names": {
+      "en": "Darius",
+      "zh-CN": "诺克萨斯之手"
+    }
+  },
+  {
+    "slug": "wr-diana",
+    "source_slug": "wild-rift-diana",
+    "zh_official_name": "皎月女神",
+    "zh_aliases": [
+      "皎月"
+    ],
+    "localized_display_names": {
+      "en": "Diana",
+      "zh-CN": "皎月女神"
+    }
+  },
+  {
+    "slug": "wr-dr-mundo",
+    "source_slug": "wild-rift-dr-mundo",
+    "zh_official_name": "祖安狂人",
+    "zh_aliases": [
+      "蒙多"
+    ],
+    "localized_display_names": {
+      "en": "Dr. Mundo",
+      "zh-CN": "祖安狂人"
+    }
+  },
+  {
+    "slug": "wr-draven",
+    "source_slug": "wild-rift-draven",
+    "zh_official_name": "荣耀行刑官",
+    "zh_aliases": [
+      "德莱文",
+      "文森特"
+    ],
+    "localized_display_names": {
+      "en": "Draven",
+      "zh-CN": "荣耀行刑官"
+    }
+  },
+  {
+    "slug": "wr-ekko",
+    "source_slug": "wild-rift-ekko",
+    "zh_official_name": "时间刺客",
+    "zh_aliases": [
+      "艾克"
+    ],
+    "localized_display_names": {
+      "en": "Ekko",
+      "zh-CN": "时间刺客"
+    }
+  },
+  {
+    "slug": "wr-ezreal",
+    "source_slug": "wild-rift-ezreal",
+    "zh_official_name": "探险家",
+    "zh_aliases": [
+      "EZ",
+      "小黄毛"
+    ],
+    "localized_display_names": {
+      "en": "Ezreal",
+      "zh-CN": "探险家"
+    }
+  },
+  {
+    "slug": "wr-fiddlesticks",
+    "source_slug": "wild-rift-fiddlesticks",
+    "zh_official_name": "远古恐惧",
+    "zh_aliases": [
+      "末日",
+      "稻草人"
+    ],
+    "localized_display_names": {
+      "en": "Fiddlesticks",
+      "zh-CN": "远古恐惧"
+    }
+  },
+  {
+    "slug": "wr-fiora",
+    "source_slug": "wild-rift-fiora",
+    "zh_official_name": "无双剑姬",
+    "zh_aliases": [
+      "剑姬"
+    ],
+    "localized_display_names": {
+      "en": "Fiora",
+      "zh-CN": "无双剑姬"
+    }
+  },
+  {
+    "slug": "wr-fizz",
+    "source_slug": "wild-rift-fizz",
+    "zh_official_name": "潮汐海灵",
+    "zh_aliases": [
+      "小鱼人"
+    ],
+    "localized_display_names": {
+      "en": "Fizz",
+      "zh-CN": "潮汐海灵"
+    }
+  },
+  {
+    "slug": "wr-galio",
+    "source_slug": "wild-rift-galio",
+    "zh_official_name": "正义巨像",
+    "zh_aliases": [
+      "加里奥"
+    ],
+    "localized_display_names": {
+      "en": "Galio",
+      "zh-CN": "正义巨像"
+    }
+  },
+  {
+    "slug": "wr-garen",
+    "source_slug": "wild-rift-garen",
+    "zh_official_name": "德玛西亚之力",
+    "zh_aliases": [
+      "盖伦",
+      "大宝剑"
+    ],
+    "localized_display_names": {
+      "en": "Garen",
+      "zh-CN": "德玛西亚之力"
+    }
+  },
+  {
+    "slug": "wr-gnar",
+    "source_slug": "wild-rift-gnar",
+    "zh_official_name": "迷失之牙",
+    "zh_aliases": [
+      "纳尔"
+    ],
+    "localized_display_names": {
+      "en": "Gnar",
+      "zh-CN": "迷失之牙"
+    }
+  },
+  {
+    "slug": "wr-gragas",
+    "source_slug": "wild-rift-gragas",
+    "zh_official_name": "酒桶",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Gragas",
+      "zh-CN": "酒桶"
+    }
+  },
+  {
+    "slug": "wr-graves",
+    "source_slug": "wild-rift-graves",
+    "zh_official_name": "法外狂徒",
+    "zh_aliases": [
+      "男枪"
+    ],
+    "localized_display_names": {
+      "en": "Graves",
+      "zh-CN": "法外狂徒"
+    }
+  },
+  {
+    "slug": "wr-gwen",
+    "source_slug": "wild-rift-gwen",
+    "zh_official_name": "灵罗娃娃",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Gwen",
+      "zh-CN": "灵罗娃娃"
+    }
+  },
+  {
+    "slug": "wr-hecarim",
+    "source_slug": "wild-rift-hecarim",
+    "zh_official_name": "战争之影",
+    "zh_aliases": [
+      "人马"
+    ],
+    "localized_display_names": {
+      "en": "Hecarim",
+      "zh-CN": "战争之影"
+    }
+  },
+  {
+    "slug": "wr-heimerdinger",
+    "source_slug": "wild-rift-heimerdinger",
+    "zh_official_name": "大发明家",
+    "zh_aliases": [
+      "大头"
+    ],
+    "localized_display_names": {
+      "en": "Heimerdinger",
+      "zh-CN": "大发明家"
+    }
+  },
+  {
+    "slug": "wr-irelia",
+    "source_slug": "wild-rift-irelia",
+    "zh_official_name": "刀锋舞者",
+    "zh_aliases": [
+      "刀妹"
+    ],
+    "localized_display_names": {
+      "en": "Irelia",
+      "zh-CN": "刀锋舞者"
+    }
+  },
+  {
+    "slug": "wr-janna",
+    "source_slug": "wild-rift-janna",
+    "zh_official_name": "风暴之怒",
+    "zh_aliases": [
+      "风女"
+    ],
+    "localized_display_names": {
+      "en": "Janna",
+      "zh-CN": "风暴之怒"
+    }
+  },
+  {
+    "slug": "wr-jarvan-iv",
+    "source_slug": "wild-rift-jarvan-iv",
+    "zh_official_name": "德玛西亚皇子",
+    "zh_aliases": [
+      "皇子"
+    ],
+    "localized_display_names": {
+      "en": "Jarvan IV",
+      "zh-CN": "德玛西亚皇子"
+    }
+  },
+  {
+    "slug": "wr-jax",
+    "source_slug": "wild-rift-jax",
+    "zh_official_name": "武器大师",
+    "zh_aliases": [
+      "武器",
+      "贾老师"
+    ],
+    "localized_display_names": {
+      "en": "Jax",
+      "zh-CN": "武器大师"
+    }
+  },
+  {
+    "slug": "wr-jayce",
+    "source_slug": "wild-rift-jayce",
+    "zh_official_name": "未来守护者",
+    "zh_aliases": [
+      "杰斯"
+    ],
+    "localized_display_names": {
+      "en": "Jayce",
+      "zh-CN": "未来守护者"
+    }
+  },
+  {
+    "slug": "wr-jhin",
+    "source_slug": "wild-rift-jhin",
+    "zh_official_name": "戏命师",
+    "zh_aliases": [
+      "烬"
+    ],
+    "localized_display_names": {
+      "en": "Jhin",
+      "zh-CN": "戏命师"
+    }
+  },
+  {
+    "slug": "wr-jinx",
+    "source_slug": "wild-rift-jinx",
+    "zh_official_name": "暴走萝莉",
+    "zh_aliases": [
+      "金克丝",
+      "萝莉"
+    ],
+    "localized_display_names": {
+      "en": "Jinx",
+      "zh-CN": "暴走萝莉"
+    }
+  },
+  {
+    "slug": "wr-kai-sa",
+    "source_slug": "wild-rift-kai-sa",
+    "zh_official_name": "卡莎",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Kai'Sa",
+      "zh-CN": "卡莎"
+    }
+  },
+  {
+    "slug": "wr-kalista",
+    "source_slug": "wild-rift-kalista",
+    "zh_official_name": "复仇之矛",
+    "zh_aliases": [
+      "滑板鞋"
+    ],
+    "localized_display_names": {
+      "en": "Kalista",
+      "zh-CN": "复仇之矛"
+    }
+  },
+  {
+    "slug": "wr-karma",
+    "source_slug": "wild-rift-karma",
+    "zh_official_name": "天启者",
+    "zh_aliases": [
+      "扇子妈"
+    ],
+    "localized_display_names": {
+      "en": "Karma",
+      "zh-CN": "天启者"
+    }
+  },
+  {
+    "slug": "wr-kassadin",
+    "source_slug": "wild-rift-kassadin",
+    "zh_official_name": "虚空行者",
+    "zh_aliases": [
+      "K头丁"
+    ],
+    "localized_display_names": {
+      "en": "Kassadin",
+      "zh-CN": "虚空行者"
+    }
+  },
+  {
+    "slug": "wr-katarina",
+    "source_slug": "wild-rift-katarina",
+    "zh_official_name": "不祥之刃",
+    "zh_aliases": [
+      "卡特"
+    ],
+    "localized_display_names": {
+      "en": "Katarina",
+      "zh-CN": "不祥之刃"
+    }
+  },
+  {
+    "slug": "wr-kayle",
+    "source_slug": "wild-rift-kayle",
+    "zh_official_name": "正义天使",
+    "zh_aliases": [
+      "天使"
+    ],
+    "localized_display_names": {
+      "en": "Kayle",
+      "zh-CN": "正义天使"
+    }
+  },
+  {
+    "slug": "wr-kayn",
+    "source_slug": "wild-rift-kayn",
+    "zh_official_name": "影流之镰",
+    "zh_aliases": [
+      "凯隐"
+    ],
+    "localized_display_names": {
+      "en": "Kayn",
+      "zh-CN": "影流之镰"
+    }
+  },
+  {
+    "slug": "wr-kennen",
+    "source_slug": "wild-rift-kennen",
+    "zh_official_name": "狂暴之心",
+    "zh_aliases": [
+      "凯南",
+      "电竞耗子"
+    ],
+    "localized_display_names": {
+      "en": "Kennen",
+      "zh-CN": "狂暴之心"
+    }
+  },
+  {
+    "slug": "wr-kha-zix",
+    "source_slug": "wild-rift-kha-zix",
+    "zh_official_name": "卡兹克",
+    "zh_aliases": [
+      "螳螂"
+    ],
+    "localized_display_names": {
+      "en": "Kha'Zix",
+      "zh-CN": "卡兹克"
+    }
+  },
+  {
+    "slug": "wr-kindred",
+    "source_slug": "wild-rift-kindred",
+    "zh_official_name": "永猎双子",
+    "zh_aliases": [
+      "千珏"
+    ],
+    "localized_display_names": {
+      "en": "Kindred",
+      "zh-CN": "永猎双子"
+    }
+  },
+  {
+    "slug": "wr-lee-sin",
+    "source_slug": "wild-rift-lee-sin",
+    "zh_official_name": "盲僧",
+    "zh_aliases": [
+      "瞎子"
+    ],
+    "localized_display_names": {
+      "en": "Lee Sin",
+      "zh-CN": "盲僧"
+    }
+  },
+  {
+    "slug": "wr-leona",
+    "source_slug": "wild-rift-leona",
+    "zh_official_name": "曙光女神",
+    "zh_aliases": [
+      "女坦",
+      "日女"
+    ],
+    "localized_display_names": {
+      "en": "Leona",
+      "zh-CN": "曙光女神"
+    }
+  },
+  {
+    "slug": "wr-lillia",
+    "source_slug": "wild-rift-lillia",
+    "zh_official_name": "含羞蓓蕾",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Lillia",
+      "zh-CN": "含羞蓓蕾"
+    }
+  },
+  {
+    "slug": "wr-lissandra",
+    "source_slug": "wild-rift-lissandra",
+    "zh_official_name": "冰霜女巫",
+    "zh_aliases": [
+      "冰女"
+    ],
+    "localized_display_names": {
+      "en": "Lissandra",
+      "zh-CN": "冰霜女巫"
+    }
+  },
+  {
+    "slug": "wr-lucian",
+    "source_slug": "wild-rift-lucian",
+    "zh_official_name": "圣枪游侠",
+    "zh_aliases": [
+      "卢锡安",
+      "奥巴马"
+    ],
+    "localized_display_names": {
+      "en": "Lucian",
+      "zh-CN": "圣枪游侠"
+    }
+  },
+  {
+    "slug": "wr-lulu",
+    "source_slug": "wild-rift-lulu",
+    "zh_official_name": "仙灵女巫",
+    "zh_aliases": [
+      "露露"
+    ],
+    "localized_display_names": {
+      "en": "Lulu",
+      "zh-CN": "仙灵女巫"
+    }
+  },
+  {
+    "slug": "wr-lux",
+    "source_slug": "wild-rift-lux",
+    "zh_official_name": "光辉女郎",
+    "zh_aliases": [
+      "光辉"
+    ],
+    "localized_display_names": {
+      "en": "Lux",
+      "zh-CN": "光辉女郎"
+    }
+  },
+  {
+    "slug": "wr-malphite",
+    "source_slug": "wild-rift-malphite",
+    "zh_official_name": "熔岩巨兽",
+    "zh_aliases": [
+      "石头人"
+    ],
+    "localized_display_names": {
+      "en": "Malphite",
+      "zh-CN": "熔岩巨兽"
+    }
+  },
+  {
+    "slug": "wr-maokai",
+    "source_slug": "wild-rift-maokai",
+    "zh_official_name": "扭曲树精",
+    "zh_aliases": [
+      "大树"
+    ],
+    "localized_display_names": {
+      "en": "Maokai",
+      "zh-CN": "扭曲树精"
+    }
+  },
+  {
+    "slug": "wr-master-yi",
+    "source_slug": "wild-rift-master-yi",
+    "zh_official_name": "无极剑圣",
+    "zh_aliases": [
+      "剑圣",
+      "易大师"
+    ],
+    "localized_display_names": {
+      "en": "Master Yi",
+      "zh-CN": "无极剑圣"
+    }
+  },
+  {
+    "slug": "wr-milio",
+    "source_slug": "wild-rift-milio",
+    "zh_official_name": "明烛",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Milio",
+      "zh-CN": "明烛"
+    }
+  },
+  {
+    "slug": "wr-miss-fortune",
+    "source_slug": "wild-rift-miss-fortune",
+    "zh_official_name": "赏金猎人",
+    "zh_aliases": [
+      "女枪",
+      "好运姐"
+    ],
+    "localized_display_names": {
+      "en": "Miss Fortune",
+      "zh-CN": "赏金猎人"
+    }
+  },
+  {
+    "slug": "wr-mordekaiser",
+    "source_slug": "wild-rift-mordekaiser",
+    "zh_official_name": "铁铠冥魂",
+    "zh_aliases": [
+      "铁男"
+    ],
+    "localized_display_names": {
+      "en": "Mordekaiser",
+      "zh-CN": "铁铠冥魂"
+    }
+  },
+  {
+    "slug": "wr-morgana",
+    "source_slug": "wild-rift-morgana",
+    "zh_official_name": "堕落天使",
+    "zh_aliases": [
+      "莫甘娜"
+    ],
+    "localized_display_names": {
+      "en": "Morgana",
+      "zh-CN": "堕落天使"
+    }
+  },
+  {
+    "slug": "wr-nami",
+    "source_slug": "wild-rift-nami",
+    "zh_official_name": "唤潮鲛姬",
+    "zh_aliases": [
+      "娜美"
+    ],
+    "localized_display_names": {
+      "en": "Nami",
+      "zh-CN": "唤潮鲛姬"
+    }
+  },
+  {
+    "slug": "wr-nasus",
+    "source_slug": "wild-rift-nasus",
+    "zh_official_name": "沙漠死神",
+    "zh_aliases": [
+      "狗头"
+    ],
+    "localized_display_names": {
+      "en": "Nasus",
+      "zh-CN": "沙漠死神"
+    }
+  },
+  {
+    "slug": "wr-nautilus",
+    "source_slug": "wild-rift-nautilus",
+    "zh_official_name": "深海泰坦",
+    "zh_aliases": [
+      "泰坦"
+    ],
+    "localized_display_names": {
+      "en": "Nautilus",
+      "zh-CN": "深海泰坦"
+    }
+  },
+  {
+    "slug": "wr-nilah",
+    "source_slug": "wild-rift-nilah",
+    "zh_official_name": "不羁之悦",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Nilah",
+      "zh-CN": "不羁之悦"
+    }
+  },
+  {
+    "slug": "wr-nocturne",
+    "source_slug": "wild-rift-nocturne",
+    "zh_official_name": "永恒梦魇",
+    "zh_aliases": [
+      "梦魇"
+    ],
+    "localized_display_names": {
+      "en": "Nocturne",
+      "zh-CN": "永恒梦魇"
+    }
+  },
+  {
+    "slug": "wr-norra",
+    "source_slug": "wild-rift-norra",
+    "zh_official_name": "诺拉",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Norra",
+      "zh-CN": "诺拉"
+    }
+  },
+  {
+    "slug": "wr-nunu",
+    "source_slug": "wild-rift-nunu",
+    "zh_official_name": "努努和威朗普",
+    "zh_aliases": [
+      "雪人"
+    ],
+    "localized_display_names": {
+      "en": "Nunu",
+      "zh-CN": "努努和威朗普"
+    }
+  },
+  {
+    "slug": "wr-olaf",
+    "source_slug": "wild-rift-olaf",
+    "zh_official_name": "狂战士",
+    "zh_aliases": [
+      "奥拉夫",
+      "疯狗"
+    ],
+    "localized_display_names": {
+      "en": "Olaf",
+      "zh-CN": "狂战士"
+    }
+  },
+  {
+    "slug": "wr-orianna",
+    "source_slug": "wild-rift-orianna",
+    "zh_official_name": "发条魔灵",
+    "zh_aliases": [
+      "发条"
+    ],
+    "localized_display_names": {
+      "en": "Orianna",
+      "zh-CN": "发条魔灵"
+    }
+  },
+  {
+    "slug": "wr-ornn",
+    "source_slug": "wild-rift-ornn",
+    "zh_official_name": "山隐之焰",
+    "zh_aliases": [
+      "奥恩",
+      "羊"
+    ],
+    "localized_display_names": {
+      "en": "Ornn",
+      "zh-CN": "山隐之焰"
+    }
+  },
+  {
+    "slug": "wr-poppy",
+    "source_slug": "wild-rift-poppy",
+    "zh_official_name": "圣锤之毅",
+    "zh_aliases": [
+      "波比"
+    ],
+    "localized_display_names": {
+      "en": "Poppy",
+      "zh-CN": "圣锤之毅"
+    }
+  },
+  {
+    "slug": "wr-pyke",
+    "source_slug": "wild-rift-pyke",
+    "zh_official_name": "血港鬼影",
+    "zh_aliases": [
+      "派克"
+    ],
+    "localized_display_names": {
+      "en": "Pyke",
+      "zh-CN": "血港鬼影"
+    }
+  },
+  {
+    "slug": "wr-rakan",
+    "source_slug": "wild-rift-rakan",
+    "zh_official_name": "幻翎",
+    "zh_aliases": [
+      "洛"
+    ],
+    "localized_display_names": {
+      "en": "Rakan",
+      "zh-CN": "幻翎"
+    }
+  },
+  {
+    "slug": "wr-rammus",
+    "source_slug": "wild-rift-rammus",
+    "zh_official_name": "披甲龙龟",
+    "zh_aliases": [
+      "龙龟"
+    ],
+    "localized_display_names": {
+      "en": "Rammus",
+      "zh-CN": "披甲龙龟"
+    }
+  },
+  {
+    "slug": "wr-renekton",
+    "source_slug": "wild-rift-renekton",
+    "zh_official_name": "荒漠屠夫",
+    "zh_aliases": [
+      "鳄鱼"
+    ],
+    "localized_display_names": {
+      "en": "Renekton",
+      "zh-CN": "荒漠屠夫"
+    }
+  },
+  {
+    "slug": "wr-riven",
+    "source_slug": "wild-rift-riven",
+    "zh_official_name": "放逐之刃",
+    "zh_aliases": [
+      "锐雯"
+    ],
+    "localized_display_names": {
+      "en": "Riven",
+      "zh-CN": "放逐之刃"
+    }
+  },
+  {
+    "slug": "wr-rumble",
+    "source_slug": "wild-rift-rumble",
+    "zh_official_name": "机械公敌",
+    "zh_aliases": [
+      "兰博"
+    ],
+    "localized_display_names": {
+      "en": "Rumble",
+      "zh-CN": "机械公敌"
+    }
+  },
+  {
+    "slug": "wr-ryze",
+    "source_slug": "wild-rift-ryze",
+    "zh_official_name": "符文法师",
+    "zh_aliases": [
+      "瑞兹",
+      "光头"
+    ],
+    "localized_display_names": {
+      "en": "Ryze",
+      "zh-CN": "符文法师"
+    }
+  },
+  {
+    "slug": "wr-samira",
+    "source_slug": "wild-rift-samira",
+    "zh_official_name": "沙漠玫瑰",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Samira",
+      "zh-CN": "沙漠玫瑰"
+    }
+  },
+  {
+    "slug": "wr-senna",
+    "source_slug": "wild-rift-senna",
+    "zh_official_name": "涤魂圣枪",
+    "zh_aliases": [
+      "赛娜"
+    ],
+    "localized_display_names": {
+      "en": "Senna",
+      "zh-CN": "涤魂圣枪"
+    }
+  },
+  {
+    "slug": "wr-seraphine",
+    "source_slug": "wild-rift-seraphine",
+    "zh_official_name": "星籁歌姬",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Seraphine",
+      "zh-CN": "星籁歌姬"
+    }
+  },
+  {
+    "slug": "wr-shen",
+    "source_slug": "wild-rift-shen",
+    "zh_official_name": "暮光之眼",
+    "zh_aliases": [
+      "腰子"
+    ],
+    "localized_display_names": {
+      "en": "Shen",
+      "zh-CN": "暮光之眼"
+    }
+  },
+  {
+    "slug": "wr-shyvana",
+    "source_slug": "wild-rift-shyvana",
+    "zh_official_name": "龙血武姬",
+    "zh_aliases": [
+      "龙女"
+    ],
+    "localized_display_names": {
+      "en": "Shyvana",
+      "zh-CN": "龙血武姬"
+    }
+  },
+  {
+    "slug": "wr-singed",
+    "source_slug": "wild-rift-singed",
+    "zh_official_name": "炼金术士",
+    "zh_aliases": [
+      "炼金"
+    ],
+    "localized_display_names": {
+      "en": "Singed",
+      "zh-CN": "炼金术士"
+    }
+  },
+  {
+    "slug": "wr-sion",
+    "source_slug": "wild-rift-sion",
+    "zh_official_name": "亡灵战神",
+    "zh_aliases": [
+      "塞恩",
+      "老司机"
+    ],
+    "localized_display_names": {
+      "en": "Sion",
+      "zh-CN": "亡灵战神"
+    }
+  },
+  {
+    "slug": "wr-sivir",
+    "source_slug": "wild-rift-sivir",
+    "zh_official_name": "战争女神",
+    "zh_aliases": [
+      "轮子妈"
+    ],
+    "localized_display_names": {
+      "en": "Sivir",
+      "zh-CN": "战争女神"
+    }
+  },
+  {
+    "slug": "wr-smolder",
+    "source_slug": "wild-rift-smolder",
+    "zh_official_name": "炽炎雏龙",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Smolder",
+      "zh-CN": "炽炎雏龙"
+    }
+  },
+  {
+    "slug": "wr-sona",
+    "source_slug": "wild-rift-sona",
+    "zh_official_name": "琴瑟仙女",
+    "zh_aliases": [
+      "琴女"
+    ],
+    "localized_display_names": {
+      "en": "Sona",
+      "zh-CN": "琴瑟仙女"
+    }
+  },
+  {
+    "slug": "wr-soraka",
+    "source_slug": "wild-rift-soraka",
+    "zh_official_name": "众星之子",
+    "zh_aliases": [
+      "星妈"
+    ],
+    "localized_display_names": {
+      "en": "Soraka",
+      "zh-CN": "众星之子"
+    }
+  },
+  {
+    "slug": "wr-swain",
+    "source_slug": "wild-rift-swain",
+    "zh_official_name": "诺克萨斯统领",
+    "zh_aliases": [
+      "乌鸦"
+    ],
+    "localized_display_names": {
+      "en": "Swain",
+      "zh-CN": "诺克萨斯统领"
+    }
+  },
+  {
+    "slug": "wr-syndra",
+    "source_slug": "wild-rift-syndra",
+    "zh_official_name": "暗黑元首",
+    "zh_aliases": [
+      "球女"
+    ],
+    "localized_display_names": {
+      "en": "Syndra",
+      "zh-CN": "暗黑元首"
+    }
+  },
+  {
+    "slug": "wr-talon",
+    "source_slug": "wild-rift-talon",
+    "zh_official_name": "刀锋之影",
+    "zh_aliases": [
+      "男刀"
+    ],
+    "localized_display_names": {
+      "en": "Talon",
+      "zh-CN": "刀锋之影"
+    }
+  },
+  {
+    "slug": "wr-teemo",
+    "source_slug": "wild-rift-teemo",
+    "zh_official_name": "迅捷斥候",
+    "zh_aliases": [
+      "提莫"
+    ],
+    "localized_display_names": {
+      "en": "Teemo",
+      "zh-CN": "迅捷斥候"
+    }
+  },
+  {
+    "slug": "wr-thresh",
+    "source_slug": "wild-rift-thresh",
+    "zh_official_name": "魂锁典狱长",
+    "zh_aliases": [
+      "锤石"
+    ],
+    "localized_display_names": {
+      "en": "Thresh",
+      "zh-CN": "魂锁典狱长"
+    }
+  },
+  {
+    "slug": "wr-tristana",
+    "source_slug": "wild-rift-tristana",
+    "zh_official_name": "麦林炮手",
+    "zh_aliases": [
+      "小炮"
+    ],
+    "localized_display_names": {
+      "en": "Tristana",
+      "zh-CN": "麦林炮手"
+    }
+  },
+  {
+    "slug": "wr-tryndamere",
+    "source_slug": "wild-rift-tryndamere",
+    "zh_official_name": "蛮族之王",
+    "zh_aliases": [
+      "蛮王"
+    ],
+    "localized_display_names": {
+      "en": "Tryndamere",
+      "zh-CN": "蛮族之王"
+    }
+  },
+  {
+    "slug": "wr-twisted-fate",
+    "source_slug": "wild-rift-twisted-fate",
+    "zh_official_name": "卡牌大师",
+    "zh_aliases": [
+      "卡牌"
+    ],
+    "localized_display_names": {
+      "en": "Twisted Fate",
+      "zh-CN": "卡牌大师"
+    }
+  },
+  {
+    "slug": "wr-twitch",
+    "source_slug": "wild-rift-twitch",
+    "zh_official_name": "瘟疫之源",
+    "zh_aliases": [
+      "老鼠"
+    ],
+    "localized_display_names": {
+      "en": "Twitch",
+      "zh-CN": "瘟疫之源"
+    }
+  },
+  {
+    "slug": "wr-urgot",
+    "source_slug": "wild-rift-urgot",
+    "zh_official_name": "无畏战车",
+    "zh_aliases": [
+      "螃蟹"
+    ],
+    "localized_display_names": {
+      "en": "Urgot",
+      "zh-CN": "无畏战车"
+    }
+  },
+  {
+    "slug": "wr-varus",
+    "source_slug": "wild-rift-varus",
+    "zh_official_name": "惩戒之箭",
+    "zh_aliases": [
+      "韦鲁斯"
+    ],
+    "localized_display_names": {
+      "en": "Varus",
+      "zh-CN": "惩戒之箭"
+    }
+  },
+  {
+    "slug": "wr-vayne",
+    "source_slug": "wild-rift-vayne",
+    "zh_official_name": "暗夜猎手",
+    "zh_aliases": [
+      "VN",
+      "薇恩"
+    ],
+    "localized_display_names": {
+      "en": "Vayne",
+      "zh-CN": "暗夜猎手"
+    }
+  },
+  {
+    "slug": "wr-veigar",
+    "source_slug": "wild-rift-veigar",
+    "zh_official_name": "邪恶小法师",
+    "zh_aliases": [
+      "小法"
+    ],
+    "localized_display_names": {
+      "en": "Veigar",
+      "zh-CN": "邪恶小法师"
+    }
+  },
+  {
+    "slug": "wr-vex",
+    "source_slug": "wild-rift-vex",
+    "zh_official_name": "愁云使者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Vex",
+      "zh-CN": "愁云使者"
+    }
+  },
+  {
+    "slug": "wr-vi",
+    "source_slug": "wild-rift-vi",
+    "zh_official_name": "皮城执法官",
+    "zh_aliases": [
+      "蔚",
+      "楚雨荨"
+    ],
+    "localized_display_names": {
+      "en": "Vi",
+      "zh-CN": "皮城执法官"
+    }
+  },
+  {
+    "slug": "wr-viego",
+    "source_slug": "wild-rift-viego",
+    "zh_official_name": "破败之王",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Viego",
+      "zh-CN": "破败之王"
+    }
+  },
+  {
+    "slug": "wr-viktor",
+    "source_slug": "wild-rift-viktor",
+    "zh_official_name": "奥术先驱",
+    "zh_aliases": [
+      "三只手",
+      "维克托"
+    ],
+    "localized_display_names": {
+      "en": "Viktor",
+      "zh-CN": "奥术先驱"
+    }
+  },
+  {
+    "slug": "wr-vladimir",
+    "source_slug": "wild-rift-vladimir",
+    "zh_official_name": "猩红收割者",
+    "zh_aliases": [
+      "吸血鬼"
+    ],
+    "localized_display_names": {
+      "en": "Vladimir",
+      "zh-CN": "猩红收割者"
+    }
+  },
+  {
+    "slug": "wr-volibear",
+    "source_slug": "wild-rift-volibear",
+    "zh_official_name": "不灭狂雷",
+    "zh_aliases": [
+      "狗熊"
+    ],
+    "localized_display_names": {
+      "en": "Volibear",
+      "zh-CN": "不灭狂雷"
+    }
+  },
+  {
+    "slug": "wr-warwick",
+    "source_slug": "wild-rift-warwick",
+    "zh_official_name": "祖安怒兽",
+    "zh_aliases": [
+      "狼人"
+    ],
+    "localized_display_names": {
+      "en": "Warwick",
+      "zh-CN": "祖安怒兽"
+    }
+  },
+  {
+    "slug": "wr-wukong",
+    "source_slug": "wild-rift-wukong",
+    "zh_official_name": "孙悟空",
+    "zh_aliases": [
+      "猴子"
+    ],
+    "localized_display_names": {
+      "en": "Wukong",
+      "zh-CN": "孙悟空"
+    }
+  },
+  {
+    "slug": "wr-xayah",
+    "source_slug": "wild-rift-xayah",
+    "zh_official_name": "逆羽",
+    "zh_aliases": [
+      "霞"
+    ],
+    "localized_display_names": {
+      "en": "Xayah",
+      "zh-CN": "逆羽"
+    }
+  },
+  {
+    "slug": "wr-xin-zhao",
+    "source_slug": "wild-rift-xin-zhao",
+    "zh_official_name": "德邦总管",
+    "zh_aliases": [
+      "赵信",
+      "菊花信"
+    ],
+    "localized_display_names": {
+      "en": "Xin Zhao",
+      "zh-CN": "德邦总管"
+    }
+  },
+  {
+    "slug": "wr-yasuo",
+    "source_slug": "wild-rift-yasuo",
+    "zh_official_name": "疾风剑豪",
+    "zh_aliases": [
+      "压缩",
+      "快乐风男",
+      "托儿索"
+    ],
+    "localized_display_names": {
+      "en": "Yasuo",
+      "zh-CN": "疾风剑豪"
+    }
+  },
+  {
+    "slug": "wr-yone",
+    "source_slug": "wild-rift-yone",
+    "zh_official_name": "封魔剑魂",
+    "zh_aliases": [
+      "永恩"
+    ],
+    "localized_display_names": {
+      "en": "Yone",
+      "zh-CN": "封魔剑魂"
+    }
+  },
+  {
+    "slug": "wr-yuumi",
+    "source_slug": "wild-rift-yuumi",
+    "zh_official_name": "魔法猫咪",
+    "zh_aliases": [
+      "猫咪"
+    ],
+    "localized_display_names": {
+      "en": "Yuumi",
+      "zh-CN": "魔法猫咪"
+    }
+  },
+  {
+    "slug": "wr-zed",
+    "source_slug": "wild-rift-zed",
+    "zh_official_name": "影流之主",
+    "zh_aliases": [
+      "劫",
+      "儿童劫"
+    ],
+    "localized_display_names": {
+      "en": "Zed",
+      "zh-CN": "影流之主"
+    }
+  },
+  {
+    "slug": "wr-zeri",
+    "source_slug": "wild-rift-zeri",
+    "zh_official_name": "祖安花火",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Zeri",
+      "zh-CN": "祖安花火"
+    }
+  },
+  {
+    "slug": "wr-ziggs",
+    "source_slug": "wild-rift-ziggs",
+    "zh_official_name": "爆破鬼才",
+    "zh_aliases": [
+      "炸弹人"
+    ],
+    "localized_display_names": {
+      "en": "Ziggs",
+      "zh-CN": "爆破鬼才"
+    }
+  },
+  {
+    "slug": "wr-zilean",
+    "source_slug": "wild-rift-zilean",
+    "zh_official_name": "时光守护者",
+    "zh_aliases": [
+      "时光"
+    ],
+    "localized_display_names": {
+      "en": "Zilean",
+      "zh-CN": "时光守护者"
+    }
+  },
+  {
+    "slug": "wr-zoe",
+    "source_slug": "wild-rift-zoe",
+    "zh_official_name": "暮光星灵",
+    "zh_aliases": [
+      "佐伊"
+    ],
+    "localized_display_names": {
+      "en": "Zoe",
+      "zh-CN": "暮光星灵"
+    }
+  },
+  {
+    "slug": "wr-zyra",
+    "source_slug": "wild-rift-zyra",
+    "zh_official_name": "荆棘之兴",
+    "zh_aliases": [
+      "婕拉"
+    ],
+    "localized_display_names": {
+      "en": "Zyra",
+      "zh-CN": "荆棘之兴"
+    }
+  }
+]

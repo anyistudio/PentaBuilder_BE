@@ -1,0 +1,15 @@
+Constant pools:
+- define conservative AP, AD, bruiser, tank, and support item templates for lol and wild_rift
+
+Class HeuristicRunResult:
+- pair structured result with plain reasoning text
+
+Function generate_run_result:
+- derive a deterministic fallback/result shape for every supported run_type
+- reuse shared build/rune selection helpers
+- keep output stable for cache keys, tests, offline baselines, and provider fallback
+
+Helper functions:
+- infer champion archetype from catalog payload
+- choose default runes and item substitutions for assassin-heavy, healing-heavy, and tank-heavy contexts
+- generate slot explanations, alternatives, and compare-build summaries

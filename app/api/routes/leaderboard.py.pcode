@@ -1,0 +1,7 @@
+Route list_leaderboard:
+- require login
+- resolve active data_version when omitted
+- normalize optional champion filters and return paginated leaderboard entries
+
+Route get_champion_leaderboard:
+- reuse the same listing logic while pinning own_champion_slug from the path

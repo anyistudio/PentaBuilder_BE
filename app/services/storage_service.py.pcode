@@ -1,0 +1,24 @@
+Class StorageService:
+- centralize reads from local files or S3-compatible object storage
+- choose backend based on root prefix or GAME_DATA_SOURCE
+
+Function read_json_from_root:
+- read and parse JSON from one root + relative path
+
+Function read_optional_json_from_root:
+- return None instead of raising when a localization asset is missing
+
+Function read_text_from_root:
+- dispatch to local or S3 read path
+
+Function _should_use_s3:
+- decide if the requested root should be resolved through object storage
+
+Function _read_text_from_local:
+- resolve repo-relative or absolute filesystem paths
+
+Function _read_text_from_s3:
+- fetch object text from the configured S3 bucket
+
+Property s3_client:
+- lazily construct the boto3 client on first S3 access

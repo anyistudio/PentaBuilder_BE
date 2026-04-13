@@ -1,0 +1,5 @@
+Constant NAMING_CONVENTION:
+- keep constraint/index names deterministic across migrations
+
+Class Base:
+- shared DeclarativeBase for all ORM models

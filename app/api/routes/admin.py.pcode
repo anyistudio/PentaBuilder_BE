@@ -1,0 +1,8 @@
+Private helper _schedule_job:
+- create an AdminJobRun record
+- queue background execution and return accepted metadata
+
+Admin routes:
+- protect every endpoint with HTTP Basic admin auth
+- activate data versions, clear cache, precompute baselines, generate calibrations, run benchmarks, and inspect jobs
+- expose a small metrics snapshot for operational visibility

@@ -1,0 +1,4 @@
+Class MetricsService:
+- accumulate lightweight in-memory counters and histograms
+- track request totals/success, run counts by run_type/model, cache-resolution counts, latency, and cost
+- expose snapshot() for admin inspection

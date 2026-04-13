@@ -1,0 +1,4 @@
+Leaderboard schemas:
+- top-user snapshot for the current winning row
+- per-entry payload with own/enemy scope and top score metadata
+- pagination metadata and list wrapper for leaderboard endpoints

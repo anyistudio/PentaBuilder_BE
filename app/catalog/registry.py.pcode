@@ -1,0 +1,29 @@
+Class CatalogEntity:
+- immutable normalized catalog row
+- keep canonical slug, source slug, display names, aliases, and raw payload
+- choose preferred_name and preferred_aliases per language/style
+
+Class GameCatalog:
+- store champions/items/runes dictionaries plus one combined search_index
+
+Class CatalogSnapshot:
+- bundle one loaded data_version with manifest and per-game catalogs
+
+Class GameDataRegistry:
+- cache loaded snapshots in-process by data_version
+- load manifest, champions, items, runes, and localization assets on demand
+
+Function get_or_load:
+- return cached snapshot or load a new one from storage
+
+Function _load_game_catalog:
+- load one game's three entity files plus optional localization maps
+
+Function _load_entities:
+- canonicalize slugs from source data
+- merge localization metadata
+- create CatalogEntity rows keyed by canonical slug
+
+Function _load_localization_map:
+- support dict or list localization asset shapes
+- key records by slug for quick merge during load

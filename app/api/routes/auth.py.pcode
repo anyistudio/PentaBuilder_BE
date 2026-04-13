@@ -1,0 +1,11 @@
+Route exchange_auth_token:
+- verify Clerk token and return backend bearer token plus user profile
+
+Route get_me:
+- return the authenticated backend user
+
+Route patch_me_preferences:
+- persist username, language, and terminology-style preferences
+
+Route delete_me:
+- remove the user and clean up dependent session/run artifacts

@@ -1,0 +1,6 @@
+Class RequestIDMiddleware:
+- create or forward X-Request-ID
+- store request_id on request.state and in a contextvar
+- record request success metrics when MetricsService is attached
+- log request_started and request_completed with latency plus user/session/run ids
+- add X-Request-ID to every response

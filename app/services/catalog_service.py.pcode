@@ -1,0 +1,27 @@
+Class CatalogService:
+- combine DataVersionService and GameDataRegistry for read-only catalog APIs
+
+Function get_current_version:
+- return the active DataVersion row
+
+Function list_versions:
+- return available DataVersion rows
+
+Function list_entities:
+- resolve version
+- load the correct catalog snapshot
+- format localized DTO rows for one entity type
+
+Function lookup:
+- resolve version
+- search the in-memory mixed entity index
+- score and return localized lookup rows
+
+Function _resolve_version:
+- use the active version when query data_version is omitted
+
+Function _format_entity:
+- choose display name and aliases for one language/style
+
+Function _score_entity:
+- rank exact match above prefix match above substring match

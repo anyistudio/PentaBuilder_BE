@@ -1,0 +1,23 @@
+Class CatalogEntityType:
+- enumerate champion/item/rune lookup scopes
+
+Class CatalogEntitySummary:
+- minimal display payload for catalog lists
+
+Class CatalogLookupResult:
+- extend summary with entity_type and game for mixed lookup results
+
+Class CatalogVersionPayload:
+- expose current/available data version metadata
+
+Class CatalogVersionListPayload:
+- wrap multiple CatalogVersionPayload records
+
+Class CatalogCollectionPayload:
+- wrap champions/items/runes list responses
+
+Class CatalogLookupPayload:
+- wrap search query plus result rows
+
+Class CatalogQueryOptions:
+- centralize shared optional catalog query fields

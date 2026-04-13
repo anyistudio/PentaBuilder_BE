@@ -1,0 +1,23 @@
+Function create_app:
+- read Settings via get_settings()
+- configure structured logging
+- construct FastAPI application
+- attach session_factory plus all singleton services to app.state:
+  - StorageService
+  - GameDataRegistry
+  - DataVersionService
+  - CatalogService
+  - CacheService
+  - LeaderboardService
+  - SessionService
+  - AuthService
+  - EventStreamService
+  - MetricsService
+  - BenchmarkService
+  - AIRunService
+  - AdminJobService
+- register RequestIDMiddleware, routes, and exception handlers
+
+Function main:
+- read host/port/reload from Settings
+- start uvicorn with app.main:app

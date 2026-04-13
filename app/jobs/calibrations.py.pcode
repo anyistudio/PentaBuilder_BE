@@ -1,0 +1,5 @@
+Function generate_calibration_summary:
+- inspect the current game snapshot counts for champions, items, and runes
+- produce a model/game/data_version summary focused on canonical slugs and game separation
+- store the summary in object storage
+- upsert model_calibrations so the online pipeline can attach the latest summary

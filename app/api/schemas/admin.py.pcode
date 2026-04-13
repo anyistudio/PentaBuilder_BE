@@ -1,0 +1,5 @@
+Admin schemas:
+- activate-version, cache-clear, baseline, calibration, and benchmark request bodies
+- ProviderModelRef for explicit provider/model job input
+- accepted-job response and detailed job-status response
+- AdminJobRunSchema for request payload, summary, artifact key, and timing metadata

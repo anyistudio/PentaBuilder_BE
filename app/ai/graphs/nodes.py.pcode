@@ -1,0 +1,11 @@
+Function prepare_context_node:
+- pass through validated context and operation_context into graph state
+
+Function generate_result_node:
+- build the prompt from run_type, match context, preferences, baseline, reference summary, and calibration summary
+- run deterministic heuristic generation first for every run type
+- for long-form answer run types, optionally replace heuristic summary with provider output
+- attach provider usage metadata under temporary _provider_usage for the service layer
+
+Function validate_result_node:
+- enforce the minimum structured result contract before leaving the graph

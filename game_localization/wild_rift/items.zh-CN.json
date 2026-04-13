@@ -1,0 +1,2464 @@
+[
+  {
+    "slug": "wr-abyssal-mask",
+    "source_slug": "wild-rift-abyssal-mask",
+    "zh_official_name": "深渊面具",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Abyssal Mask",
+      "zh-CN": "深渊面具"
+    }
+  },
+  {
+    "slug": "wr-adaptive-helm",
+    "source_slug": "wild-rift-adaptive-helm",
+    "zh_official_name": "适应性头盔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Adaptive Helm",
+      "zh-CN": "适应性头盔"
+    }
+  },
+  {
+    "slug": "wr-aether-wisp",
+    "source_slug": "wild-rift-aether-wisp",
+    "zh_official_name": "以太精魂",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Aether Wisp",
+      "zh-CN": "以太精魂"
+    }
+  },
+  {
+    "slug": "wr-amaranth-s-twinguard",
+    "source_slug": "wild-rift-amaranth-s-twinguard",
+    "zh_official_name": "阿玛兰斯的双重守护",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Amaranth's Twinguard",
+      "zh-CN": "阿玛兰斯的双重守护"
+    }
+  },
+  {
+    "slug": "wr-amaranth-s-twinguard-ruin",
+    "source_slug": "wild-rift-amaranth-s-twinguard-ruin",
+    "zh_official_name": "阿玛兰斯的双重守护(破败)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Amaranth's Twinguard (Ruin)",
+      "zh-CN": "阿玛兰斯的双重守护(破败)"
+    }
+  },
+  {
+    "slug": "wr-amplifying-tome",
+    "source_slug": "wild-rift-amplifying-tome",
+    "zh_official_name": "增幅典籍",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Amplifying Tome",
+      "zh-CN": "增幅典籍"
+    }
+  },
+  {
+    "slug": "wr-ancient-coin",
+    "source_slug": "wild-rift-ancient-coin",
+    "zh_official_name": "上古钱币",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ancient Coin",
+      "zh-CN": "上古钱币"
+    }
+  },
+  {
+    "slug": "wr-archangel-s-staff",
+    "source_slug": "wild-rift-archangel-s-staff",
+    "zh_official_name": "大天使之杖",
+    "zh_aliases": [
+      "大天使"
+    ],
+    "localized_display_names": {
+      "en": "Archangel's Staff",
+      "zh-CN": "大天使之杖"
+    }
+  },
+  {
+    "slug": "wr-ardent-censer",
+    "source_slug": "wild-rift-ardent-censer",
+    "zh_official_name": "炽热香炉",
+    "zh_aliases": [
+      "香炉"
+    ],
+    "localized_display_names": {
+      "en": "Ardent Censer",
+      "zh-CN": "炽热香炉"
+    }
+  },
+  {
+    "slug": "wr-athene-s-unholy-grail",
+    "source_slug": "wild-rift-athene-s-unholy-grail",
+    "zh_official_name": "雅典娜的邪恶圣杯",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Athene's Unholy Grail",
+      "zh-CN": "雅典娜的邪恶圣杯"
+    }
+  },
+  {
+    "slug": "wr-awakened-soulstealer",
+    "source_slug": "wild-rift-awakened-soulstealer",
+    "zh_official_name": "觉醒的窃魂法典",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Awakened Soulstealer",
+      "zh-CN": "觉醒的窃魂法典"
+    }
+  },
+  {
+    "slug": "wr-axiom-arc",
+    "source_slug": "wild-rift-axiom-arc",
+    "zh_official_name": "公理圆弧",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Axiom Arc",
+      "zh-CN": "公理圆弧"
+    }
+  },
+  {
+    "slug": "wr-b-f-sword",
+    "source_slug": "wild-rift-b-f-sword",
+    "zh_official_name": "暴风之剑",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "B. F. Sword",
+      "zh-CN": "暴风之剑"
+    }
+  },
+  {
+    "slug": "wr-bami-s-cinder",
+    "source_slug": "wild-rift-bami-s-cinder",
+    "zh_official_name": "斑比的熔渣",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Bami's Cinder",
+      "zh-CN": "斑比的熔渣"
+    }
+  },
+  {
+    "slug": "wr-bandle-fantasy",
+    "source_slug": "wild-rift-bandle-fantasy",
+    "zh_official_name": "班德尔童话",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Bandle Fantasy",
+      "zh-CN": "班德尔童话"
+    }
+  },
+  {
+    "slug": "wr-banshee-s-veil",
+    "source_slug": "wild-rift-banshee-s-veil",
+    "zh_official_name": "女妖面纱",
+    "zh_aliases": [
+      "女妖"
+    ],
+    "localized_display_names": {
+      "en": "Banshee's Veil",
+      "zh-CN": "女妖面纱"
+    }
+  },
+  {
+    "slug": "wr-berserker-s-greaves",
+    "source_slug": "wild-rift-berserker-s-greaves",
+    "zh_official_name": "狂战士胫甲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Berserker's Greaves",
+      "zh-CN": "狂战士胫甲"
+    }
+  },
+  {
+    "slug": "wr-black-cleaver",
+    "source_slug": "wild-rift-black-cleaver",
+    "zh_official_name": "黑色切割者",
+    "zh_aliases": [
+      "黑切"
+    ],
+    "localized_display_names": {
+      "en": "Black Cleaver",
+      "zh-CN": "黑色切割者"
+    }
+  },
+  {
+    "slug": "wr-black-mist-scythe",
+    "source_slug": "wild-rift-black-mist-scythe",
+    "zh_official_name": "黑雾巨镰",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Black Mist Scythe",
+      "zh-CN": "黑雾巨镰"
+    }
+  },
+  {
+    "slug": "wr-blackfire-torch",
+    "source_slug": "wild-rift-blackfire-torch",
+    "zh_official_name": "黯炎火炬",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Blackfire Torch",
+      "zh-CN": "黯炎火炬"
+    }
+  },
+  {
+    "slug": "wr-blade-of-the-ruined-king",
+    "source_slug": "wild-rift-blade-of-the-ruined-king",
+    "zh_official_name": "破败王者之刃",
+    "zh_aliases": [
+      "破败"
+    ],
+    "localized_display_names": {
+      "en": "Blade of the Ruined King",
+      "zh-CN": "破败王者之刃"
+    }
+  },
+  {
+    "slug": "wr-blade-of-the-ruined-king-ruin",
+    "source_slug": "wild-rift-blade-of-the-ruined-king-ruin",
+    "zh_official_name": "破败王者之刃(破败)",
+    "zh_aliases": [
+      "破败"
+    ],
+    "localized_display_names": {
+      "en": "Blade of the Ruined King (Ruin)",
+      "zh-CN": "破败王者之刃(破败)"
+    }
+  },
+  {
+    "slug": "wr-blasting-wand",
+    "source_slug": "wild-rift-blasting-wand",
+    "zh_official_name": "爆裂魔杖",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Blasting Wand",
+      "zh-CN": "爆裂魔杖"
+    }
+  },
+  {
+    "slug": "wr-bloodthirster",
+    "source_slug": "wild-rift-bloodthirster",
+    "zh_official_name": "饮血剑",
+    "zh_aliases": [
+      "饮血"
+    ],
+    "localized_display_names": {
+      "en": "Bloodthirster",
+      "zh-CN": "饮血剑"
+    }
+  },
+  {
+    "slug": "wr-boots-of-dynamism",
+    "source_slug": "wild-rift-boots-of-dynamism",
+    "zh_official_name": "动力之靴",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Boots of Dynamism",
+      "zh-CN": "动力之靴"
+    }
+  },
+  {
+    "slug": "wr-boots-of-furor",
+    "source_slug": "wild-rift-boots-of-furor",
+    "zh_official_name": "狂怒之靴",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Boots of Furor",
+      "zh-CN": "狂怒之靴"
+    }
+  },
+  {
+    "slug": "wr-boots-of-mana",
+    "source_slug": "wild-rift-boots-of-mana",
+    "zh_official_name": "法力之靴",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Boots of Mana",
+      "zh-CN": "法力之靴"
+    }
+  },
+  {
+    "slug": "wr-boots-of-speed",
+    "source_slug": "wild-rift-boots-of-speed",
+    "zh_official_name": "速度之靴",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Boots of Speed",
+      "zh-CN": "速度之靴"
+    }
+  },
+  {
+    "slug": "wr-boots-of-swiftness",
+    "source_slug": "wild-rift-boots-of-swiftness",
+    "zh_official_name": "轻灵之靴",
+    "zh_aliases": [
+      "三速鞋"
+    ],
+    "localized_display_names": {
+      "en": "Boots of Swiftness",
+      "zh-CN": "轻灵之靴"
+    }
+  },
+  {
+    "slug": "wr-bramble-vest",
+    "source_slug": "wild-rift-bramble-vest",
+    "zh_official_name": "棘刺背心",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Bramble Vest",
+      "zh-CN": "棘刺背心"
+    }
+  },
+  {
+    "slug": "wr-brawler-s-gloves",
+    "source_slug": "wild-rift-brawler-s-gloves",
+    "zh_official_name": "搏击拳套",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Brawler's Gloves",
+      "zh-CN": "搏击拳套"
+    }
+  },
+  {
+    "slug": "wr-bulwark-of-the-mountain",
+    "source_slug": "wild-rift-bulwark-of-the-mountain",
+    "zh_official_name": "山脉壁垒",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Bulwark of the Mountain",
+      "zh-CN": "山脉壁垒"
+    }
+  },
+  {
+    "slug": "wr-catalyst-of-aeons",
+    "source_slug": "wild-rift-catalyst-of-aeons",
+    "zh_official_name": "万世催化石",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Catalyst of Aeons",
+      "zh-CN": "万世催化石"
+    }
+  },
+  {
+    "slug": "wr-caulfield-s-warhammer",
+    "source_slug": "wild-rift-caulfield-s-warhammer",
+    "zh_official_name": "考尔菲德的战锤",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Caulfield's Warhammer",
+      "zh-CN": "考尔菲德的战锤"
+    }
+  },
+  {
+    "slug": "wr-chain-vest",
+    "source_slug": "wild-rift-chain-vest",
+    "zh_official_name": "锁子甲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Chain Vest",
+      "zh-CN": "锁子甲"
+    }
+  },
+  {
+    "slug": "wr-chempunk-chainsword",
+    "source_slug": "wild-rift-chempunk-chainsword",
+    "zh_official_name": "炼金朋克链锯剑",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Chempunk Chainsword",
+      "zh-CN": "炼金朋克链锯剑"
+    }
+  },
+  {
+    "slug": "wr-cloak-of-agility",
+    "source_slug": "wild-rift-cloak-of-agility",
+    "zh_official_name": "灵巧披风",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Cloak of Agility",
+      "zh-CN": "灵巧披风"
+    }
+  },
+  {
+    "slug": "wr-cloth-armor",
+    "source_slug": "wild-rift-cloth-armor",
+    "zh_official_name": "布甲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Cloth Armor",
+      "zh-CN": "布甲"
+    }
+  },
+  {
+    "slug": "wr-control-ward",
+    "source_slug": "wild-rift-control-ward",
+    "zh_official_name": "控制守卫",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Control Ward",
+      "zh-CN": "控制守卫"
+    }
+  },
+  {
+    "slug": "wr-cosmic-drive",
+    "source_slug": "wild-rift-cosmic-drive",
+    "zh_official_name": "星界驱驰",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Cosmic Drive",
+      "zh-CN": "星界驱驰"
+    }
+  },
+  {
+    "slug": "wr-crown-of-the-shattered-queen",
+    "source_slug": "wild-rift-crown-of-the-shattered-queen",
+    "zh_official_name": "破碎王后之冕",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Crown of the Shattered Queen",
+      "zh-CN": "破碎王后之冕"
+    }
+  },
+  {
+    "slug": "wr-crystalline-reflector",
+    "source_slug": "wild-rift-crystalline-reflector",
+    "zh_official_name": "水晶反射器",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Crystalline Reflector",
+      "zh-CN": "水晶反射器"
+    }
+  },
+  {
+    "slug": "wr-dagger",
+    "source_slug": "wild-rift-dagger",
+    "zh_official_name": "短剑",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Dagger",
+      "zh-CN": "短剑"
+    }
+  },
+  {
+    "slug": "wr-dawncore",
+    "source_slug": "wild-rift-dawncore",
+    "zh_official_name": "黎明核心",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Dawncore",
+      "zh-CN": "黎明核心"
+    }
+  },
+  {
+    "slug": "wr-dawnshroud",
+    "source_slug": "wild-rift-dawnshroud",
+    "zh_official_name": "黎明之刺",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Dawnshroud",
+      "zh-CN": "黎明之刺"
+    }
+  },
+  {
+    "slug": "wr-dawnshroud-light",
+    "source_slug": "wild-rift-dawnshroud-light",
+    "zh_official_name": "破晓玉翼(光明)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Dawnshroud (Light)",
+      "zh-CN": "破晓玉翼(光明)"
+    }
+  },
+  {
+    "slug": "wr-dead-man-s-plate",
+    "source_slug": "wild-rift-dead-man-s-plate",
+    "zh_official_name": "亡者的板甲",
+    "zh_aliases": [
+      "亡板",
+      "亡者板甲"
+    ],
+    "localized_display_names": {
+      "en": "Dead Man's Plate",
+      "zh-CN": "亡者的板甲"
+    }
+  },
+  {
+    "slug": "wr-death-s-dance",
+    "source_slug": "wild-rift-death-s-dance",
+    "zh_official_name": "死亡之舞",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Death's Dance",
+      "zh-CN": "死亡之舞"
+    }
+  },
+  {
+    "slug": "wr-divine-sunderer",
+    "source_slug": "wild-rift-divine-sunderer",
+    "zh_official_name": "神圣分离者",
+    "zh_aliases": [
+      "神分"
+    ],
+    "localized_display_names": {
+      "en": "Divine Sunderer",
+      "zh-CN": "神圣分离者"
+    }
+  },
+  {
+    "slug": "wr-dream-maker",
+    "source_slug": "wild-rift-dream-maker",
+    "zh_official_name": "圆梦使者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Dream Maker",
+      "zh-CN": "圆梦使者"
+    }
+  },
+  {
+    "slug": "wr-duskblade-of-draktharr",
+    "source_slug": "wild-rift-duskblade-of-draktharr",
+    "zh_official_name": "德拉克萨的暮刃",
+    "zh_aliases": [
+      "幕刃"
+    ],
+    "localized_display_names": {
+      "en": "Duskblade of Draktharr",
+      "zh-CN": "德拉克萨的暮刃"
+    }
+  },
+  {
+    "slug": "wr-eclipse",
+    "source_slug": "wild-rift-eclipse",
+    "zh_official_name": "星蚀",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Eclipse",
+      "zh-CN": "星蚀"
+    }
+  },
+  {
+    "slug": "wr-edge-of-night",
+    "source_slug": "wild-rift-edge-of-night",
+    "zh_official_name": "夜之锋刃",
+    "zh_aliases": [
+      "夜刃"
+    ],
+    "localized_display_names": {
+      "en": "Edge of Night",
+      "zh-CN": "夜之锋刃"
+    }
+  },
+  {
+    "slug": "wr-essence-reaver",
+    "source_slug": "wild-rift-essence-reaver",
+    "zh_official_name": "夺萃之镰",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Essence Reaver",
+      "zh-CN": "夺萃之镰"
+    }
+  },
+  {
+    "slug": "wr-executioner-s-calling",
+    "source_slug": "wild-rift-executioner-s-calling",
+    "zh_official_name": "死刑宣告",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Executioner's Calling",
+      "zh-CN": "死刑宣告"
+    }
+  },
+  {
+    "slug": "wr-experimental-hexplate",
+    "source_slug": "wild-rift-experimental-hexplate",
+    "zh_official_name": "海克斯注力刚壁",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Experimental Hexplate",
+      "zh-CN": "海克斯注力刚壁"
+    }
+  },
+  {
+    "slug": "wr-fiendish-codex",
+    "source_slug": "wild-rift-fiendish-codex",
+    "zh_official_name": "恶魔法典",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Fiendish Codex",
+      "zh-CN": "恶魔法典"
+    }
+  },
+  {
+    "slug": "wr-fimbulwinter",
+    "source_slug": "wild-rift-fimbulwinter",
+    "zh_official_name": "末日寒冬",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Fimbulwinter",
+      "zh-CN": "末日寒冬"
+    }
+  },
+  {
+    "slug": "wr-forbidden-idol",
+    "source_slug": "wild-rift-forbidden-idol",
+    "zh_official_name": "禁忌雕像",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Forbidden Idol",
+      "zh-CN": "禁忌雕像"
+    }
+  },
+  {
+    "slug": "wr-force-of-nature",
+    "source_slug": "wild-rift-force-of-nature",
+    "zh_official_name": "自然之力",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Force of Nature",
+      "zh-CN": "自然之力"
+    }
+  },
+  {
+    "slug": "wr-frozen-heart",
+    "source_slug": "wild-rift-frozen-heart",
+    "zh_official_name": "冰霜之心",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Frozen Heart",
+      "zh-CN": "冰霜之心"
+    }
+  },
+  {
+    "slug": "wr-frozen-mallet",
+    "source_slug": "wild-rift-frozen-mallet",
+    "zh_official_name": "冰霜之锤",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Frozen Mallet",
+      "zh-CN": "冰霜之锤"
+    }
+  },
+  {
+    "slug": "wr-galeforce",
+    "source_slug": "wild-rift-galeforce",
+    "zh_official_name": "狂风之力",
+    "zh_aliases": [
+      "狂风"
+    ],
+    "localized_display_names": {
+      "en": "Galeforce",
+      "zh-CN": "狂风之力"
+    }
+  },
+  {
+    "slug": "wr-gambler-s-blade",
+    "source_slug": "wild-rift-gambler-s-blade",
+    "zh_official_name": "投机者之刃",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Gambler's Blade",
+      "zh-CN": "投机者之刃"
+    }
+  },
+  {
+    "slug": "wr-giant-s-belt",
+    "source_slug": "wild-rift-giant-s-belt",
+    "zh_official_name": "巨人腰带",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Giant's Belt",
+      "zh-CN": "巨人腰带"
+    }
+  },
+  {
+    "slug": "wr-glacial-shroud",
+    "source_slug": "wild-rift-glacial-shroud",
+    "zh_official_name": "冰川护甲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Glacial Shroud",
+      "zh-CN": "冰川护甲"
+    }
+  },
+  {
+    "slug": "wr-glorious-enchant",
+    "source_slug": "wild-rift-glorious-enchant",
+    "zh_official_name": "正义荣耀",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Glorious Enchant",
+      "zh-CN": "正义荣耀"
+    }
+  },
+  {
+    "slug": "wr-gluttonous-greaves",
+    "source_slug": "wild-rift-gluttonous-greaves",
+    "zh_official_name": "贪婪之靴",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Gluttonous Greaves",
+      "zh-CN": "贪婪之靴"
+    }
+  },
+  {
+    "slug": "wr-goredrinker",
+    "source_slug": "wild-rift-goredrinker",
+    "zh_official_name": "渴血战斧",
+    "zh_aliases": [
+      "渴血"
+    ],
+    "localized_display_names": {
+      "en": "Goredrinker",
+      "zh-CN": "渴血战斧"
+    }
+  },
+  {
+    "slug": "wr-guardian-angel",
+    "source_slug": "wild-rift-guardian-angel",
+    "zh_official_name": "守护天使",
+    "zh_aliases": [
+      "复活甲",
+      "春哥"
+    ],
+    "localized_display_names": {
+      "en": "Guardian Angel",
+      "zh-CN": "守护天使"
+    }
+  },
+  {
+    "slug": "wr-guinsoo-s-rageblade",
+    "source_slug": "wild-rift-guinsoo-s-rageblade",
+    "zh_official_name": "鬼索的狂暴之刃",
+    "zh_aliases": [
+      "羊刀"
+    ],
+    "localized_display_names": {
+      "en": "Guinsoo's Rageblade",
+      "zh-CN": "鬼索的狂暴之刃"
+    }
+  },
+  {
+    "slug": "wr-harmonic-echo",
+    "source_slug": "wild-rift-harmonic-echo",
+    "zh_official_name": "和谐回音",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Harmonic Echo",
+      "zh-CN": "和谐回音"
+    }
+  },
+  {
+    "slug": "wr-harmonic-echo-light",
+    "source_slug": "wild-rift-harmonic-echo-light",
+    "zh_official_name": "和谐回音(光明)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Harmonic Echo (Light)",
+      "zh-CN": "和谐回音(光明)"
+    }
+  },
+  {
+    "slug": "wr-harrowing-crescent",
+    "source_slug": "wild-rift-harrowing-crescent",
+    "zh_official_name": "鬼影新月",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Harrowing Crescent",
+      "zh-CN": "鬼影新月"
+    }
+  },
+  {
+    "slug": "wr-haunting-guise",
+    "source_slug": "wild-rift-haunting-guise",
+    "zh_official_name": "幽魂面具",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Haunting Guise",
+      "zh-CN": "幽魂面具"
+    }
+  },
+  {
+    "slug": "wr-heartsteel",
+    "source_slug": "wild-rift-heartsteel",
+    "zh_official_name": "心之钢",
+    "zh_aliases": [
+      "刚子"
+    ],
+    "localized_display_names": {
+      "en": "Heartsteel",
+      "zh-CN": "心之钢"
+    }
+  },
+  {
+    "slug": "wr-hellfire-hatchet",
+    "source_slug": "wild-rift-hellfire-hatchet",
+    "zh_official_name": "恶火小斧",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hellfire Hatchet",
+      "zh-CN": "恶火小斧"
+    }
+  },
+  {
+    "slug": "wr-hexdrinker",
+    "source_slug": "wild-rift-hexdrinker",
+    "zh_official_name": "海克斯饮魔刀",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hexdrinker",
+      "zh-CN": "海克斯饮魔刀"
+    }
+  },
+  {
+    "slug": "wr-hextech-alternator",
+    "source_slug": "wild-rift-hextech-alternator",
+    "zh_official_name": "海克斯科技发电机",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech Alternator",
+      "zh-CN": "海克斯科技发电机"
+    }
+  },
+  {
+    "slug": "wr-hextech-black-cleaver",
+    "source_slug": "wild-rift-hextech-black-cleaver",
+    "zh_official_name": "海克斯科技黑色切割者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech Black Cleaver",
+      "zh-CN": "海克斯科技黑色切割者"
+    }
+  },
+  {
+    "slug": "wr-hextech-glp-800",
+    "source_slug": "wild-rift-hextech-glp-800",
+    "zh_official_name": "海克斯科技GLP-800",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech GLP-800",
+      "zh-CN": "海克斯科技GLP-800"
+    }
+  },
+  {
+    "slug": "wr-hextech-gunblade",
+    "source_slug": "wild-rift-hextech-gunblade",
+    "zh_official_name": "海克斯科技枪刃",
+    "zh_aliases": [
+      "科技枪"
+    ],
+    "localized_display_names": {
+      "en": "Hextech Gunblade",
+      "zh-CN": "海克斯科技枪刃"
+    }
+  },
+  {
+    "slug": "wr-hextech-megadrive",
+    "source_slug": "wild-rift-hextech-megadrive",
+    "zh_official_name": "海克斯科技充能器",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech Megadrive",
+      "zh-CN": "海克斯科技充能器"
+    }
+  },
+  {
+    "slug": "wr-hextech-revolver",
+    "source_slug": "wild-rift-hextech-revolver",
+    "zh_official_name": "海克斯科技左轮手枪",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech Revolver",
+      "zh-CN": "海克斯科技左轮手枪"
+    }
+  },
+  {
+    "slug": "wr-hextech-soulstealer",
+    "source_slug": "wild-rift-hextech-soulstealer",
+    "zh_official_name": "",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech Soulstealer",
+      "zh-CN": ""
+    }
+  },
+  {
+    "slug": "wr-hextech-stormrazor",
+    "source_slug": "wild-rift-hextech-stormrazor",
+    "zh_official_name": "海克斯科技岚切",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech Stormrazor",
+      "zh-CN": "海克斯科技岚切"
+    }
+  },
+  {
+    "slug": "wr-hextech-zeke-s-convergence",
+    "source_slug": "wild-rift-hextech-zeke-s-convergence",
+    "zh_official_name": "海克斯科技基克的聚合",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hextech Zeke's Convergence",
+      "zh-CN": "海克斯科技基克的聚合"
+    }
+  },
+  {
+    "slug": "wr-hollow-radiance",
+    "source_slug": "wild-rift-hollow-radiance",
+    "zh_official_name": "璀璨回响",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hollow Radiance",
+      "zh-CN": "璀璨回响"
+    }
+  },
+  {
+    "slug": "wr-horizon-focus",
+    "source_slug": "wild-rift-horizon-focus",
+    "zh_official_name": "视界专注",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Horizon Focus",
+      "zh-CN": "视界专注"
+    }
+  },
+  {
+    "slug": "wr-horizon-focus-light",
+    "source_slug": "wild-rift-horizon-focus-light",
+    "zh_official_name": "视界专注(光明)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Horizon Focus (Light)",
+      "zh-CN": "视界专注(光明)"
+    }
+  },
+  {
+    "slug": "wr-hubris",
+    "source_slug": "wild-rift-hubris",
+    "zh_official_name": "狂妄",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hubris",
+      "zh-CN": "狂妄"
+    }
+  },
+  {
+    "slug": "wr-hullbreaker",
+    "source_slug": "wild-rift-hullbreaker",
+    "zh_official_name": "破舰者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hullbreaker",
+      "zh-CN": "破舰者"
+    }
+  },
+  {
+    "slug": "wr-iceborn-gauntlet",
+    "source_slug": "wild-rift-iceborn-gauntlet",
+    "zh_official_name": "冰脉护手",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Iceborn Gauntlet",
+      "zh-CN": "冰脉护手"
+    }
+  },
+  {
+    "slug": "wr-immortal-shieldbow",
+    "source_slug": "wild-rift-immortal-shieldbow",
+    "zh_official_name": "不朽盾弓",
+    "zh_aliases": [
+      "盾弓"
+    ],
+    "localized_display_names": {
+      "en": "Immortal Shieldbow",
+      "zh-CN": "不朽盾弓"
+    }
+  },
+  {
+    "slug": "wr-imperial-mandate",
+    "source_slug": "wild-rift-imperial-mandate",
+    "zh_official_name": "帝国指令",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Imperial Mandate",
+      "zh-CN": "帝国指令"
+    }
+  },
+  {
+    "slug": "wr-infinity-edge",
+    "source_slug": "wild-rift-infinity-edge",
+    "zh_official_name": "无尽之刃",
+    "zh_aliases": [
+      "无尽"
+    ],
+    "localized_display_names": {
+      "en": "Infinity Edge",
+      "zh-CN": "无尽之刃"
+    }
+  },
+  {
+    "slug": "wr-infinity-edge-ruin",
+    "source_slug": "wild-rift-infinity-edge-ruin",
+    "zh_official_name": "无尽之刃(破败)",
+    "zh_aliases": [
+      "无尽"
+    ],
+    "localized_display_names": {
+      "en": "Infinity Edge (Ruin)",
+      "zh-CN": "无尽之刃(破败)"
+    }
+  },
+  {
+    "slug": "wr-infinity-orb",
+    "source_slug": "wild-rift-infinity-orb",
+    "zh_official_name": "无限法球",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Infinity Orb",
+      "zh-CN": "无限法球"
+    }
+  },
+  {
+    "slug": "wr-infinity-orb-light",
+    "source_slug": "wild-rift-infinity-orb-light",
+    "zh_official_name": "无限法球(光明)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Infinity Orb (Light)",
+      "zh-CN": "无限法球(光明)"
+    }
+  },
+  {
+    "slug": "wr-ionian-boots-of-lucidity",
+    "source_slug": "wild-rift-ionian-boots-of-lucidity",
+    "zh_official_name": "明朗之靴",
+    "zh_aliases": [
+      "CD鞋"
+    ],
+    "localized_display_names": {
+      "en": "Ionian Boots of Lucidity",
+      "zh-CN": "明朗之靴"
+    }
+  },
+  {
+    "slug": "wr-ixtali-seedjar",
+    "source_slug": "wild-rift-ixtali-seedjar",
+    "zh_official_name": "伊克斯塔尔种子罐",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ixtali Seedjar",
+      "zh-CN": "伊克斯塔尔种子罐"
+    }
+  },
+  {
+    "slug": "wr-jaurim-s-fist",
+    "source_slug": "wild-rift-jaurim-s-fist",
+    "zh_official_name": "紫木拳套",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Jaurim's Fist",
+      "zh-CN": "紫木拳套"
+    }
+  },
+  {
+    "slug": "wr-kaenic-rookern",
+    "source_slug": "wild-rift-kaenic-rookern",
+    "zh_official_name": "败魔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Kaenic Rookern",
+      "zh-CN": "败魔"
+    }
+  },
+  {
+    "slug": "wr-kindlegem",
+    "source_slug": "wild-rift-kindlegem",
+    "zh_official_name": "燃烧宝石",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Kindlegem",
+      "zh-CN": "燃烧宝石"
+    }
+  },
+  {
+    "slug": "wr-kircheis-shard",
+    "source_slug": "wild-rift-kircheis-shard",
+    "zh_official_name": "吉尔菲艾斯碎片",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Kircheis Shard",
+      "zh-CN": "吉尔菲艾斯碎片"
+    }
+  },
+  {
+    "slug": "wr-knight-s-vow",
+    "source_slug": "wild-rift-knight-s-vow",
+    "zh_official_name": "骑士之誓",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Knight's Vow",
+      "zh-CN": "骑士之誓"
+    }
+  },
+  {
+    "slug": "wr-kraken-slayer",
+    "source_slug": "wild-rift-kraken-slayer",
+    "zh_official_name": "海妖杀手",
+    "zh_aliases": [
+      "海妖"
+    ],
+    "localized_display_names": {
+      "en": "Kraken Slayer",
+      "zh-CN": "海妖杀手"
+    }
+  },
+  {
+    "slug": "wr-last-whisper",
+    "source_slug": "wild-rift-last-whisper",
+    "zh_official_name": "最后的轻语",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Last Whisper",
+      "zh-CN": "最后的轻语"
+    }
+  },
+  {
+    "slug": "wr-liandry-s-torment",
+    "source_slug": "wild-rift-liandry-s-torment",
+    "zh_official_name": "兰德里的折磨",
+    "zh_aliases": [
+      "兰德里",
+      "大面具",
+      "面具"
+    ],
+    "localized_display_names": {
+      "en": "Liandry's Torment",
+      "zh-CN": "兰德里的折磨"
+    }
+  },
+  {
+    "slug": "wr-lich-bane",
+    "source_slug": "wild-rift-lich-bane",
+    "zh_official_name": "巫妖之祸",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Lich Bane",
+      "zh-CN": "巫妖之祸"
+    }
+  },
+  {
+    "slug": "wr-locket-enchant",
+    "source_slug": "wild-rift-locket-enchant",
+    "zh_official_name": "鸟盾",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Locket Enchant",
+      "zh-CN": "鸟盾"
+    }
+  },
+  {
+    "slug": "wr-long-sword",
+    "source_slug": "wild-rift-long-sword",
+    "zh_official_name": "长剑",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Long Sword",
+      "zh-CN": "长剑"
+    }
+  },
+  {
+    "slug": "wr-lord-dominik-s-regards",
+    "source_slug": "wild-rift-lord-dominik-s-regards",
+    "zh_official_name": "多米尼克领主的致意",
+    "zh_aliases": [
+      "大穿甲",
+      "多米尼克"
+    ],
+    "localized_display_names": {
+      "en": "Lord Dominik's Regards",
+      "zh-CN": "多米尼克领主的致意"
+    }
+  },
+  {
+    "slug": "wr-lost-chapter",
+    "source_slug": "wild-rift-lost-chapter",
+    "zh_official_name": "遗失的章节",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Lost Chapter",
+      "zh-CN": "遗失的章节"
+    }
+  },
+  {
+    "slug": "wr-luden-s-echo",
+    "source_slug": "wild-rift-luden-s-echo",
+    "zh_official_name": "卢登的回声",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Luden's Echo",
+      "zh-CN": "卢登的回声"
+    }
+  },
+  {
+    "slug": "wr-magnetic-blaster",
+    "source_slug": "wild-rift-magnetic-blaster",
+    "zh_official_name": "磁能破坏炮",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Magnetic Blaster",
+      "zh-CN": "磁能破坏炮"
+    }
+  },
+  {
+    "slug": "wr-magnetron-enchant",
+    "source_slug": "wild-rift-magnetron-enchant",
+    "zh_official_name": "磁石",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Magnetron Enchant",
+      "zh-CN": "磁石"
+    }
+  },
+  {
+    "slug": "wr-malignance",
+    "source_slug": "wild-rift-malignance",
+    "zh_official_name": "残疫",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Malignance",
+      "zh-CN": "残疫"
+    }
+  },
+  {
+    "slug": "wr-manamune",
+    "source_slug": "wild-rift-manamune",
+    "zh_official_name": "魔宗",
+    "zh_aliases": [
+      "魔切"
+    ],
+    "localized_display_names": {
+      "en": "Manamune",
+      "zh-CN": "魔宗"
+    }
+  },
+  {
+    "slug": "wr-mantle-of-the-twelfth-hour",
+    "source_slug": "wild-rift-mantle-of-the-twelfth-hour",
+    "zh_official_name": "十二生肖的披风",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Mantle of the Twelfth Hour",
+      "zh-CN": "十二生肖的披风"
+    }
+  },
+  {
+    "slug": "wr-maw-of-malmortius",
+    "source_slug": "wild-rift-maw-of-malmortius",
+    "zh_official_name": "玛莫提乌斯之噬",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Maw of Malmortius",
+      "zh-CN": "玛莫提乌斯之噬"
+    }
+  },
+  {
+    "slug": "wr-mejai-s-soulstealer",
+    "source_slug": "wild-rift-mejai-s-soulstealer",
+    "zh_official_name": "梅贾的窃魂卷",
+    "zh_aliases": [
+      "杀人书"
+    ],
+    "localized_display_names": {
+      "en": "Mejai's Soulstealer",
+      "zh-CN": "梅贾的窃魂卷"
+    }
+  },
+  {
+    "slug": "wr-mercury-s-treads",
+    "source_slug": "wild-rift-mercury-s-treads",
+    "zh_official_name": "水银之靴",
+    "zh_aliases": [
+      "水银鞋",
+      "抵抗鞋"
+    ],
+    "localized_display_names": {
+      "en": "Mercury's Treads",
+      "zh-CN": "水银之靴"
+    }
+  },
+  {
+    "slug": "wr-meteor-enchant",
+    "source_slug": "wild-rift-meteor-enchant",
+    "zh_official_name": "陨石",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Meteor Enchant",
+      "zh-CN": "陨石"
+    }
+  },
+  {
+    "slug": "wr-morellonomicon",
+    "source_slug": "wild-rift-morellonomicon",
+    "zh_official_name": "莫雷洛秘典",
+    "zh_aliases": [
+      "鬼书"
+    ],
+    "localized_display_names": {
+      "en": "Morellonomicon",
+      "zh-CN": "莫雷洛秘典"
+    }
+  },
+  {
+    "slug": "wr-mortal-reminder",
+    "source_slug": "wild-rift-mortal-reminder",
+    "zh_official_name": "凡性的提醒",
+    "zh_aliases": [
+      "重伤弓"
+    ],
+    "localized_display_names": {
+      "en": "Mortal Reminder",
+      "zh-CN": "凡性的提醒"
+    }
+  },
+  {
+    "slug": "wr-muramana",
+    "source_slug": "wild-rift-muramana",
+    "zh_official_name": "魔切",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Muramana",
+      "zh-CN": "魔切"
+    }
+  },
+  {
+    "slug": "wr-nashor-s-talon",
+    "source_slug": "wild-rift-nashor-s-talon",
+    "zh_official_name": "纳什之齿",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Nashor's Talon",
+      "zh-CN": "纳什之齿"
+    }
+  },
+  {
+    "slug": "wr-nashor-s-tooth",
+    "source_slug": "wild-rift-nashor-s-tooth",
+    "zh_official_name": "纳什之牙",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Nashor's Tooth",
+      "zh-CN": "纳什之牙"
+    }
+  },
+  {
+    "slug": "wr-navori-quickblades",
+    "source_slug": "wild-rift-navori-quickblades",
+    "zh_official_name": "纳沃利迅刃",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Navori Quickblades",
+      "zh-CN": "纳沃利迅刃"
+    }
+  },
+  {
+    "slug": "wr-needlessly-large-rod",
+    "source_slug": "wild-rift-needlessly-large-rod",
+    "zh_official_name": "无用大棒",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Needlessly Large Rod",
+      "zh-CN": "无用大棒"
+    }
+  },
+  {
+    "slug": "wr-negatron-cloak",
+    "source_slug": "wild-rift-negatron-cloak",
+    "zh_official_name": "负极斗篷",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Negatron Cloak",
+      "zh-CN": "负极斗篷"
+    }
+  },
+  {
+    "slug": "wr-ninja-tabi",
+    "source_slug": "wild-rift-ninja-tabi",
+    "zh_official_name": "忍者足具",
+    "zh_aliases": [
+      "布甲鞋",
+      "铁板靴",
+      "草鞋"
+    ],
+    "localized_display_names": {
+      "en": "Ninja Tabi",
+      "zh-CN": "忍者足具"
+    }
+  },
+  {
+    "slug": "wr-noonquiver",
+    "source_slug": "wild-rift-noonquiver",
+    "zh_official_name": "正午箭袋",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Noonquiver",
+      "zh-CN": "正午箭袋"
+    }
+  },
+  {
+    "slug": "wr-null-magic-mantle",
+    "source_slug": "wild-rift-null-magic-mantle",
+    "zh_official_name": "抗魔斗篷",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Null-Magic Mantle",
+      "zh-CN": "抗魔斗篷"
+    }
+  },
+  {
+    "slug": "wr-oblivion-orb",
+    "source_slug": "wild-rift-oblivion-orb",
+    "zh_official_name": "湮灭宝珠",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Oblivion Orb",
+      "zh-CN": "湮灭宝珠"
+    }
+  },
+  {
+    "slug": "wr-oceanid-s-trident",
+    "source_slug": "wild-rift-oceanid-s-trident",
+    "zh_official_name": "海神三叉戟",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Oceanid's Trident",
+      "zh-CN": "海神三叉戟"
+    }
+  },
+  {
+    "slug": "wr-overlord-s-bloodmail",
+    "source_slug": "wild-rift-overlord-s-bloodmail",
+    "zh_official_name": "霸王血铠",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Overlord's Bloodmail",
+      "zh-CN": "霸王血铠"
+    }
+  },
+  {
+    "slug": "wr-perplexity",
+    "source_slug": "wild-rift-perplexity",
+    "zh_official_name": "困惑",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Perplexity",
+      "zh-CN": "困惑"
+    }
+  },
+  {
+    "slug": "wr-phage",
+    "source_slug": "wild-rift-phage",
+    "zh_official_name": "净蚀",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Phage",
+      "zh-CN": "净蚀"
+    }
+  },
+  {
+    "slug": "wr-phantom-dancer",
+    "source_slug": "wild-rift-phantom-dancer",
+    "zh_official_name": "幻影之舞",
+    "zh_aliases": [
+      "红叉",
+      "绿叉"
+    ],
+    "localized_display_names": {
+      "en": "Phantom Dancer",
+      "zh-CN": "幻影之舞"
+    }
+  },
+  {
+    "slug": "wr-plated-steelcaps",
+    "source_slug": "wild-rift-plated-steelcaps",
+    "zh_official_name": "铁板靴",
+    "zh_aliases": [
+      "布甲鞋",
+      "草鞋"
+    ],
+    "localized_display_names": {
+      "en": "Plated Steelcaps",
+      "zh-CN": "铁板靴"
+    }
+  },
+  {
+    "slug": "wr-prophet-s-pendant",
+    "source_slug": "wild-rift-prophet-s-pendant",
+    "zh_official_name": "先知坠饰",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Prophet's Pendant",
+      "zh-CN": "先知坠饰"
+    }
+  },
+  {
+    "slug": "wr-protect-enchant",
+    "source_slug": "wild-rift-protect-enchant",
+    "zh_official_name": "保护附魔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Protect Enchant",
+      "zh-CN": "保护附魔"
+    }
+  },
+  {
+    "slug": "wr-protector-s-vow",
+    "source_slug": "wild-rift-protector-s-vow",
+    "zh_official_name": "守护者之誓",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Protector's Vow",
+      "zh-CN": "守护者之誓"
+    }
+  },
+  {
+    "slug": "wr-protobelt-enchant",
+    "source_slug": "wild-rift-protobelt-enchant",
+    "zh_official_name": "火箭腰带",
+    "zh_aliases": [
+      "推推棒"
+    ],
+    "localized_display_names": {
+      "en": "Protobelt Enchant",
+      "zh-CN": "火箭腰带"
+    }
+  },
+  {
+    "slug": "wr-psychic-projector",
+    "source_slug": "wild-rift-psychic-projector",
+    "zh_official_name": "灵能投影仪",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Psychic Projector",
+      "zh-CN": "灵能投影仪"
+    }
+  },
+  {
+    "slug": "wr-quicksilver-enchant",
+    "source_slug": "wild-rift-quicksilver-enchant",
+    "zh_official_name": "水银饰带",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Quicksilver Enchant",
+      "zh-CN": "水银饰带"
+    }
+  },
+  {
+    "slug": "wr-rabadon-s-deathcap",
+    "source_slug": "wild-rift-rabadon-s-deathcap",
+    "zh_official_name": "灭世者的死亡之帽",
+    "zh_aliases": [
+      "大帽子",
+      "帽子",
+      "法穿帽"
+    ],
+    "localized_display_names": {
+      "en": "Rabadon's Deathcap",
+      "zh-CN": "灭世者的死亡之帽"
+    }
+  },
+  {
+    "slug": "wr-rabadon-s-deathcap-ruin",
+    "source_slug": "wild-rift-rabadon-s-deathcap-ruin",
+    "zh_official_name": "灭世者的死亡之帽(破败)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Rabadon's Deathcap (Ruin)",
+      "zh-CN": "灭世者的死亡之帽(破败)"
+    }
+  },
+  {
+    "slug": "wr-radiant-virtue",
+    "source_slug": "wild-rift-radiant-virtue",
+    "zh_official_name": "辉耀美德",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Radiant Virtue",
+      "zh-CN": "辉耀美德"
+    }
+  },
+  {
+    "slug": "wr-randuin-s-omen",
+    "source_slug": "wild-rift-randuin-s-omen",
+    "zh_official_name": "兰顿之兆",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Randuin's Omen",
+      "zh-CN": "兰顿之兆"
+    }
+  },
+  {
+    "slug": "wr-rapid-firecannon",
+    "source_slug": "wild-rift-rapid-firecannon",
+    "zh_official_name": "疾射火炮",
+    "zh_aliases": [
+      "火炮"
+    ],
+    "localized_display_names": {
+      "en": "Rapid Firecannon",
+      "zh-CN": "疾射火炮"
+    }
+  },
+  {
+    "slug": "wr-ravenous-hydra",
+    "source_slug": "wild-rift-ravenous-hydra",
+    "zh_official_name": "贪欲九头蛇",
+    "zh_aliases": [
+      "贪九"
+    ],
+    "localized_display_names": {
+      "en": "Ravenous Hydra",
+      "zh-CN": "贪欲九头蛇"
+    }
+  },
+  {
+    "slug": "wr-recurve-bow",
+    "source_slug": "wild-rift-recurve-bow",
+    "zh_official_name": "反曲之弓",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Recurve Bow",
+      "zh-CN": "反曲之弓"
+    }
+  },
+  {
+    "slug": "wr-redeeming-enchant",
+    "source_slug": "wild-rift-redeeming-enchant",
+    "zh_official_name": "救赎",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Redeeming Enchant",
+      "zh-CN": "救赎"
+    }
+  },
+  {
+    "slug": "wr-redemption",
+    "source_slug": "wild-rift-redemption",
+    "zh_official_name": "救赎",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Redemption",
+      "zh-CN": "救赎"
+    }
+  },
+  {
+    "slug": "wr-relic-shield",
+    "source_slug": "wild-rift-relic-shield",
+    "zh_official_name": "圣物之盾",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Relic Shield",
+      "zh-CN": "圣物之盾"
+    }
+  },
+  {
+    "slug": "wr-repulsor-enchant",
+    "source_slug": "wild-rift-repulsor-enchant",
+    "zh_official_name": "推推棒",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Repulsor Enchant",
+      "zh-CN": "推推棒"
+    }
+  },
+  {
+    "slug": "wr-revitalizing-enchant",
+    "source_slug": "wild-rift-revitalizing-enchant",
+    "zh_official_name": "复苏附魔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Revitalizing Enchant",
+      "zh-CN": "复苏附魔"
+    }
+  },
+  {
+    "slug": "wr-riftmaker",
+    "source_slug": "wild-rift-riftmaker",
+    "zh_official_name": "裂隙制造者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Riftmaker",
+      "zh-CN": "裂隙制造者"
+    }
+  },
+  {
+    "slug": "wr-riftmaker-light",
+    "source_slug": "wild-rift-riftmaker-light",
+    "zh_official_name": "峡谷制造者(光明)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Riftmaker (Light)",
+      "zh-CN": "峡谷制造者(光明)"
+    }
+  },
+  {
+    "slug": "wr-ring-of-revelation",
+    "source_slug": "wild-rift-ring-of-revelation",
+    "zh_official_name": "启示之戒",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ring of Revelation",
+      "zh-CN": "启示之戒"
+    }
+  },
+  {
+    "slug": "wr-rod-of-ages",
+    "source_slug": "wild-rift-rod-of-ages",
+    "zh_official_name": "时光之杖",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Rod of Ages",
+      "zh-CN": "时光之杖"
+    }
+  },
+  {
+    "slug": "wr-ruby-crystal",
+    "source_slug": "wild-rift-ruby-crystal",
+    "zh_official_name": "红水晶",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ruby Crystal",
+      "zh-CN": "红水晶"
+    }
+  },
+  {
+    "slug": "wr-runaan-s-hurricane",
+    "source_slug": "wild-rift-runaan-s-hurricane",
+    "zh_official_name": "卢安娜的飓风",
+    "zh_aliases": [
+      "飓风",
+      "分裂弓"
+    ],
+    "localized_display_names": {
+      "en": "Runaan's Hurricane",
+      "zh-CN": "卢安娜的飓风"
+    }
+  },
+  {
+    "slug": "wr-rylai-s-crystal-scepter",
+    "source_slug": "wild-rift-rylai-s-crystal-scepter",
+    "zh_official_name": "瑞莱的冰晶节杖",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Rylai's Crystal Scepter",
+      "zh-CN": "瑞莱的冰晶节杖"
+    }
+  },
+  {
+    "slug": "wr-sapphire-crystal",
+    "source_slug": "wild-rift-sapphire-crystal",
+    "zh_official_name": "蓝水晶",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Sapphire Crystal",
+      "zh-CN": "蓝水晶"
+    }
+  },
+  {
+    "slug": "wr-searing-crown",
+    "source_slug": "wild-rift-searing-crown",
+    "zh_official_name": "炽热之冠",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Searing Crown",
+      "zh-CN": "炽热之冠"
+    }
+  },
+  {
+    "slug": "wr-seeker-s-armguard",
+    "source_slug": "wild-rift-seeker-s-armguard",
+    "zh_official_name": "探索者的护臂",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Seeker's Armguard",
+      "zh-CN": "探索者的护臂"
+    }
+  },
+  {
+    "slug": "wr-seraph-s-embrace",
+    "source_slug": "wild-rift-seraph-s-embrace",
+    "zh_official_name": "炽天使之拥",
+    "zh_aliases": [
+      "炽天使"
+    ],
+    "localized_display_names": {
+      "en": "Seraph's Embrace",
+      "zh-CN": "炽天使之拥"
+    }
+  },
+  {
+    "slug": "wr-serpent-s-fang",
+    "source_slug": "wild-rift-serpent-s-fang",
+    "zh_official_name": "巨蛇之牙",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Serpent's Fang",
+      "zh-CN": "巨蛇之牙"
+    }
+  },
+  {
+    "slug": "wr-serrated-dirk",
+    "source_slug": "wild-rift-serrated-dirk",
+    "zh_official_name": "锯齿短匕",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Serrated Dirk",
+      "zh-CN": "锯齿短匕"
+    }
+  },
+  {
+    "slug": "wr-serylda-s-grudge",
+    "source_slug": "wild-rift-serylda-s-grudge",
+    "zh_official_name": "赛瑞尔达的怨恨",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Serylda's Grudge",
+      "zh-CN": "赛瑞尔达的怨恨"
+    }
+  },
+  {
+    "slug": "wr-shadows-enchant",
+    "source_slug": "wild-rift-shadows-enchant",
+    "zh_official_name": "双生暗影",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Shadows Enchant",
+      "zh-CN": "双生暗影"
+    }
+  },
+  {
+    "slug": "wr-sheen",
+    "source_slug": "wild-rift-sheen",
+    "zh_official_name": "耀光",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Sheen",
+      "zh-CN": "耀光"
+    }
+  },
+  {
+    "slug": "wr-shimmering-spark",
+    "source_slug": "wild-rift-shimmering-spark",
+    "zh_official_name": "闪光花火",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Shimmering Spark",
+      "zh-CN": "闪光花火"
+    }
+  },
+  {
+    "slug": "wr-solari-chargeblade",
+    "source_slug": "wild-rift-solari-chargeblade",
+    "zh_official_name": "烈阳魔刃",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Solari Chargeblade",
+      "zh-CN": "烈阳魔刃"
+    }
+  },
+  {
+    "slug": "wr-soul-transfer",
+    "source_slug": "wild-rift-soul-transfer",
+    "zh_official_name": "灵魂转移",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Soul Transfer",
+      "zh-CN": "灵魂转移"
+    }
+  },
+  {
+    "slug": "wr-soul-weep",
+    "source_slug": "wild-rift-soul-weep",
+    "zh_official_name": "灵魂悲泣",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Soul Weep",
+      "zh-CN": "灵魂悲泣"
+    }
+  },
+  {
+    "slug": "wr-spear-of-shojin",
+    "source_slug": "wild-rift-spear-of-shojin",
+    "zh_official_name": "朔极之矛",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Spear of Shojin",
+      "zh-CN": "朔极之矛"
+    }
+  },
+  {
+    "slug": "wr-spectral-sickle",
+    "source_slug": "wild-rift-spectral-sickle",
+    "zh_official_name": "幽魂镰刀",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Spectral Sickle",
+      "zh-CN": "幽魂镰刀"
+    }
+  },
+  {
+    "slug": "wr-spectre-s-cowl",
+    "source_slug": "wild-rift-spectre-s-cowl",
+    "zh_official_name": "幽魂斗篷",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Spectre's Cowl",
+      "zh-CN": "幽魂斗篷"
+    }
+  },
+  {
+    "slug": "wr-spirit-visage",
+    "source_slug": "wild-rift-spirit-visage",
+    "zh_official_name": "振奋盔甲",
+    "zh_aliases": [
+      "绿甲",
+      "振奋"
+    ],
+    "localized_display_names": {
+      "en": "Spirit Visage",
+      "zh-CN": "振奋盔甲"
+    }
+  },
+  {
+    "slug": "wr-staff-of-flowing-waters",
+    "source_slug": "wild-rift-staff-of-flowing-waters",
+    "zh_official_name": "流水法杖",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Staff of Flowing Waters",
+      "zh-CN": "流水法杖"
+    }
+  },
+  {
+    "slug": "wr-stasis-enchant",
+    "source_slug": "wild-rift-stasis-enchant",
+    "zh_official_name": "中娅沙漏",
+    "zh_aliases": [
+      "金身",
+      "中娅"
+    ],
+    "localized_display_names": {
+      "en": "Stasis Enchant",
+      "zh-CN": "中娅沙漏"
+    }
+  },
+  {
+    "slug": "wr-statikk-shiv",
+    "source_slug": "wild-rift-statikk-shiv",
+    "zh_official_name": "斯塔缇克电刃",
+    "zh_aliases": [
+      "电刀"
+    ],
+    "localized_display_names": {
+      "en": "Statikk Shiv",
+      "zh-CN": "斯塔缇克电刃"
+    }
+  },
+  {
+    "slug": "wr-sterak-s-gage",
+    "source_slug": "wild-rift-sterak-s-gage",
+    "zh_official_name": "斯特拉克挑战护手",
+    "zh_aliases": [
+      "血手"
+    ],
+    "localized_display_names": {
+      "en": "Sterak's Gage",
+      "zh-CN": "斯特拉克挑战护手"
+    }
+  },
+  {
+    "slug": "wr-sterak-s-gage-ruin",
+    "source_slug": "wild-rift-sterak-s-gage-ruin",
+    "zh_official_name": "斯特拉克挑战护手(破败)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Sterak's Gage (Ruin)",
+      "zh-CN": "斯特拉克挑战护手(破败)"
+    }
+  },
+  {
+    "slug": "wr-stinger",
+    "source_slug": "wild-rift-stinger",
+    "zh_official_name": "蜂刺",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Stinger",
+      "zh-CN": "蜂刺"
+    }
+  },
+  {
+    "slug": "wr-stoneplate-enchant",
+    "source_slug": "wild-rift-stoneplate-enchant",
+    "zh_official_name": "石像鬼板甲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Stoneplate Enchant",
+      "zh-CN": "石像鬼板甲"
+    }
+  },
+  {
+    "slug": "wr-stormrazor",
+    "source_slug": "wild-rift-stormrazor",
+    "zh_official_name": "岚切",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Stormrazor",
+      "zh-CN": "岚切"
+    }
+  },
+  {
+    "slug": "wr-stormsurge",
+    "source_slug": "wild-rift-stormsurge",
+    "zh_official_name": "风暴狂涌",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Stormsurge",
+      "zh-CN": "风暴狂涌"
+    }
+  },
+  {
+    "slug": "wr-stridebreaker",
+    "source_slug": "wild-rift-stridebreaker",
+    "zh_official_name": "挺进破坏者",
+    "zh_aliases": [
+      "挺进"
+    ],
+    "localized_display_names": {
+      "en": "Stridebreaker",
+      "zh-CN": "挺进破坏者"
+    }
+  },
+  {
+    "slug": "wr-sundered-sky",
+    "source_slug": "wild-rift-sundered-sky",
+    "zh_official_name": "焚天",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Sundered Sky",
+      "zh-CN": "焚天"
+    }
+  },
+  {
+    "slug": "wr-sunfire-aegis",
+    "source_slug": "wild-rift-sunfire-aegis",
+    "zh_official_name": "日炎圣盾",
+    "zh_aliases": [
+      "日炎",
+      "日炎斗篷"
+    ],
+    "localized_display_names": {
+      "en": "Sunfire Aegis",
+      "zh-CN": "日炎圣盾"
+    }
+  },
+  {
+    "slug": "wr-sunfire-cape",
+    "source_slug": "wild-rift-sunfire-cape",
+    "zh_official_name": "日炎斗篷",
+    "zh_aliases": [
+      "日炎"
+    ],
+    "localized_display_names": {
+      "en": "Sunfire Cape",
+      "zh-CN": "日炎斗篷"
+    }
+  },
+  {
+    "slug": "wr-surging-scales",
+    "source_slug": "wild-rift-surging-scales",
+    "zh_official_name": "狂涌之鳞",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Surging Scales",
+      "zh-CN": "狂涌之鳞"
+    }
+  },
+  {
+    "slug": "wr-sweeping-lens",
+    "source_slug": "wild-rift-sweeping-lens",
+    "zh_official_name": "扫描透镜",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Sweeping Lens",
+      "zh-CN": "扫描透镜"
+    }
+  },
+  {
+    "slug": "wr-talisman-of-ascension",
+    "source_slug": "wild-rift-talisman-of-ascension",
+    "zh_official_name": "飞升护符",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Talisman of Ascension",
+      "zh-CN": "飞升护符"
+    }
+  },
+  {
+    "slug": "wr-targon-s-buckler",
+    "source_slug": "wild-rift-targon-s-buckler",
+    "zh_official_name": "巨神峰圆盾",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Targon's Buckler",
+      "zh-CN": "巨神峰圆盾"
+    }
+  },
+  {
+    "slug": "wr-tear-of-the-goddess",
+    "source_slug": "wild-rift-tear-of-the-goddess",
+    "zh_official_name": "女神之泪",
+    "zh_aliases": [
+      "女神泪"
+    ],
+    "localized_display_names": {
+      "en": "Tear of the Goddess",
+      "zh-CN": "女神之泪"
+    }
+  },
+  {
+    "slug": "wr-teleport-enchant",
+    "source_slug": "wild-rift-teleport-enchant",
+    "zh_official_name": "传送",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Teleport Enchant",
+      "zh-CN": "传送"
+    }
+  },
+  {
+    "slug": "wr-terminus",
+    "source_slug": "wild-rift-terminus",
+    "zh_official_name": "界弓",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Terminus",
+      "zh-CN": "界弓"
+    }
+  },
+  {
+    "slug": "wr-the-collector",
+    "source_slug": "wild-rift-the-collector",
+    "zh_official_name": "收集者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "The Collector",
+      "zh-CN": "收集者"
+    }
+  },
+  {
+    "slug": "wr-thornmail",
+    "source_slug": "wild-rift-thornmail",
+    "zh_official_name": "荆棘之甲",
+    "zh_aliases": [
+      "反甲"
+    ],
+    "localized_display_names": {
+      "en": "Thornmail",
+      "zh-CN": "荆棘之甲"
+    }
+  },
+  {
+    "slug": "wr-titanic-hydra",
+    "source_slug": "wild-rift-titanic-hydra",
+    "zh_official_name": "巨型九头蛇",
+    "zh_aliases": [
+      "巨九"
+    ],
+    "localized_display_names": {
+      "en": "Titanic Hydra",
+      "zh-CN": "巨型九头蛇"
+    }
+  },
+  {
+    "slug": "wr-trinity-force",
+    "source_slug": "wild-rift-trinity-force",
+    "zh_official_name": "三相之力",
+    "zh_aliases": [
+      "三相"
+    ],
+    "localized_display_names": {
+      "en": "Trinity Force",
+      "zh-CN": "三相之力"
+    }
+  },
+  {
+    "slug": "wr-umbral-glaive",
+    "source_slug": "wild-rift-umbral-glaive",
+    "zh_official_name": "黯影阔剑",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Umbral Glaive",
+      "zh-CN": "黯影阔剑"
+    }
+  },
+  {
+    "slug": "wr-unending-despair",
+    "source_slug": "wild-rift-unending-despair",
+    "zh_official_name": "无终恨意",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Unending Despair",
+      "zh-CN": "无终恨意"
+    }
+  },
+  {
+    "slug": "wr-vampiric-scepter",
+    "source_slug": "wild-rift-vampiric-scepter",
+    "zh_official_name": "吸血鬼节杖",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Vampiric Scepter",
+      "zh-CN": "吸血鬼节杖"
+    }
+  },
+  {
+    "slug": "wr-veil-enchant",
+    "source_slug": "wild-rift-veil-enchant",
+    "zh_official_name": "面纱附魔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Veil Enchant",
+      "zh-CN": "面纱附魔"
+    }
+  },
+  {
+    "slug": "wr-void-amethyst",
+    "source_slug": "wild-rift-void-amethyst",
+    "zh_official_name": "虚空紫水晶",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Void Amethyst",
+      "zh-CN": "虚空紫水晶"
+    }
+  },
+  {
+    "slug": "wr-void-staff",
+    "source_slug": "wild-rift-void-staff",
+    "zh_official_name": "虚空之杖",
+    "zh_aliases": [
+      "法穿棒"
+    ],
+    "localized_display_names": {
+      "en": "Void Staff",
+      "zh-CN": "虚空之杖"
+    }
+  },
+  {
+    "slug": "wr-warden-s-mail",
+    "source_slug": "wild-rift-warden-s-mail",
+    "zh_official_name": "守望者铠甲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Warden's Mail",
+      "zh-CN": "守望者铠甲"
+    }
+  },
+  {
+    "slug": "wr-warding-totem",
+    "source_slug": "wild-rift-warding-totem",
+    "zh_official_name": "监视图腾",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Warding Totem",
+      "zh-CN": "监视图腾"
+    }
+  },
+  {
+    "slug": "wr-warmog-s-armor",
+    "source_slug": "wild-rift-warmog-s-armor",
+    "zh_official_name": "狂徒铠甲",
+    "zh_aliases": [
+      "狂徒"
+    ],
+    "localized_display_names": {
+      "en": "Warmog's Armor",
+      "zh-CN": "狂徒铠甲"
+    }
+  },
+  {
+    "slug": "wr-warmog-s-armor-ruin",
+    "source_slug": "wild-rift-warmog-s-armor-ruin",
+    "zh_official_name": "狂徒铠甲(破败)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Warmog's Armor (Ruin)",
+      "zh-CN": "狂徒铠甲(破败)"
+    }
+  },
+  {
+    "slug": "wr-winged-moonplate",
+    "source_slug": "wild-rift-winged-moonplate",
+    "zh_official_name": "带翼的月板甲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Winged Moonplate",
+      "zh-CN": "带翼的月板甲"
+    }
+  },
+  {
+    "slug": "wr-winter-s-approach",
+    "source_slug": "wild-rift-winter-s-approach",
+    "zh_official_name": "凛冬将至",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Winter's Approach",
+      "zh-CN": "凛冬将至"
+    }
+  },
+  {
+    "slug": "wr-wit-s-end",
+    "source_slug": "wild-rift-wit-s-end",
+    "zh_official_name": "智慧末刃",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Wit's End",
+      "zh-CN": "智慧末刃"
+    }
+  },
+  {
+    "slug": "wr-yordle-duskblade-of-draktharr",
+    "source_slug": "wild-rift-yordle-duskblade-of-draktharr",
+    "zh_official_name": "约德尔德拉克萨的暮刃",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Duskblade of Draktharr",
+      "zh-CN": "约德尔德拉克萨的暮刃"
+    }
+  },
+  {
+    "slug": "wr-yordle-harmonic-echo",
+    "source_slug": "wild-rift-yordle-harmonic-echo",
+    "zh_official_name": "约德尔和谐回音",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Harmonic Echo",
+      "zh-CN": "约德尔和谐回音"
+    }
+  },
+  {
+    "slug": "wr-yordle-infinity-orb",
+    "source_slug": "wild-rift-yordle-infinity-orb",
+    "zh_official_name": "约德尔无限法球",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Infinity Orb",
+      "zh-CN": "约德尔无限法球"
+    }
+  },
+  {
+    "slug": "wr-yordle-liandry-s-torment",
+    "source_slug": "wild-rift-yordle-liandry-s-torment",
+    "zh_official_name": "约德尔兰德里的折磨",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Liandry's Torment",
+      "zh-CN": "约德尔兰德里的折磨"
+    }
+  },
+  {
+    "slug": "wr-yordle-redemption",
+    "source_slug": "wild-rift-yordle-redemption",
+    "zh_official_name": "约德尔救赎",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Redemption",
+      "zh-CN": "约德尔救赎"
+    }
+  },
+  {
+    "slug": "wr-yordle-runaan-s-hurricane",
+    "source_slug": "wild-rift-yordle-runaan-s-hurricane",
+    "zh_official_name": "约德尔卢安娜的飓风",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Runaan's Hurricane",
+      "zh-CN": "约德尔卢安娜的飓风"
+    }
+  },
+  {
+    "slug": "wr-yordle-serylda-s-grudge",
+    "source_slug": "wild-rift-yordle-serylda-s-grudge",
+    "zh_official_name": "约德尔赛瑞尔达的怨恨",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Serylda's Grudge",
+      "zh-CN": "约德尔赛瑞尔达的怨恨"
+    }
+  },
+  {
+    "slug": "wr-yordle-sunfire-aegis",
+    "source_slug": "wild-rift-yordle-sunfire-aegis",
+    "zh_official_name": "约德尔日炎圣盾",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Sunfire Aegis",
+      "zh-CN": "约德尔日炎圣盾"
+    }
+  },
+  {
+    "slug": "wr-yordle-trap",
+    "source_slug": "wild-rift-yordle-trap",
+    "zh_official_name": "约德尔陷阱",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yordle Trap",
+      "zh-CN": "约德尔陷阱"
+    }
+  },
+  {
+    "slug": "wr-youmuu-s-ghostblade",
+    "source_slug": "wild-rift-youmuu-s-ghostblade",
+    "zh_official_name": "幽梦之灵",
+    "zh_aliases": [
+      "幽梦"
+    ],
+    "localized_display_names": {
+      "en": "Youmuu's Ghostblade",
+      "zh-CN": "幽梦之灵"
+    }
+  },
+  {
+    "slug": "wr-youmuu-s-ghostblade-light",
+    "source_slug": "wild-rift-youmuu-s-ghostblade-light",
+    "zh_official_name": "幽梦之灵(光明)",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Youmuu's Ghostblade (Light)",
+      "zh-CN": "幽梦之灵(光明)"
+    }
+  },
+  {
+    "slug": "wr-zeal",
+    "source_slug": "wild-rift-zeal",
+    "zh_official_name": "狂热",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Zeal",
+      "zh-CN": "狂热"
+    }
+  },
+  {
+    "slug": "wr-zeke-s-convergence",
+    "source_slug": "wild-rift-zeke-s-convergence",
+    "zh_official_name": "基克的聚合",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Zeke's Convergence",
+      "zh-CN": "基克的聚合"
+    }
+  }
+]

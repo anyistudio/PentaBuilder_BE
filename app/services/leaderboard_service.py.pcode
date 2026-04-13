@@ -1,0 +1,6 @@
+Class LeaderboardService:
+- accept only eligible evaluate_build runs for leaderboard updates
+- scope entries by game, data_version, own champion, and optional single enemy champion
+- keep the best score and top user/session/run snapshot
+- list filtered leaderboard entries
+- recompute entries after user/session cleanup removes the previous top run

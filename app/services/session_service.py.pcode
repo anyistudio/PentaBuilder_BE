@@ -1,0 +1,6 @@
+Class SessionService:
+- create persisted user sessions and initialize transcript objects
+- list and fetch session metadata
+- merge claim payloads from local client buffers into transcript JSON
+- append completed AI run events into transcripts
+- delete transcripts and linked run artifacts when a session is removed

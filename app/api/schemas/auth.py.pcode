@@ -1,0 +1,11 @@
+Class UserSchema:
+- normalized user payload for auth and /me responses
+
+Class AuthExchangeRequest:
+- carry provider and provider_token from Clerk exchange
+
+Class AuthExchangePayload:
+- return backend token metadata plus UserSchema
+
+Class PatchMePreferencesRequest:
+- allow partial preference updates for language/style/username

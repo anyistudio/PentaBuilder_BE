@@ -1,0 +1,2040 @@
+[
+  {
+    "slug": "lol-aatrox",
+    "source_slug": "lol-aatrox",
+    "zh_official_name": "暗裔剑魔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Aatrox",
+      "zh-CN": "暗裔剑魔"
+    }
+  },
+  {
+    "slug": "lol-ahri",
+    "source_slug": "lol-ahri",
+    "zh_official_name": "九尾妖狐",
+    "zh_aliases": [
+      "狐狸",
+      "刮痧师傅"
+    ],
+    "localized_display_names": {
+      "en": "Ahri",
+      "zh-CN": "九尾妖狐"
+    }
+  },
+  {
+    "slug": "lol-akali",
+    "source_slug": "lol-akali",
+    "zh_official_name": "离群之刺",
+    "zh_aliases": [
+      "阿卡丽"
+    ],
+    "localized_display_names": {
+      "en": "Akali",
+      "zh-CN": "离群之刺"
+    }
+  },
+  {
+    "slug": "lol-akshan",
+    "source_slug": "lol-akshan",
+    "zh_official_name": "影哨",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Akshan",
+      "zh-CN": "影哨"
+    }
+  },
+  {
+    "slug": "lol-alistar",
+    "source_slug": "lol-alistar",
+    "zh_official_name": "牛头酋长",
+    "zh_aliases": [
+      "牛头"
+    ],
+    "localized_display_names": {
+      "en": "Alistar",
+      "zh-CN": "牛头酋长"
+    }
+  },
+  {
+    "slug": "lol-ambessa",
+    "source_slug": "lol-ambessa",
+    "zh_official_name": "铁血狼母",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ambessa",
+      "zh-CN": "铁血狼母"
+    }
+  },
+  {
+    "slug": "lol-amumu",
+    "source_slug": "lol-amumu",
+    "zh_official_name": "殇之木乃伊",
+    "zh_aliases": [
+      "木木"
+    ],
+    "localized_display_names": {
+      "en": "Amumu",
+      "zh-CN": "殇之木乃伊"
+    }
+  },
+  {
+    "slug": "lol-anivia",
+    "source_slug": "lol-anivia",
+    "zh_official_name": "冰晶凤凰",
+    "zh_aliases": [
+      "冰鸟"
+    ],
+    "localized_display_names": {
+      "en": "Anivia",
+      "zh-CN": "冰晶凤凰"
+    }
+  },
+  {
+    "slug": "lol-annie",
+    "source_slug": "lol-annie",
+    "zh_official_name": "黑暗之女",
+    "zh_aliases": [
+      "火女"
+    ],
+    "localized_display_names": {
+      "en": "Annie",
+      "zh-CN": "黑暗之女"
+    }
+  },
+  {
+    "slug": "lol-aphelios",
+    "source_slug": "lol-aphelios",
+    "zh_official_name": "残月之肃",
+    "zh_aliases": [
+      "厄斐琉斯",
+      "吴亦凡",
+      "无E凡"
+    ],
+    "localized_display_names": {
+      "en": "Aphelios",
+      "zh-CN": "残月之肃"
+    }
+  },
+  {
+    "slug": "lol-ashe",
+    "source_slug": "lol-ashe",
+    "zh_official_name": "寒冰射手",
+    "zh_aliases": [
+      "寒冰"
+    ],
+    "localized_display_names": {
+      "en": "Ashe",
+      "zh-CN": "寒冰射手"
+    }
+  },
+  {
+    "slug": "lol-aurelion-sol",
+    "source_slug": "lol-aurelion-sol",
+    "zh_official_name": "铸星龙王",
+    "zh_aliases": [
+      "龙王"
+    ],
+    "localized_display_names": {
+      "en": "Aurelion Sol",
+      "zh-CN": "铸星龙王"
+    }
+  },
+  {
+    "slug": "lol-aurora",
+    "source_slug": "lol-aurora",
+    "zh_official_name": "双界灵兔",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Aurora",
+      "zh-CN": "双界灵兔"
+    }
+  },
+  {
+    "slug": "lol-azir",
+    "source_slug": "lol-azir",
+    "zh_official_name": "沙漠皇帝",
+    "zh_aliases": [
+      "沙皇"
+    ],
+    "localized_display_names": {
+      "en": "Azir",
+      "zh-CN": "沙漠皇帝"
+    }
+  },
+  {
+    "slug": "lol-bard",
+    "source_slug": "lol-bard",
+    "zh_official_name": "星界游神",
+    "zh_aliases": [
+      "巴德"
+    ],
+    "localized_display_names": {
+      "en": "Bard",
+      "zh-CN": "星界游神"
+    }
+  },
+  {
+    "slug": "lol-bel-veth",
+    "source_slug": "lol-bel-veth",
+    "zh_official_name": "卑尔维斯",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Bel'Veth",
+      "zh-CN": "卑尔维斯"
+    }
+  },
+  {
+    "slug": "lol-blitzcrank",
+    "source_slug": "lol-blitzcrank",
+    "zh_official_name": "蒸汽机器人",
+    "zh_aliases": [
+      "机器人"
+    ],
+    "localized_display_names": {
+      "en": "Blitzcrank",
+      "zh-CN": "蒸汽机器人"
+    }
+  },
+  {
+    "slug": "lol-brand",
+    "source_slug": "lol-brand",
+    "zh_official_name": "复仇焰魂",
+    "zh_aliases": [
+      "火男"
+    ],
+    "localized_display_names": {
+      "en": "Brand",
+      "zh-CN": "复仇焰魂"
+    }
+  },
+  {
+    "slug": "lol-braum",
+    "source_slug": "lol-braum",
+    "zh_official_name": "弗雷尔卓德之心",
+    "zh_aliases": [
+      "布隆",
+      "防盗门"
+    ],
+    "localized_display_names": {
+      "en": "Braum",
+      "zh-CN": "弗雷尔卓德之心"
+    }
+  },
+  {
+    "slug": "lol-briar",
+    "source_slug": "lol-briar",
+    "zh_official_name": "狂厄蔷薇",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Briar",
+      "zh-CN": "狂厄蔷薇"
+    }
+  },
+  {
+    "slug": "lol-caitlyn",
+    "source_slug": "lol-caitlyn",
+    "zh_official_name": "皮城女警",
+    "zh_aliases": [
+      "女警"
+    ],
+    "localized_display_names": {
+      "en": "Caitlyn",
+      "zh-CN": "皮城女警"
+    }
+  },
+  {
+    "slug": "lol-camille",
+    "source_slug": "lol-camille",
+    "zh_official_name": "青钢影",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Camille",
+      "zh-CN": "青钢影"
+    }
+  },
+  {
+    "slug": "lol-cassiopeia",
+    "source_slug": "lol-cassiopeia",
+    "zh_official_name": "魔蛇之拥",
+    "zh_aliases": [
+      "蛇女"
+    ],
+    "localized_display_names": {
+      "en": "Cassiopeia",
+      "zh-CN": "魔蛇之拥"
+    }
+  },
+  {
+    "slug": "lol-cho-gath",
+    "source_slug": "lol-cho-gath",
+    "zh_official_name": "科加斯",
+    "zh_aliases": [
+      "大虫子"
+    ],
+    "localized_display_names": {
+      "en": "Cho'Gath",
+      "zh-CN": "科加斯"
+    }
+  },
+  {
+    "slug": "lol-corki",
+    "source_slug": "lol-corki",
+    "zh_official_name": "英勇投弹手",
+    "zh_aliases": [
+      "飞机"
+    ],
+    "localized_display_names": {
+      "en": "Corki",
+      "zh-CN": "英勇投弹手"
+    }
+  },
+  {
+    "slug": "lol-darius",
+    "source_slug": "lol-darius",
+    "zh_official_name": "诺克萨斯之手",
+    "zh_aliases": [
+      "诺手"
+    ],
+    "localized_display_names": {
+      "en": "Darius",
+      "zh-CN": "诺克萨斯之手"
+    }
+  },
+  {
+    "slug": "lol-diana",
+    "source_slug": "lol-diana",
+    "zh_official_name": "皎月女神",
+    "zh_aliases": [
+      "皎月"
+    ],
+    "localized_display_names": {
+      "en": "Diana",
+      "zh-CN": "皎月女神"
+    }
+  },
+  {
+    "slug": "lol-dr-mundo",
+    "source_slug": "lol-dr-mundo",
+    "zh_official_name": "祖安狂人",
+    "zh_aliases": [
+      "蒙多"
+    ],
+    "localized_display_names": {
+      "en": "Dr. Mundo",
+      "zh-CN": "祖安狂人"
+    }
+  },
+  {
+    "slug": "lol-draven",
+    "source_slug": "lol-draven",
+    "zh_official_name": "荣耀行刑官",
+    "zh_aliases": [
+      "德莱文",
+      "文森特"
+    ],
+    "localized_display_names": {
+      "en": "Draven",
+      "zh-CN": "荣耀行刑官"
+    }
+  },
+  {
+    "slug": "lol-ekko",
+    "source_slug": "lol-ekko",
+    "zh_official_name": "时间刺客",
+    "zh_aliases": [
+      "艾克"
+    ],
+    "localized_display_names": {
+      "en": "Ekko",
+      "zh-CN": "时间刺客"
+    }
+  },
+  {
+    "slug": "lol-elise",
+    "source_slug": "lol-elise",
+    "zh_official_name": "蜘蛛女皇",
+    "zh_aliases": [
+      "蜘蛛"
+    ],
+    "localized_display_names": {
+      "en": "Elise",
+      "zh-CN": "蜘蛛女皇"
+    }
+  },
+  {
+    "slug": "lol-evelynn",
+    "source_slug": "lol-evelynn",
+    "zh_official_name": "痛苦之拥",
+    "zh_aliases": [
+      "寡妇"
+    ],
+    "localized_display_names": {
+      "en": "Evelynn",
+      "zh-CN": "痛苦之拥"
+    }
+  },
+  {
+    "slug": "lol-ezreal",
+    "source_slug": "lol-ezreal",
+    "zh_official_name": "探险家",
+    "zh_aliases": [
+      "EZ",
+      "小黄毛"
+    ],
+    "localized_display_names": {
+      "en": "Ezreal",
+      "zh-CN": "探险家"
+    }
+  },
+  {
+    "slug": "lol-fiddlesticks",
+    "source_slug": "lol-fiddlesticks",
+    "zh_official_name": "远古恐惧",
+    "zh_aliases": [
+      "末日",
+      "稻草人"
+    ],
+    "localized_display_names": {
+      "en": "Fiddlesticks",
+      "zh-CN": "远古恐惧"
+    }
+  },
+  {
+    "slug": "lol-fiora",
+    "source_slug": "lol-fiora",
+    "zh_official_name": "无双剑姬",
+    "zh_aliases": [
+      "剑姬"
+    ],
+    "localized_display_names": {
+      "en": "Fiora",
+      "zh-CN": "无双剑姬"
+    }
+  },
+  {
+    "slug": "lol-fizz",
+    "source_slug": "lol-fizz",
+    "zh_official_name": "潮汐海灵",
+    "zh_aliases": [
+      "小鱼人"
+    ],
+    "localized_display_names": {
+      "en": "Fizz",
+      "zh-CN": "潮汐海灵"
+    }
+  },
+  {
+    "slug": "lol-galio",
+    "source_slug": "lol-galio",
+    "zh_official_name": "正义巨像",
+    "zh_aliases": [
+      "加里奥"
+    ],
+    "localized_display_names": {
+      "en": "Galio",
+      "zh-CN": "正义巨像"
+    }
+  },
+  {
+    "slug": "lol-gangplank",
+    "source_slug": "lol-gangplank",
+    "zh_official_name": "海洋之灾",
+    "zh_aliases": [
+      "船长"
+    ],
+    "localized_display_names": {
+      "en": "Gangplank",
+      "zh-CN": "海洋之灾"
+    }
+  },
+  {
+    "slug": "lol-garen",
+    "source_slug": "lol-garen",
+    "zh_official_name": "德玛西亚之力",
+    "zh_aliases": [
+      "盖伦",
+      "大宝剑"
+    ],
+    "localized_display_names": {
+      "en": "Garen",
+      "zh-CN": "德玛西亚之力"
+    }
+  },
+  {
+    "slug": "lol-gnar",
+    "source_slug": "lol-gnar",
+    "zh_official_name": "迷失之牙",
+    "zh_aliases": [
+      "纳尔"
+    ],
+    "localized_display_names": {
+      "en": "Gnar",
+      "zh-CN": "迷失之牙"
+    }
+  },
+  {
+    "slug": "lol-gragas",
+    "source_slug": "lol-gragas",
+    "zh_official_name": "酒桶",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Gragas",
+      "zh-CN": "酒桶"
+    }
+  },
+  {
+    "slug": "lol-graves",
+    "source_slug": "lol-graves",
+    "zh_official_name": "法外狂徒",
+    "zh_aliases": [
+      "男枪"
+    ],
+    "localized_display_names": {
+      "en": "Graves",
+      "zh-CN": "法外狂徒"
+    }
+  },
+  {
+    "slug": "lol-gwen",
+    "source_slug": "lol-gwen",
+    "zh_official_name": "灵罗娃娃",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Gwen",
+      "zh-CN": "灵罗娃娃"
+    }
+  },
+  {
+    "slug": "lol-hecarim",
+    "source_slug": "lol-hecarim",
+    "zh_official_name": "战争之影",
+    "zh_aliases": [
+      "人马"
+    ],
+    "localized_display_names": {
+      "en": "Hecarim",
+      "zh-CN": "战争之影"
+    }
+  },
+  {
+    "slug": "lol-heimerdinger",
+    "source_slug": "lol-heimerdinger",
+    "zh_official_name": "大发明家",
+    "zh_aliases": [
+      "大头"
+    ],
+    "localized_display_names": {
+      "en": "Heimerdinger",
+      "zh-CN": "大发明家"
+    }
+  },
+  {
+    "slug": "lol-hwei",
+    "source_slug": "lol-hwei",
+    "zh_official_name": "异画师",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hwei",
+      "zh-CN": "异画师"
+    }
+  },
+  {
+    "slug": "lol-illaoi",
+    "source_slug": "lol-illaoi",
+    "zh_official_name": "海兽祭司",
+    "zh_aliases": [
+      "触手妈"
+    ],
+    "localized_display_names": {
+      "en": "Illaoi",
+      "zh-CN": "海兽祭司"
+    }
+  },
+  {
+    "slug": "lol-irelia",
+    "source_slug": "lol-irelia",
+    "zh_official_name": "刀锋舞者",
+    "zh_aliases": [
+      "刀妹"
+    ],
+    "localized_display_names": {
+      "en": "Irelia",
+      "zh-CN": "刀锋舞者"
+    }
+  },
+  {
+    "slug": "lol-ivern",
+    "source_slug": "lol-ivern",
+    "zh_official_name": "翠神",
+    "zh_aliases": [
+      "艾翁"
+    ],
+    "localized_display_names": {
+      "en": "Ivern",
+      "zh-CN": "翠神"
+    }
+  },
+  {
+    "slug": "lol-janna",
+    "source_slug": "lol-janna",
+    "zh_official_name": "风暴之怒",
+    "zh_aliases": [
+      "风女"
+    ],
+    "localized_display_names": {
+      "en": "Janna",
+      "zh-CN": "风暴之怒"
+    }
+  },
+  {
+    "slug": "lol-jarvan-iv",
+    "source_slug": "lol-jarvan-iv",
+    "zh_official_name": "德玛西亚皇子",
+    "zh_aliases": [
+      "皇子"
+    ],
+    "localized_display_names": {
+      "en": "Jarvan IV",
+      "zh-CN": "德玛西亚皇子"
+    }
+  },
+  {
+    "slug": "lol-jax",
+    "source_slug": "lol-jax",
+    "zh_official_name": "武器大师",
+    "zh_aliases": [
+      "武器",
+      "贾老师"
+    ],
+    "localized_display_names": {
+      "en": "Jax",
+      "zh-CN": "武器大师"
+    }
+  },
+  {
+    "slug": "lol-jayce",
+    "source_slug": "lol-jayce",
+    "zh_official_name": "未来守护者",
+    "zh_aliases": [
+      "杰斯"
+    ],
+    "localized_display_names": {
+      "en": "Jayce",
+      "zh-CN": "未来守护者"
+    }
+  },
+  {
+    "slug": "lol-jhin",
+    "source_slug": "lol-jhin",
+    "zh_official_name": "戏命师",
+    "zh_aliases": [
+      "烬"
+    ],
+    "localized_display_names": {
+      "en": "Jhin",
+      "zh-CN": "戏命师"
+    }
+  },
+  {
+    "slug": "lol-jinx",
+    "source_slug": "lol-jinx",
+    "zh_official_name": "暴走萝莉",
+    "zh_aliases": [
+      "金克丝",
+      "萝莉"
+    ],
+    "localized_display_names": {
+      "en": "Jinx",
+      "zh-CN": "暴走萝莉"
+    }
+  },
+  {
+    "slug": "lol-k-sante",
+    "source_slug": "lol-k-sante",
+    "zh_official_name": "奎桑提",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "K'Sante",
+      "zh-CN": "奎桑提"
+    }
+  },
+  {
+    "slug": "lol-kai-sa",
+    "source_slug": "lol-kai-sa",
+    "zh_official_name": "卡莎",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Kai'Sa",
+      "zh-CN": "卡莎"
+    }
+  },
+  {
+    "slug": "lol-kalista",
+    "source_slug": "lol-kalista",
+    "zh_official_name": "复仇之矛",
+    "zh_aliases": [
+      "滑板鞋"
+    ],
+    "localized_display_names": {
+      "en": "Kalista",
+      "zh-CN": "复仇之矛"
+    }
+  },
+  {
+    "slug": "lol-karma",
+    "source_slug": "lol-karma",
+    "zh_official_name": "天启者",
+    "zh_aliases": [
+      "扇子妈"
+    ],
+    "localized_display_names": {
+      "en": "Karma",
+      "zh-CN": "天启者"
+    }
+  },
+  {
+    "slug": "lol-karthus",
+    "source_slug": "lol-karthus",
+    "zh_official_name": "死亡颂唱者",
+    "zh_aliases": [
+      "死歌"
+    ],
+    "localized_display_names": {
+      "en": "Karthus",
+      "zh-CN": "死亡颂唱者"
+    }
+  },
+  {
+    "slug": "lol-kassadin",
+    "source_slug": "lol-kassadin",
+    "zh_official_name": "虚空行者",
+    "zh_aliases": [
+      "K头丁"
+    ],
+    "localized_display_names": {
+      "en": "Kassadin",
+      "zh-CN": "虚空行者"
+    }
+  },
+  {
+    "slug": "lol-katarina",
+    "source_slug": "lol-katarina",
+    "zh_official_name": "不祥之刃",
+    "zh_aliases": [
+      "卡特"
+    ],
+    "localized_display_names": {
+      "en": "Katarina",
+      "zh-CN": "不祥之刃"
+    }
+  },
+  {
+    "slug": "lol-kayle",
+    "source_slug": "lol-kayle",
+    "zh_official_name": "正义天使",
+    "zh_aliases": [
+      "天使"
+    ],
+    "localized_display_names": {
+      "en": "Kayle",
+      "zh-CN": "正义天使"
+    }
+  },
+  {
+    "slug": "lol-kayn",
+    "source_slug": "lol-kayn",
+    "zh_official_name": "影流之镰",
+    "zh_aliases": [
+      "凯隐"
+    ],
+    "localized_display_names": {
+      "en": "Kayn",
+      "zh-CN": "影流之镰"
+    }
+  },
+  {
+    "slug": "lol-kennen",
+    "source_slug": "lol-kennen",
+    "zh_official_name": "狂暴之心",
+    "zh_aliases": [
+      "凯南",
+      "电竞耗子"
+    ],
+    "localized_display_names": {
+      "en": "Kennen",
+      "zh-CN": "狂暴之心"
+    }
+  },
+  {
+    "slug": "lol-kha-zix",
+    "source_slug": "lol-kha-zix",
+    "zh_official_name": "卡兹克",
+    "zh_aliases": [
+      "螳螂"
+    ],
+    "localized_display_names": {
+      "en": "Kha'Zix",
+      "zh-CN": "卡兹克"
+    }
+  },
+  {
+    "slug": "lol-kindred",
+    "source_slug": "lol-kindred",
+    "zh_official_name": "永猎双子",
+    "zh_aliases": [
+      "千珏"
+    ],
+    "localized_display_names": {
+      "en": "Kindred",
+      "zh-CN": "永猎双子"
+    }
+  },
+  {
+    "slug": "lol-kled",
+    "source_slug": "lol-kled",
+    "zh_official_name": "暴怒骑士",
+    "zh_aliases": [
+      "克烈"
+    ],
+    "localized_display_names": {
+      "en": "Kled",
+      "zh-CN": "暴怒骑士"
+    }
+  },
+  {
+    "slug": "lol-kog-maw",
+    "source_slug": "lol-kog-maw",
+    "zh_official_name": "克格莫",
+    "zh_aliases": [
+      "大嘴"
+    ],
+    "localized_display_names": {
+      "en": "Kog'Maw",
+      "zh-CN": "克格莫"
+    }
+  },
+  {
+    "slug": "lol-leblanc",
+    "source_slug": "lol-leblanc",
+    "zh_official_name": "诡术妖姬",
+    "zh_aliases": [
+      "妖姬"
+    ],
+    "localized_display_names": {
+      "en": "LeBlanc",
+      "zh-CN": "诡术妖姬"
+    }
+  },
+  {
+    "slug": "lol-lee-sin",
+    "source_slug": "lol-lee-sin",
+    "zh_official_name": "盲僧",
+    "zh_aliases": [
+      "瞎子"
+    ],
+    "localized_display_names": {
+      "en": "Lee Sin",
+      "zh-CN": "盲僧"
+    }
+  },
+  {
+    "slug": "lol-leona",
+    "source_slug": "lol-leona",
+    "zh_official_name": "曙光女神",
+    "zh_aliases": [
+      "女坦",
+      "日女"
+    ],
+    "localized_display_names": {
+      "en": "Leona",
+      "zh-CN": "曙光女神"
+    }
+  },
+  {
+    "slug": "lol-lillia",
+    "source_slug": "lol-lillia",
+    "zh_official_name": "含羞蓓蕾",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Lillia",
+      "zh-CN": "含羞蓓蕾"
+    }
+  },
+  {
+    "slug": "lol-lissandra",
+    "source_slug": "lol-lissandra",
+    "zh_official_name": "冰霜女巫",
+    "zh_aliases": [
+      "冰女"
+    ],
+    "localized_display_names": {
+      "en": "Lissandra",
+      "zh-CN": "冰霜女巫"
+    }
+  },
+  {
+    "slug": "lol-lucian",
+    "source_slug": "lol-lucian",
+    "zh_official_name": "圣枪游侠",
+    "zh_aliases": [
+      "卢锡安",
+      "奥巴马"
+    ],
+    "localized_display_names": {
+      "en": "Lucian",
+      "zh-CN": "圣枪游侠"
+    }
+  },
+  {
+    "slug": "lol-lulu",
+    "source_slug": "lol-lulu",
+    "zh_official_name": "仙灵女巫",
+    "zh_aliases": [
+      "露露"
+    ],
+    "localized_display_names": {
+      "en": "Lulu",
+      "zh-CN": "仙灵女巫"
+    }
+  },
+  {
+    "slug": "lol-lux",
+    "source_slug": "lol-lux",
+    "zh_official_name": "光辉女郎",
+    "zh_aliases": [
+      "光辉"
+    ],
+    "localized_display_names": {
+      "en": "Lux",
+      "zh-CN": "光辉女郎"
+    }
+  },
+  {
+    "slug": "lol-malphite",
+    "source_slug": "lol-malphite",
+    "zh_official_name": "熔岩巨兽",
+    "zh_aliases": [
+      "石头人"
+    ],
+    "localized_display_names": {
+      "en": "Malphite",
+      "zh-CN": "熔岩巨兽"
+    }
+  },
+  {
+    "slug": "lol-malzahar",
+    "source_slug": "lol-malzahar",
+    "zh_official_name": "虚空先知",
+    "zh_aliases": [
+      "蚂蚱"
+    ],
+    "localized_display_names": {
+      "en": "Malzahar",
+      "zh-CN": "虚空先知"
+    }
+  },
+  {
+    "slug": "lol-maokai",
+    "source_slug": "lol-maokai",
+    "zh_official_name": "扭曲树精",
+    "zh_aliases": [
+      "大树"
+    ],
+    "localized_display_names": {
+      "en": "Maokai",
+      "zh-CN": "扭曲树精"
+    }
+  },
+  {
+    "slug": "lol-master-yi",
+    "source_slug": "lol-master-yi",
+    "zh_official_name": "无极剑圣",
+    "zh_aliases": [
+      "剑圣",
+      "易大师"
+    ],
+    "localized_display_names": {
+      "en": "Master Yi",
+      "zh-CN": "无极剑圣"
+    }
+  },
+  {
+    "slug": "lol-mel",
+    "source_slug": "lol-mel",
+    "zh_official_name": "流光镜影",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Mel",
+      "zh-CN": "流光镜影"
+    }
+  },
+  {
+    "slug": "lol-milio",
+    "source_slug": "lol-milio",
+    "zh_official_name": "明烛",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Milio",
+      "zh-CN": "明烛"
+    }
+  },
+  {
+    "slug": "lol-miss-fortune",
+    "source_slug": "lol-miss-fortune",
+    "zh_official_name": "赏金猎人",
+    "zh_aliases": [
+      "女枪",
+      "好运姐"
+    ],
+    "localized_display_names": {
+      "en": "Miss Fortune",
+      "zh-CN": "赏金猎人"
+    }
+  },
+  {
+    "slug": "lol-mordekaiser",
+    "source_slug": "lol-mordekaiser",
+    "zh_official_name": "铁铠冥魂",
+    "zh_aliases": [
+      "铁男"
+    ],
+    "localized_display_names": {
+      "en": "Mordekaiser",
+      "zh-CN": "铁铠冥魂"
+    }
+  },
+  {
+    "slug": "lol-morgana",
+    "source_slug": "lol-morgana",
+    "zh_official_name": "堕落天使",
+    "zh_aliases": [
+      "莫甘娜"
+    ],
+    "localized_display_names": {
+      "en": "Morgana",
+      "zh-CN": "堕落天使"
+    }
+  },
+  {
+    "slug": "lol-naafiri",
+    "source_slug": "lol-naafiri",
+    "zh_official_name": "百裂冥犬",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Naafiri",
+      "zh-CN": "百裂冥犬"
+    }
+  },
+  {
+    "slug": "lol-nami",
+    "source_slug": "lol-nami",
+    "zh_official_name": "唤潮鲛姬",
+    "zh_aliases": [
+      "娜美"
+    ],
+    "localized_display_names": {
+      "en": "Nami",
+      "zh-CN": "唤潮鲛姬"
+    }
+  },
+  {
+    "slug": "lol-nasus",
+    "source_slug": "lol-nasus",
+    "zh_official_name": "沙漠死神",
+    "zh_aliases": [
+      "狗头"
+    ],
+    "localized_display_names": {
+      "en": "Nasus",
+      "zh-CN": "沙漠死神"
+    }
+  },
+  {
+    "slug": "lol-nautilus",
+    "source_slug": "lol-nautilus",
+    "zh_official_name": "深海泰坦",
+    "zh_aliases": [
+      "泰坦"
+    ],
+    "localized_display_names": {
+      "en": "Nautilus",
+      "zh-CN": "深海泰坦"
+    }
+  },
+  {
+    "slug": "lol-neeko",
+    "source_slug": "lol-neeko",
+    "zh_official_name": "万花通灵",
+    "zh_aliases": [
+      "妮蔻"
+    ],
+    "localized_display_names": {
+      "en": "Neeko",
+      "zh-CN": "万花通灵"
+    }
+  },
+  {
+    "slug": "lol-nidalee",
+    "source_slug": "lol-nidalee",
+    "zh_official_name": "狂野女猎手",
+    "zh_aliases": [
+      "豹女"
+    ],
+    "localized_display_names": {
+      "en": "Nidalee",
+      "zh-CN": "狂野女猎手"
+    }
+  },
+  {
+    "slug": "lol-nilah",
+    "source_slug": "lol-nilah",
+    "zh_official_name": "不羁之悦",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Nilah",
+      "zh-CN": "不羁之悦"
+    }
+  },
+  {
+    "slug": "lol-nocturne",
+    "source_slug": "lol-nocturne",
+    "zh_official_name": "永恒梦魇",
+    "zh_aliases": [
+      "梦魇"
+    ],
+    "localized_display_names": {
+      "en": "Nocturne",
+      "zh-CN": "永恒梦魇"
+    }
+  },
+  {
+    "slug": "lol-nunu",
+    "source_slug": "lol-nunu",
+    "zh_official_name": "努努和威朗普",
+    "zh_aliases": [
+      "雪人"
+    ],
+    "localized_display_names": {
+      "en": "Nunu",
+      "zh-CN": "努努和威朗普"
+    }
+  },
+  {
+    "slug": "lol-olaf",
+    "source_slug": "lol-olaf",
+    "zh_official_name": "狂战士",
+    "zh_aliases": [
+      "奥拉夫",
+      "疯狗"
+    ],
+    "localized_display_names": {
+      "en": "Olaf",
+      "zh-CN": "狂战士"
+    }
+  },
+  {
+    "slug": "lol-orianna",
+    "source_slug": "lol-orianna",
+    "zh_official_name": "发条魔灵",
+    "zh_aliases": [
+      "发条"
+    ],
+    "localized_display_names": {
+      "en": "Orianna",
+      "zh-CN": "发条魔灵"
+    }
+  },
+  {
+    "slug": "lol-ornn",
+    "source_slug": "lol-ornn",
+    "zh_official_name": "山隐之焰",
+    "zh_aliases": [
+      "奥恩",
+      "羊"
+    ],
+    "localized_display_names": {
+      "en": "Ornn",
+      "zh-CN": "山隐之焰"
+    }
+  },
+  {
+    "slug": "lol-pantheon",
+    "source_slug": "lol-pantheon",
+    "zh_official_name": "不屈之枪",
+    "zh_aliases": [
+      "潘森",
+      "斯巴达"
+    ],
+    "localized_display_names": {
+      "en": "Pantheon",
+      "zh-CN": "不屈之枪"
+    }
+  },
+  {
+    "slug": "lol-poppy",
+    "source_slug": "lol-poppy",
+    "zh_official_name": "圣锤之毅",
+    "zh_aliases": [
+      "波比"
+    ],
+    "localized_display_names": {
+      "en": "Poppy",
+      "zh-CN": "圣锤之毅"
+    }
+  },
+  {
+    "slug": "lol-pyke",
+    "source_slug": "lol-pyke",
+    "zh_official_name": "血港鬼影",
+    "zh_aliases": [
+      "派克"
+    ],
+    "localized_display_names": {
+      "en": "Pyke",
+      "zh-CN": "血港鬼影"
+    }
+  },
+  {
+    "slug": "lol-qiyana",
+    "source_slug": "lol-qiyana",
+    "zh_official_name": "元素女皇",
+    "zh_aliases": [
+      "奇亚娜"
+    ],
+    "localized_display_names": {
+      "en": "Qiyana",
+      "zh-CN": "元素女皇"
+    }
+  },
+  {
+    "slug": "lol-quinn",
+    "source_slug": "lol-quinn",
+    "zh_official_name": "德玛西亚之翼",
+    "zh_aliases": [
+      "鸟人"
+    ],
+    "localized_display_names": {
+      "en": "Quinn",
+      "zh-CN": "德玛西亚之翼"
+    }
+  },
+  {
+    "slug": "lol-rakan",
+    "source_slug": "lol-rakan",
+    "zh_official_name": "幻翎",
+    "zh_aliases": [
+      "洛"
+    ],
+    "localized_display_names": {
+      "en": "Rakan",
+      "zh-CN": "幻翎"
+    }
+  },
+  {
+    "slug": "lol-rammus",
+    "source_slug": "lol-rammus",
+    "zh_official_name": "披甲龙龟",
+    "zh_aliases": [
+      "龙龟"
+    ],
+    "localized_display_names": {
+      "en": "Rammus",
+      "zh-CN": "披甲龙龟"
+    }
+  },
+  {
+    "slug": "lol-rek-sai",
+    "source_slug": "lol-rek-sai",
+    "zh_official_name": "雷克塞",
+    "zh_aliases": [
+      "挖掘机"
+    ],
+    "localized_display_names": {
+      "en": "Rek'Sai",
+      "zh-CN": "雷克塞"
+    }
+  },
+  {
+    "slug": "lol-rell",
+    "source_slug": "lol-rell",
+    "zh_official_name": "镕铁少女",
+    "zh_aliases": [
+      "女骑士"
+    ],
+    "localized_display_names": {
+      "en": "Rell",
+      "zh-CN": "镕铁少女"
+    }
+  },
+  {
+    "slug": "lol-renata-glasc",
+    "source_slug": "lol-renata-glasc",
+    "zh_official_name": "烈娜塔·戈拉斯克",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Renata Glasc",
+      "zh-CN": "烈娜塔·戈拉斯克"
+    }
+  },
+  {
+    "slug": "lol-renekton",
+    "source_slug": "lol-renekton",
+    "zh_official_name": "荒漠屠夫",
+    "zh_aliases": [
+      "鳄鱼"
+    ],
+    "localized_display_names": {
+      "en": "Renekton",
+      "zh-CN": "荒漠屠夫"
+    }
+  },
+  {
+    "slug": "lol-rengar",
+    "source_slug": "lol-rengar",
+    "zh_official_name": "傲之追猎者",
+    "zh_aliases": [
+      "狮子狗"
+    ],
+    "localized_display_names": {
+      "en": "Rengar",
+      "zh-CN": "傲之追猎者"
+    }
+  },
+  {
+    "slug": "lol-riven",
+    "source_slug": "lol-riven",
+    "zh_official_name": "放逐之刃",
+    "zh_aliases": [
+      "锐雯"
+    ],
+    "localized_display_names": {
+      "en": "Riven",
+      "zh-CN": "放逐之刃"
+    }
+  },
+  {
+    "slug": "lol-rumble",
+    "source_slug": "lol-rumble",
+    "zh_official_name": "机械公敌",
+    "zh_aliases": [
+      "兰博"
+    ],
+    "localized_display_names": {
+      "en": "Rumble",
+      "zh-CN": "机械公敌"
+    }
+  },
+  {
+    "slug": "lol-ryze",
+    "source_slug": "lol-ryze",
+    "zh_official_name": "符文法师",
+    "zh_aliases": [
+      "瑞兹",
+      "光头"
+    ],
+    "localized_display_names": {
+      "en": "Ryze",
+      "zh-CN": "符文法师"
+    }
+  },
+  {
+    "slug": "lol-samira",
+    "source_slug": "lol-samira",
+    "zh_official_name": "沙漠玫瑰",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Samira",
+      "zh-CN": "沙漠玫瑰"
+    }
+  },
+  {
+    "slug": "lol-sejuani",
+    "source_slug": "lol-sejuani",
+    "zh_official_name": "北地之怒",
+    "zh_aliases": [
+      "猪妹"
+    ],
+    "localized_display_names": {
+      "en": "Sejuani",
+      "zh-CN": "北地之怒"
+    }
+  },
+  {
+    "slug": "lol-senna",
+    "source_slug": "lol-senna",
+    "zh_official_name": "涤魂圣枪",
+    "zh_aliases": [
+      "赛娜"
+    ],
+    "localized_display_names": {
+      "en": "Senna",
+      "zh-CN": "涤魂圣枪"
+    }
+  },
+  {
+    "slug": "lol-seraphine",
+    "source_slug": "lol-seraphine",
+    "zh_official_name": "星籁歌姬",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Seraphine",
+      "zh-CN": "星籁歌姬"
+    }
+  },
+  {
+    "slug": "lol-sett",
+    "source_slug": "lol-sett",
+    "zh_official_name": "腕豪",
+    "zh_aliases": [
+      "劲夫"
+    ],
+    "localized_display_names": {
+      "en": "Sett",
+      "zh-CN": "腕豪"
+    }
+  },
+  {
+    "slug": "lol-shaco",
+    "source_slug": "lol-shaco",
+    "zh_official_name": "恶魔小丑",
+    "zh_aliases": [
+      "小丑"
+    ],
+    "localized_display_names": {
+      "en": "Shaco",
+      "zh-CN": "恶魔小丑"
+    }
+  },
+  {
+    "slug": "lol-shen",
+    "source_slug": "lol-shen",
+    "zh_official_name": "暮光之眼",
+    "zh_aliases": [
+      "腰子"
+    ],
+    "localized_display_names": {
+      "en": "Shen",
+      "zh-CN": "暮光之眼"
+    }
+  },
+  {
+    "slug": "lol-shyvana",
+    "source_slug": "lol-shyvana",
+    "zh_official_name": "龙血武姬",
+    "zh_aliases": [
+      "龙女"
+    ],
+    "localized_display_names": {
+      "en": "Shyvana",
+      "zh-CN": "龙血武姬"
+    }
+  },
+  {
+    "slug": "lol-singed",
+    "source_slug": "lol-singed",
+    "zh_official_name": "炼金术士",
+    "zh_aliases": [
+      "炼金"
+    ],
+    "localized_display_names": {
+      "en": "Singed",
+      "zh-CN": "炼金术士"
+    }
+  },
+  {
+    "slug": "lol-sion",
+    "source_slug": "lol-sion",
+    "zh_official_name": "亡灵战神",
+    "zh_aliases": [
+      "塞恩",
+      "老司机"
+    ],
+    "localized_display_names": {
+      "en": "Sion",
+      "zh-CN": "亡灵战神"
+    }
+  },
+  {
+    "slug": "lol-sivir",
+    "source_slug": "lol-sivir",
+    "zh_official_name": "战争女神",
+    "zh_aliases": [
+      "轮子妈"
+    ],
+    "localized_display_names": {
+      "en": "Sivir",
+      "zh-CN": "战争女神"
+    }
+  },
+  {
+    "slug": "lol-skarner",
+    "source_slug": "lol-skarner",
+    "zh_official_name": "上古领主",
+    "zh_aliases": [
+      "蝎子"
+    ],
+    "localized_display_names": {
+      "en": "Skarner",
+      "zh-CN": "上古领主"
+    }
+  },
+  {
+    "slug": "lol-smolder",
+    "source_slug": "lol-smolder",
+    "zh_official_name": "炽炎雏龙",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Smolder",
+      "zh-CN": "炽炎雏龙"
+    }
+  },
+  {
+    "slug": "lol-sona",
+    "source_slug": "lol-sona",
+    "zh_official_name": "琴瑟仙女",
+    "zh_aliases": [
+      "琴女"
+    ],
+    "localized_display_names": {
+      "en": "Sona",
+      "zh-CN": "琴瑟仙女"
+    }
+  },
+  {
+    "slug": "lol-soraka",
+    "source_slug": "lol-soraka",
+    "zh_official_name": "众星之子",
+    "zh_aliases": [
+      "星妈"
+    ],
+    "localized_display_names": {
+      "en": "Soraka",
+      "zh-CN": "众星之子"
+    }
+  },
+  {
+    "slug": "lol-swain",
+    "source_slug": "lol-swain",
+    "zh_official_name": "诺克萨斯统领",
+    "zh_aliases": [
+      "乌鸦"
+    ],
+    "localized_display_names": {
+      "en": "Swain",
+      "zh-CN": "诺克萨斯统领"
+    }
+  },
+  {
+    "slug": "lol-sylas",
+    "source_slug": "lol-sylas",
+    "zh_official_name": "解脱者",
+    "zh_aliases": [
+      "偷男"
+    ],
+    "localized_display_names": {
+      "en": "Sylas",
+      "zh-CN": "解脱者"
+    }
+  },
+  {
+    "slug": "lol-syndra",
+    "source_slug": "lol-syndra",
+    "zh_official_name": "暗黑元首",
+    "zh_aliases": [
+      "球女"
+    ],
+    "localized_display_names": {
+      "en": "Syndra",
+      "zh-CN": "暗黑元首"
+    }
+  },
+  {
+    "slug": "lol-tahm-kench",
+    "source_slug": "lol-tahm-kench",
+    "zh_official_name": "河流之王",
+    "zh_aliases": [
+      "塔姆",
+      "蛤蟆"
+    ],
+    "localized_display_names": {
+      "en": "Tahm Kench",
+      "zh-CN": "河流之王"
+    }
+  },
+  {
+    "slug": "lol-taliyah",
+    "source_slug": "lol-taliyah",
+    "zh_official_name": "岩雀",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Taliyah",
+      "zh-CN": "岩雀"
+    }
+  },
+  {
+    "slug": "lol-talon",
+    "source_slug": "lol-talon",
+    "zh_official_name": "刀锋之影",
+    "zh_aliases": [
+      "男刀"
+    ],
+    "localized_display_names": {
+      "en": "Talon",
+      "zh-CN": "刀锋之影"
+    }
+  },
+  {
+    "slug": "lol-taric",
+    "source_slug": "lol-taric",
+    "zh_official_name": "瓦洛兰之盾",
+    "zh_aliases": [
+      "宝石"
+    ],
+    "localized_display_names": {
+      "en": "Taric",
+      "zh-CN": "瓦洛兰之盾"
+    }
+  },
+  {
+    "slug": "lol-teemo",
+    "source_slug": "lol-teemo",
+    "zh_official_name": "迅捷斥候",
+    "zh_aliases": [
+      "提莫"
+    ],
+    "localized_display_names": {
+      "en": "Teemo",
+      "zh-CN": "迅捷斥候"
+    }
+  },
+  {
+    "slug": "lol-thresh",
+    "source_slug": "lol-thresh",
+    "zh_official_name": "魂锁典狱长",
+    "zh_aliases": [
+      "锤石"
+    ],
+    "localized_display_names": {
+      "en": "Thresh",
+      "zh-CN": "魂锁典狱长"
+    }
+  },
+  {
+    "slug": "lol-tristana",
+    "source_slug": "lol-tristana",
+    "zh_official_name": "麦林炮手",
+    "zh_aliases": [
+      "小炮"
+    ],
+    "localized_display_names": {
+      "en": "Tristana",
+      "zh-CN": "麦林炮手"
+    }
+  },
+  {
+    "slug": "lol-trundle",
+    "source_slug": "lol-trundle",
+    "zh_official_name": "巨魔之王",
+    "zh_aliases": [
+      "巨魔"
+    ],
+    "localized_display_names": {
+      "en": "Trundle",
+      "zh-CN": "巨魔之王"
+    }
+  },
+  {
+    "slug": "lol-tryndamere",
+    "source_slug": "lol-tryndamere",
+    "zh_official_name": "蛮族之王",
+    "zh_aliases": [
+      "蛮王"
+    ],
+    "localized_display_names": {
+      "en": "Tryndamere",
+      "zh-CN": "蛮族之王"
+    }
+  },
+  {
+    "slug": "lol-twisted-fate",
+    "source_slug": "lol-twisted-fate",
+    "zh_official_name": "卡牌大师",
+    "zh_aliases": [
+      "卡牌"
+    ],
+    "localized_display_names": {
+      "en": "Twisted Fate",
+      "zh-CN": "卡牌大师"
+    }
+  },
+  {
+    "slug": "lol-twitch",
+    "source_slug": "lol-twitch",
+    "zh_official_name": "瘟疫之源",
+    "zh_aliases": [
+      "老鼠"
+    ],
+    "localized_display_names": {
+      "en": "Twitch",
+      "zh-CN": "瘟疫之源"
+    }
+  },
+  {
+    "slug": "lol-udyr",
+    "source_slug": "lol-udyr",
+    "zh_official_name": "兽灵行者",
+    "zh_aliases": [
+      "乌迪尔"
+    ],
+    "localized_display_names": {
+      "en": "Udyr",
+      "zh-CN": "兽灵行者"
+    }
+  },
+  {
+    "slug": "lol-urgot",
+    "source_slug": "lol-urgot",
+    "zh_official_name": "无畏战车",
+    "zh_aliases": [
+      "螃蟹"
+    ],
+    "localized_display_names": {
+      "en": "Urgot",
+      "zh-CN": "无畏战车"
+    }
+  },
+  {
+    "slug": "lol-varus",
+    "source_slug": "lol-varus",
+    "zh_official_name": "惩戒之箭",
+    "zh_aliases": [
+      "韦鲁斯"
+    ],
+    "localized_display_names": {
+      "en": "Varus",
+      "zh-CN": "惩戒之箭"
+    }
+  },
+  {
+    "slug": "lol-vayne",
+    "source_slug": "lol-vayne",
+    "zh_official_name": "暗夜猎手",
+    "zh_aliases": [
+      "VN",
+      "薇恩"
+    ],
+    "localized_display_names": {
+      "en": "Vayne",
+      "zh-CN": "暗夜猎手"
+    }
+  },
+  {
+    "slug": "lol-veigar",
+    "source_slug": "lol-veigar",
+    "zh_official_name": "邪恶小法师",
+    "zh_aliases": [
+      "小法"
+    ],
+    "localized_display_names": {
+      "en": "Veigar",
+      "zh-CN": "邪恶小法师"
+    }
+  },
+  {
+    "slug": "lol-vel-koz",
+    "source_slug": "lol-vel-koz",
+    "zh_official_name": "维克兹",
+    "zh_aliases": [
+      "大眼"
+    ],
+    "localized_display_names": {
+      "en": "Vel'Koz",
+      "zh-CN": "维克兹"
+    }
+  },
+  {
+    "slug": "lol-vex",
+    "source_slug": "lol-vex",
+    "zh_official_name": "愁云使者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Vex",
+      "zh-CN": "愁云使者"
+    }
+  },
+  {
+    "slug": "lol-vi",
+    "source_slug": "lol-vi",
+    "zh_official_name": "皮城执法官",
+    "zh_aliases": [
+      "蔚",
+      "楚雨荨"
+    ],
+    "localized_display_names": {
+      "en": "Vi",
+      "zh-CN": "皮城执法官"
+    }
+  },
+  {
+    "slug": "lol-viego",
+    "source_slug": "lol-viego",
+    "zh_official_name": "破败之王",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Viego",
+      "zh-CN": "破败之王"
+    }
+  },
+  {
+    "slug": "lol-viktor",
+    "source_slug": "lol-viktor",
+    "zh_official_name": "奥术先驱",
+    "zh_aliases": [
+      "三只手",
+      "维克托"
+    ],
+    "localized_display_names": {
+      "en": "Viktor",
+      "zh-CN": "奥术先驱"
+    }
+  },
+  {
+    "slug": "lol-vladimir",
+    "source_slug": "lol-vladimir",
+    "zh_official_name": "猩红收割者",
+    "zh_aliases": [
+      "吸血鬼"
+    ],
+    "localized_display_names": {
+      "en": "Vladimir",
+      "zh-CN": "猩红收割者"
+    }
+  },
+  {
+    "slug": "lol-volibear",
+    "source_slug": "lol-volibear",
+    "zh_official_name": "不灭狂雷",
+    "zh_aliases": [
+      "狗熊"
+    ],
+    "localized_display_names": {
+      "en": "Volibear",
+      "zh-CN": "不灭狂雷"
+    }
+  },
+  {
+    "slug": "lol-warwick",
+    "source_slug": "lol-warwick",
+    "zh_official_name": "祖安怒兽",
+    "zh_aliases": [
+      "狼人"
+    ],
+    "localized_display_names": {
+      "en": "Warwick",
+      "zh-CN": "祖安怒兽"
+    }
+  },
+  {
+    "slug": "lol-wukong",
+    "source_slug": "lol-wukong",
+    "zh_official_name": "孙悟空",
+    "zh_aliases": [
+      "猴子"
+    ],
+    "localized_display_names": {
+      "en": "Wukong",
+      "zh-CN": "孙悟空"
+    }
+  },
+  {
+    "slug": "lol-xayah",
+    "source_slug": "lol-xayah",
+    "zh_official_name": "逆羽",
+    "zh_aliases": [
+      "霞"
+    ],
+    "localized_display_names": {
+      "en": "Xayah",
+      "zh-CN": "逆羽"
+    }
+  },
+  {
+    "slug": "lol-xerath",
+    "source_slug": "lol-xerath",
+    "zh_official_name": "远古巫灵",
+    "zh_aliases": [
+      "泽三炮"
+    ],
+    "localized_display_names": {
+      "en": "Xerath",
+      "zh-CN": "远古巫灵"
+    }
+  },
+  {
+    "slug": "lol-xin-zhao",
+    "source_slug": "lol-xin-zhao",
+    "zh_official_name": "德邦总管",
+    "zh_aliases": [
+      "赵信",
+      "菊花信"
+    ],
+    "localized_display_names": {
+      "en": "Xin Zhao",
+      "zh-CN": "德邦总管"
+    }
+  },
+  {
+    "slug": "lol-yasuo",
+    "source_slug": "lol-yasuo",
+    "zh_official_name": "疾风剑豪",
+    "zh_aliases": [
+      "压缩",
+      "快乐风男",
+      "托儿索"
+    ],
+    "localized_display_names": {
+      "en": "Yasuo",
+      "zh-CN": "疾风剑豪"
+    }
+  },
+  {
+    "slug": "lol-yone",
+    "source_slug": "lol-yone",
+    "zh_official_name": "封魔剑魂",
+    "zh_aliases": [
+      "永恩"
+    ],
+    "localized_display_names": {
+      "en": "Yone",
+      "zh-CN": "封魔剑魂"
+    }
+  },
+  {
+    "slug": "lol-yorick",
+    "source_slug": "lol-yorick",
+    "zh_official_name": "牧魂人",
+    "zh_aliases": [
+      "掘墓"
+    ],
+    "localized_display_names": {
+      "en": "Yorick",
+      "zh-CN": "牧魂人"
+    }
+  },
+  {
+    "slug": "lol-yunara",
+    "source_slug": "lol-yunara",
+    "zh_official_name": "不破之誓",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Yunara",
+      "zh-CN": "不破之誓"
+    }
+  },
+  {
+    "slug": "lol-yuumi",
+    "source_slug": "lol-yuumi",
+    "zh_official_name": "魔法猫咪",
+    "zh_aliases": [
+      "猫咪"
+    ],
+    "localized_display_names": {
+      "en": "Yuumi",
+      "zh-CN": "魔法猫咪"
+    }
+  },
+  {
+    "slug": "lol-zaahen",
+    "source_slug": "lol-zaahen",
+    "zh_official_name": "不落魔锋",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Zaahen",
+      "zh-CN": "不落魔锋"
+    }
+  },
+  {
+    "slug": "lol-zac",
+    "source_slug": "lol-zac",
+    "zh_official_name": "生化魔人",
+    "zh_aliases": [
+      "扎克"
+    ],
+    "localized_display_names": {
+      "en": "Zac",
+      "zh-CN": "生化魔人"
+    }
+  },
+  {
+    "slug": "lol-zed",
+    "source_slug": "lol-zed",
+    "zh_official_name": "影流之主",
+    "zh_aliases": [
+      "劫",
+      "儿童劫"
+    ],
+    "localized_display_names": {
+      "en": "Zed",
+      "zh-CN": "影流之主"
+    }
+  },
+  {
+    "slug": "lol-zeri",
+    "source_slug": "lol-zeri",
+    "zh_official_name": "祖安花火",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Zeri",
+      "zh-CN": "祖安花火"
+    }
+  },
+  {
+    "slug": "lol-ziggs",
+    "source_slug": "lol-ziggs",
+    "zh_official_name": "爆破鬼才",
+    "zh_aliases": [
+      "炸弹人"
+    ],
+    "localized_display_names": {
+      "en": "Ziggs",
+      "zh-CN": "爆破鬼才"
+    }
+  },
+  {
+    "slug": "lol-zilean",
+    "source_slug": "lol-zilean",
+    "zh_official_name": "时光守护者",
+    "zh_aliases": [
+      "时光"
+    ],
+    "localized_display_names": {
+      "en": "Zilean",
+      "zh-CN": "时光守护者"
+    }
+  },
+  {
+    "slug": "lol-zoe",
+    "source_slug": "lol-zoe",
+    "zh_official_name": "暮光星灵",
+    "zh_aliases": [
+      "佐伊"
+    ],
+    "localized_display_names": {
+      "en": "Zoe",
+      "zh-CN": "暮光星灵"
+    }
+  },
+  {
+    "slug": "lol-zyra",
+    "source_slug": "lol-zyra",
+    "zh_official_name": "荆棘之兴",
+    "zh_aliases": [
+      "婕拉"
+    ],
+    "localized_display_names": {
+      "en": "Zyra",
+      "zh-CN": "荆棘之兴"
+    }
+  }
+]

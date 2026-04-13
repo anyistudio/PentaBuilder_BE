@@ -1,0 +1,10 @@
+Class AuthenticatedPrincipal:
+- pair the User row with backend token metadata
+
+Class AuthService:
+- verify Clerk tokens or local dev-clerk shortcuts
+- upsert users from Clerk claims
+- issue and verify backend JWT access tokens
+- validate admin basic-auth credentials from env vars
+- update user preferences
+- delete a user while cleaning sessions, run artifacts, cache rows, benchmark references, and leaderboard ownership

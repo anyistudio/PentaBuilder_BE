@@ -1,0 +1,4 @@
+Function create_llm_client:
+- select the concrete provider adapter from Settings
+- return GeminiClient when Google is configured
+- return None when no live provider should be used, so heuristics can still satisfy the request

@@ -1,0 +1,4 @@
+Function validate_run_result:
+- require summary to exist
+- fill missing optional keys like score, build, runes, explanations, and alternatives
+- raise ApiError when provider output is structurally invalid

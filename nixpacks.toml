@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["python312", "python312Packages.pip", "uv"]
+
+[phases.install]
+cmds = ["uv sync --frozen"]
+
+[phases.build]
+cmds = []
+
+[start]
+cmd = "./scripts/railway_start.sh"

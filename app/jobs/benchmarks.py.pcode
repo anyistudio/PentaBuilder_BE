@@ -1,0 +1,5 @@
+Function run_benchmark_suite:
+- load the benchmark dataset and iterate requested model candidates
+- create benchmark_run rows per model
+- execute each case through the same AI run service pipeline without cache reuse
+- grade every case, write benchmark_results, and persist per-model summary artifacts

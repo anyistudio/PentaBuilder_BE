@@ -1,0 +1,5 @@
+Variable api_router:
+- create the top-level APIRouter
+- include the health router
+- include auth, catalog, session, and ai routers for the main product flow
+- include leaderboard and admin routers for operations and support workflows

@@ -1,0 +1,24 @@
+Class DataVersionService:
+- own active version lookup and lazy bootstrap behavior
+
+Function get_active_version:
+- read active version from DB or bootstrap from local manifest when empty
+
+Function list_versions:
+- list versions and bootstrap one record on an empty database
+
+Function get_version:
+- fetch a specific data_version if known
+
+Function _bootstrap_current_version:
+- read manifest.json
+- create one active data_versions row using current source_root
+
+Function _resolve_source_root:
+- choose local root or S3 root from Settings
+
+Function _build_manifest_object_key:
+- build the persisted manifest path/key string
+
+Function _extract_patch_version:
+- read optional patch_versions data if present in manifest

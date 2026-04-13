@@ -1,0 +1,5 @@
+Function precompute_baselines:
+- resolve the requested data_version snapshot
+- iterate every champion for the target game
+- run deterministic recommend_full_build generation for an empty/default context
+- upsert baseline_builds so repeated runs overwrite old baseline rows cleanly

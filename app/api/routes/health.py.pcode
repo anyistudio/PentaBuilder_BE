@@ -1,0 +1,6 @@
+Variable router:
+- define the health route group
+
+Function healthz:
+- inject Settings through Depends(get_settings)
+- return a minimal liveness payload with environment name

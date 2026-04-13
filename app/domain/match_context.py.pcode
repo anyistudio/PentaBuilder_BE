@@ -1,0 +1,59 @@
+Constants:
+- BUILD_SLOT_COUNT fixes builds at 6 slots
+- ENVIRONMENT_TAG_WHITELIST defines canonical allowed environment tags
+- GAME_SLUG_PREFIX and GAME_SOURCE_DIRECTORY keep game-specific normalization rules together
+- MAX_FREE_TEXT_LENGTH and prompt-injection regexes bound and sanitize environment free_text
+
+Function normalize_lookup_text:
+- normalize English and Chinese lookup text for catalog search
+
+Function canonicalize_catalog_slug:
+- convert raw source slugs into canonical lol-* / wr-* form
+
+Function validate_slug_for_game:
+- enforce canonical request slugs already match the selected game
+
+Class RuneSelection:
+- stable primary/secondary rune shape
+
+Class EnemyChampionContext:
+- one enemy slot with champion slug, build, and runes
+
+Class EnvironmentContext:
+- canonical tag list plus optional free_text
+- sanitize whitespace/control characters and reject obvious meta-instruction strings
+
+Class ResponsePreferences:
+- target language and terminology style for AI output
+
+Class SessionEvent:
+- local or persisted session transcript event shape
+
+Class MatchContext:
+- central domain object for all AI requests
+- validate slug prefixes, enemy count, build lengths, and environment tags
+- derive enemy_champion_slugs_sorted, enemy_comp_key, and normalized_environment_key
+
+Function canonicalize_enemy_comp:
+- sort enemy champion slugs for cache/leaderboard identity
+
+Function build_enemy_comp_key:
+- join sorted enemy slugs or return _none
+
+Function canonicalize_environment_tags:
+- validate against whitelist, dedupe, and sort
+
+Function build_normalized_environment_key:
+- join normalized tags or return _none
+
+Function build_semantic_context_hash:
+- hash canonical structured context without free_text or language preferences
+
+Function build_response_variant_hash:
+- extend semantic hash with run_type and output language/style
+
+Function _normalize_operation_context:
+- recursively sort nested operation_context dictionaries
+
+Function _stable_json_dumps:
+- serialize canonical payloads deterministically for hashing

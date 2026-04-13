@@ -1,0 +1,15 @@
+Route create_session:
+- validate the explicit game/data_version against initial_context
+- persist a user-owned session and transcript object
+
+Route list_sessions:
+- list recent sessions for the current user
+
+Route get_session_detail:
+- return metadata plus transcript JSON
+
+Route delete_session:
+- remove transcript and linked run artifacts
+
+Route claim_session:
+- merge client-side buffered events into the persisted transcript

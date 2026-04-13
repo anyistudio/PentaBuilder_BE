@@ -1,0 +1,8 @@
+Class AIRunService:
+- validate operation_context by run_type
+- create run metadata with cache keys and optional bound session ownership checks
+- short-circuit strong cache hits while still updating transcripts, leaderboard, and metrics
+- execute the LangGraph pipeline with optional provider/model overrides
+- write ai_runs metadata and run artifacts
+- update cache, leaderboard, transcripts, metrics, and structured logs after completion
+- expose background streaming execution that emits run_started, tool_event, message_delta, run_completed, and run_failed

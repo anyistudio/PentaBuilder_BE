@@ -1,0 +1,8 @@
+Class JsonFormatter:
+- render logs as one JSON object per line
+- include request_id and common HTTP fields when present
+- include user/session/run identifiers and AI cost/cache metadata when available
+
+Function configure_logging:
+- replace root handlers with JsonFormatter
+- align uvicorn loggers with the same output shape

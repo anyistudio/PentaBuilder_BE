@@ -1,0 +1,5 @@
+Dataclasses LLMUsage and LLMResult:
+- hold normalized token, latency, cost, and text output metadata
+
+Class BaseLLMClient:
+- define the provider-independent generate_text contract used by the AI service

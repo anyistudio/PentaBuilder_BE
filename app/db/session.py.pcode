@@ -1,0 +1,9 @@
+Function create_database_engine:
+- create one SQLAlchemy Engine
+- enable check_same_thread=False for SQLite
+
+Function create_session_factory:
+- build a reusable sessionmaker bound to the Engine
+
+Function managed_session:
+- yield one Session and always close it

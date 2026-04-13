@@ -1,0 +1,704 @@
+[
+  {
+    "slug": "wr-adaptive-carapace",
+    "source_slug": "wild-rift-adaptive-carapace",
+    "zh_official_name": "适应性外壳",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Adaptive Carapace",
+      "zh-CN": "适应性外壳"
+    }
+  },
+  {
+    "slug": "wr-aery",
+    "source_slug": "wild-rift-aery",
+    "zh_official_name": "召唤：艾黎",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Aery",
+      "zh-CN": "召唤：艾黎"
+    }
+  },
+  {
+    "slug": "wr-aftershock",
+    "source_slug": "wild-rift-aftershock",
+    "zh_official_name": "余震",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Aftershock",
+      "zh-CN": "余震"
+    }
+  },
+  {
+    "slug": "wr-arcane-comet",
+    "source_slug": "wild-rift-arcane-comet",
+    "zh_official_name": "奥术彗星",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Arcane Comet",
+      "zh-CN": "奥术彗星"
+    }
+  },
+  {
+    "slug": "wr-axiom-arcanist",
+    "source_slug": "wild-rift-axiom-arcanist",
+    "zh_official_name": "公理秘术",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Axiom Arcanist",
+      "zh-CN": "公理秘术"
+    }
+  },
+  {
+    "slug": "wr-backbone",
+    "source_slug": "wild-rift-backbone",
+    "zh_official_name": "骨干",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Backbone",
+      "zh-CN": "骨干"
+    }
+  },
+  {
+    "slug": "wr-bone-plating",
+    "source_slug": "wild-rift-bone-plating",
+    "zh_official_name": "骸骨镀层",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Bone Plating",
+      "zh-CN": "骸骨镀层"
+    }
+  },
+  {
+    "slug": "wr-brutal",
+    "source_slug": "wild-rift-brutal",
+    "zh_official_name": "残暴",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Brutal",
+      "zh-CN": "残暴"
+    }
+  },
+  {
+    "slug": "wr-celerity",
+    "source_slug": "wild-rift-celerity",
+    "zh_official_name": "迅捷",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Celerity",
+      "zh-CN": "迅捷"
+    }
+  },
+  {
+    "slug": "wr-chain-assault",
+    "source_slug": "wild-rift-chain-assault",
+    "zh_official_name": "连锁突袭",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Chain Assault",
+      "zh-CN": "连锁突袭"
+    }
+  },
+  {
+    "slug": "wr-champion",
+    "source_slug": "wild-rift-champion",
+    "zh_official_name": "英雄",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Champion",
+      "zh-CN": "英雄"
+    }
+  },
+  {
+    "slug": "wr-cheap-shot",
+    "source_slug": "wild-rift-cheap-shot",
+    "zh_official_name": "恶意中伤",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Cheap Shot",
+      "zh-CN": "恶意中伤"
+    }
+  },
+  {
+    "slug": "wr-conditioning",
+    "source_slug": "wild-rift-conditioning",
+    "zh_official_name": "调节",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Conditioning",
+      "zh-CN": "调节"
+    }
+  },
+  {
+    "slug": "wr-conqueror",
+    "source_slug": "wild-rift-conqueror",
+    "zh_official_name": "征服者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Conqueror",
+      "zh-CN": "征服者"
+    }
+  },
+  {
+    "slug": "wr-coup-de-grace",
+    "source_slug": "wild-rift-coup-de-grace",
+    "zh_official_name": "致命一击",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Coup de Grace",
+      "zh-CN": "致命一击"
+    }
+  },
+  {
+    "slug": "wr-courage-of-the-colossus",
+    "source_slug": "wild-rift-courage-of-the-colossus",
+    "zh_official_name": "巨像的勇气",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Courage of the Colossus",
+      "zh-CN": "巨像的勇气"
+    }
+  },
+  {
+    "slug": "wr-dark-harvest",
+    "source_slug": "wild-rift-dark-harvest",
+    "zh_official_name": "黑暗收割",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Dark Harvest",
+      "zh-CN": "黑暗收割"
+    }
+  },
+  {
+    "slug": "wr-demolish",
+    "source_slug": "wild-rift-demolish",
+    "zh_official_name": "爆破",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Demolish",
+      "zh-CN": "爆破"
+    }
+  },
+  {
+    "slug": "wr-electrocute",
+    "source_slug": "wild-rift-electrocute",
+    "zh_official_name": "电刑",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Electrocute",
+      "zh-CN": "电刑"
+    }
+  },
+  {
+    "slug": "wr-empowered-attack",
+    "source_slug": "wild-rift-empowered-attack",
+    "zh_official_name": "强化攻击",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Empowered Attack",
+      "zh-CN": "强化攻击"
+    }
+  },
+  {
+    "slug": "wr-empowerment",
+    "source_slug": "wild-rift-empowerment",
+    "zh_official_name": "强化",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Empowerment",
+      "zh-CN": "强化"
+    }
+  },
+  {
+    "slug": "wr-eyeball-collection",
+    "source_slug": "wild-rift-eyeball-collection",
+    "zh_official_name": "眼球收集器",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Eyeball Collection",
+      "zh-CN": "眼球收集器"
+    }
+  },
+  {
+    "slug": "wr-first-strike",
+    "source_slug": "wild-rift-first-strike",
+    "zh_official_name": "先攻",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "First Strike",
+      "zh-CN": "先攻"
+    }
+  },
+  {
+    "slug": "wr-fleet-footwork",
+    "source_slug": "wild-rift-fleet-footwork",
+    "zh_official_name": "迅捷步法",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Fleet Footwork",
+      "zh-CN": "迅捷步法"
+    }
+  },
+  {
+    "slug": "wr-font-of-life",
+    "source_slug": "wild-rift-font-of-life",
+    "zh_official_name": "生命源泉",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Font of Life",
+      "zh-CN": "生命源泉"
+    }
+  },
+  {
+    "slug": "wr-future-s-market",
+    "source_slug": "wild-rift-future-s-market",
+    "zh_official_name": "未来市场",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Future's Market",
+      "zh-CN": "未来市场"
+    }
+  },
+  {
+    "slug": "wr-gathering-storm",
+    "source_slug": "wild-rift-gathering-storm",
+    "zh_official_name": "风暴聚集",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Gathering Storm",
+      "zh-CN": "风暴聚集"
+    }
+  },
+  {
+    "slug": "wr-giant-slayer",
+    "source_slug": "wild-rift-giant-slayer",
+    "zh_official_name": "巨人杀手",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Giant Slayer",
+      "zh-CN": "巨人杀手"
+    }
+  },
+  {
+    "slug": "wr-glacial-augment",
+    "source_slug": "wild-rift-glacial-augment",
+    "zh_official_name": "冰川增幅",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Glacial Augment",
+      "zh-CN": "冰川增幅"
+    }
+  },
+  {
+    "slug": "wr-grasp-of-the-undying",
+    "source_slug": "wild-rift-grasp-of-the-undying",
+    "zh_official_name": "不灭之握",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Grasp of the Undying",
+      "zh-CN": "不灭之握"
+    }
+  },
+  {
+    "slug": "wr-hexflash",
+    "source_slug": "wild-rift-hexflash",
+    "zh_official_name": "海克斯闪现",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hexflash",
+      "zh-CN": "海克斯闪现"
+    }
+  },
+  {
+    "slug": "wr-hunter-genius",
+    "source_slug": "wild-rift-hunter-genius",
+    "zh_official_name": "猎人：天才",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hunter - Genius",
+      "zh-CN": "猎人：天才"
+    }
+  },
+  {
+    "slug": "wr-hunter-titan",
+    "source_slug": "wild-rift-hunter-titan",
+    "zh_official_name": "猎人：泰坦",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hunter - Titan",
+      "zh-CN": "猎人：泰坦"
+    }
+  },
+  {
+    "slug": "wr-hunter-vampirism",
+    "source_slug": "wild-rift-hunter-vampirism",
+    "zh_official_name": "猎人：吸血",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Hunter - Vampirism",
+      "zh-CN": "猎人：吸血"
+    }
+  },
+  {
+    "slug": "wr-ingenious-hunter",
+    "source_slug": "wild-rift-ingenious-hunter",
+    "zh_official_name": "灵性猎手",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ingenious Hunter",
+      "zh-CN": "灵性猎手"
+    }
+  },
+  {
+    "slug": "wr-item-crafting",
+    "source_slug": "wild-rift-item-crafting",
+    "zh_official_name": "装备打造",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Item Crafting",
+      "zh-CN": "装备打造"
+    }
+  },
+  {
+    "slug": "wr-ixtali-seedjar",
+    "source_slug": "wild-rift-ixtali-seedjar",
+    "zh_official_name": "伊克斯塔尔种子罐",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ixtali Seedjar",
+      "zh-CN": "伊克斯塔尔种子罐"
+    }
+  },
+  {
+    "slug": "wr-kleptomancy",
+    "source_slug": "wild-rift-kleptomancy",
+    "zh_official_name": "行窃预兆",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Kleptomancy",
+      "zh-CN": "行窃预兆"
+    }
+  },
+  {
+    "slug": "wr-kraken-slayer",
+    "source_slug": "wild-rift-kraken-slayer",
+    "zh_official_name": "海妖杀手",
+    "zh_aliases": [
+      "海妖"
+    ],
+    "localized_display_names": {
+      "en": "Kraken Slayer",
+      "zh-CN": "海妖杀手"
+    }
+  },
+  {
+    "slug": "wr-last-stand",
+    "source_slug": "wild-rift-last-stand",
+    "zh_official_name": "坚毅不倒",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Last Stand",
+      "zh-CN": "坚毅不倒"
+    }
+  },
+  {
+    "slug": "wr-legend-alacrity",
+    "source_slug": "wild-rift-legend-alacrity",
+    "zh_official_name": "传说：欢欣",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Legend: Alacrity",
+      "zh-CN": "传说：欢欣"
+    }
+  },
+  {
+    "slug": "wr-legend-tenacity",
+    "source_slug": "wild-rift-legend-tenacity",
+    "zh_official_name": "传说：韧性",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Legend: Tenacity",
+      "zh-CN": "传说：韧性"
+    }
+  },
+  {
+    "slug": "wr-lethal-tempo",
+    "source_slug": "wild-rift-lethal-tempo",
+    "zh_official_name": "致命节奏",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Lethal Tempo",
+      "zh-CN": "致命节奏"
+    }
+  },
+  {
+    "slug": "wr-loyalty",
+    "source_slug": "wild-rift-loyalty",
+    "zh_official_name": "忠诚",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Loyalty",
+      "zh-CN": "忠诚"
+    }
+  },
+  {
+    "slug": "wr-manaflow-band",
+    "source_slug": "wild-rift-manaflow-band",
+    "zh_official_name": "法力流系带",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Manaflow Band",
+      "zh-CN": "法力流系带"
+    }
+  },
+  {
+    "slug": "wr-mark-of-the-weak",
+    "source_slug": "wild-rift-mark-of-the-weak",
+    "zh_official_name": "弱点标记",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Mark of the Weak",
+      "zh-CN": "弱点标记"
+    }
+  },
+  {
+    "slug": "wr-mastermind",
+    "source_slug": "wild-rift-mastermind",
+    "zh_official_name": "策划者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Mastermind",
+      "zh-CN": "策划者"
+    }
+  },
+  {
+    "slug": "wr-nimbus-cloak",
+    "source_slug": "wild-rift-nimbus-cloak",
+    "zh_official_name": "灵光披风",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Nimbus Cloak",
+      "zh-CN": "灵光披风"
+    }
+  },
+  {
+    "slug": "wr-nullifying-orb",
+    "source_slug": "wild-rift-nullifying-orb",
+    "zh_official_name": "无效化之法球",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Nullifying Orb",
+      "zh-CN": "无效化之法球"
+    }
+  },
+  {
+    "slug": "wr-onslaught",
+    "source_slug": "wild-rift-onslaught",
+    "zh_official_name": "猛攻",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Onslaught",
+      "zh-CN": "猛攻"
+    }
+  },
+  {
+    "slug": "wr-overgrowth",
+    "source_slug": "wild-rift-overgrowth",
+    "zh_official_name": "过度生长",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Overgrowth",
+      "zh-CN": "过度生长"
+    }
+  },
+  {
+    "slug": "wr-pack-hunter",
+    "source_slug": "wild-rift-pack-hunter",
+    "zh_official_name": "群居猎手",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Pack Hunter",
+      "zh-CN": "群居猎手"
+    }
+  },
+  {
+    "slug": "wr-pathfinder",
+    "source_slug": "wild-rift-pathfinder",
+    "zh_official_name": "探路者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Pathfinder",
+      "zh-CN": "探路者"
+    }
+  },
+  {
+    "slug": "wr-perseverance",
+    "source_slug": "wild-rift-perseverance",
+    "zh_official_name": "不屈",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Perseverance",
+      "zh-CN": "不屈"
+    }
+  },
+  {
+    "slug": "wr-phase-rush",
+    "source_slug": "wild-rift-phase-rush",
+    "zh_official_name": "相位猛冲",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Phase Rush",
+      "zh-CN": "相位猛冲"
+    }
+  },
+  {
+    "slug": "wr-psychic-wave",
+    "source_slug": "wild-rift-psychic-wave",
+    "zh_official_name": "灵能波",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Psychic Wave",
+      "zh-CN": "灵能波"
+    }
+  },
+  {
+    "slug": "wr-regeneration",
+    "source_slug": "wild-rift-regeneration",
+    "zh_official_name": "复苏",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Regeneration",
+      "zh-CN": "复苏"
+    }
+  },
+  {
+    "slug": "wr-revitalize",
+    "source_slug": "wild-rift-revitalize",
+    "zh_official_name": "复苏",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Revitalize",
+      "zh-CN": "复苏"
+    }
+  },
+  {
+    "slug": "wr-scorch",
+    "source_slug": "wild-rift-scorch",
+    "zh_official_name": "焦灼",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Scorch",
+      "zh-CN": "焦灼"
+    }
+  },
+  {
+    "slug": "wr-second-wind",
+    "source_slug": "wild-rift-second-wind",
+    "zh_official_name": "复苏之风",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Second Wind",
+      "zh-CN": "复苏之风"
+    }
+  },
+  {
+    "slug": "wr-shield-bash",
+    "source_slug": "wild-rift-shield-bash",
+    "zh_official_name": "护盾猛击",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Shield Bash",
+      "zh-CN": "护盾猛击"
+    }
+  },
+  {
+    "slug": "wr-spirit-walker",
+    "source_slug": "wild-rift-spirit-walker",
+    "zh_official_name": "精神行者",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Spirit Walker",
+      "zh-CN": "精神行者"
+    }
+  },
+  {
+    "slug": "wr-sweet-tooth",
+    "source_slug": "wild-rift-sweet-tooth",
+    "zh_official_name": "甜食专家",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Sweet Tooth",
+      "zh-CN": "甜食专家"
+    }
+  },
+  {
+    "slug": "wr-transcendence",
+    "source_slug": "wild-rift-transcendence",
+    "zh_official_name": "超然",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Transcendence",
+      "zh-CN": "超然"
+    }
+  },
+  {
+    "slug": "wr-triumph",
+    "source_slug": "wild-rift-triumph",
+    "zh_official_name": "凯旋",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Triumph",
+      "zh-CN": "凯旋"
+    }
+  },
+  {
+    "slug": "wr-tyrant",
+    "source_slug": "wild-rift-tyrant",
+    "zh_official_name": "暴君",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Tyrant",
+      "zh-CN": "暴君"
+    }
+  },
+  {
+    "slug": "wr-ultimate-shield",
+    "source_slug": "wild-rift-ultimate-shield",
+    "zh_official_name": "终极护盾",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Ultimate Shield",
+      "zh-CN": "终极护盾"
+    }
+  },
+  {
+    "slug": "wr-unshakeable",
+    "source_slug": "wild-rift-unshakeable",
+    "zh_official_name": "坚定",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Unshakeable",
+      "zh-CN": "坚定"
+    }
+  },
+  {
+    "slug": "wr-weakness",
+    "source_slug": "wild-rift-weakness",
+    "zh_official_name": "弱点",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Weakness",
+      "zh-CN": "弱点"
+    }
+  },
+  {
+    "slug": "wr-zombie-ward",
+    "source_slug": "wild-rift-zombie-ward",
+    "zh_official_name": "僵尸守卫",
+    "zh_aliases": [],
+    "localized_display_names": {
+      "en": "Zombie Ward",
+      "zh-CN": "僵尸守卫"
+    }
+  }
+]

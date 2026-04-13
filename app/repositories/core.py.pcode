@@ -1,0 +1,22 @@
+Class UsersRepository:
+- create users
+- fetch by id or (auth_provider, auth_subject)
+
+Class DataVersionsRepository:
+- create/list/get data_versions
+- activate one version and deactivate the others
+
+Class SessionsRepository:
+- create session rows
+- fetch one session or list sessions for one user
+
+Class AIRunsRepository:
+- create and fetch ai_run rows
+
+Class CacheRepository:
+- create cache rows
+- fetch a strong-cache candidate by run_type and response_variant_hash
+
+Class LeaderboardRepository:
+- create leaderboard rows
+- fetch one leaderboard scope

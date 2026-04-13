@@ -1,0 +1,3 @@
+TypedDict RunGraphState:
+- hold graph-level context, payload, prompt, reasoning text, and final structured result
+- keep the graph state explicit instead of hiding data in closures

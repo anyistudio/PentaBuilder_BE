@@ -1,0 +1,7 @@
+Class StreamState:
+- hold buffered SSE events and terminal close state per run
+
+Class EventStreamService:
+- keep in-memory per-run event queues
+- append events from background execution
+- stream them out in SSE wire format until a terminal event closes the stream

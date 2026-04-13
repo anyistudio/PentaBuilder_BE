@@ -1,0 +1,23 @@
+Variable router:
+- define all catalog endpoints under /api/v1/catalog
+
+Function get_current_catalog_version:
+- resolve the active data version
+- return current version metadata with request_id
+
+Function list_catalog_versions:
+- list known data versions, optionally only the active one
+
+Function list_champions:
+- list champion DTOs for one game and one data version
+
+Function list_items:
+- list item DTOs for one game and one data version
+
+Function list_runes:
+- list rune DTOs for one game and one data version
+
+Function lookup_catalog:
+- validate non-empty q
+- search the in-memory catalog index
+- return localized lightweight lookup results
