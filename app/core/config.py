@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import SecretStr
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     dev_auth_enabled: bool = True
 
     database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/pentabuilder"
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def handle_database_url(cls, v: str) -> str:
+        if isinstance(v, str) and v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+psycopg://", 1)
+        return v
 
     s3_endpoint: str = "http://localhost:9000"
     s3_bucket: str = "pentabuilder-dev"
