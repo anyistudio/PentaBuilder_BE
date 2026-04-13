@@ -60,6 +60,10 @@ def sanitize_free_text(value: str) -> str:
     cleaned = " ".join(cleaned.split())
     return cleaned[:MAX_FREE_TEXT_LENGTH]
 
+def slugify_name(name: str) -> str:
+    collapsed = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    return collapsed or "unknown"
+
 
 def has_prompt_injection_markers(value: str) -> bool:
     return bool(PROMPT_INJECTION_PATTERN.search(value))

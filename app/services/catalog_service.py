@@ -11,7 +11,9 @@ from app.api.schemas.catalog import (
 )
 from app.catalog.registry import CatalogEntity, GameDataRegistry
 from app.domain.enums import Game, Language, TerminologyStyle
-from app.domain.match_context import normalize_lookup_text
+from app.domain.match_context import normalize_lookup_text, slugify_name
+from urllib.parse import urlparse
+from pathlib import Path
 from app.services.data_version_service import DataVersionService
 
 POSITION_ORDER = ("top", "jungle", "mid", "adc", "support")
@@ -83,7 +85,12 @@ class CatalogService:
         )
         entities = snapshot.catalogs[game].get_entities(entity_type.value)
         summaries = [
-            self._format_entity(entity, language=language, terminology_style=terminology_style)
+            self._format_entity(
+                entity,
+                language=language,
+                terminology_style=terminology_style,
+                data_version=version.data_version,
+            )
             for entity in entities
         ]
         return version.data_version, sorted(summaries, key=lambda item: item.name.lower())
@@ -129,6 +136,7 @@ class CatalogService:
                     entity,
                     language=language,
                     terminology_style=terminology_style,
+                    data_version=version.data_version,
                 ).model_dump(),
                 entity_type=CatalogEntityType(entity.entity_type),
                 game=entity.game,
@@ -151,13 +159,22 @@ class CatalogService:
         *,
         language: Language,
         terminology_style: TerminologyStyle,
+        data_version: str,
     ) -> CatalogEntitySummary:
         raw_payload = entity.raw_payload if isinstance(entity.raw_payload, dict) else {}
+        
+        icon_url = entity.icon_url
+        if icon_url and entity.english_name:
+            suffix = Path(urlparse(icon_url).path).suffix.lower() or ".png"
+            folder_name = f"{entity.entity_type}_icons"
+            file_name = f"{slugify_name(entity.english_name)}{suffix}"
+            icon_url = f"/api/v1/assets/{data_version}/{entity.game.value}/{folder_name}/{file_name}"
+
         base_payload: dict[str, Any] = {
             "slug": entity.slug,
             "name": entity.preferred_name(language, terminology_style),
             "aliases": entity.preferred_aliases(language, terminology_style),
-            "icon_url": entity.icon_url,
+            "icon_url": icon_url,
         }
 
         if entity.entity_type == CatalogEntityType.CHAMPION.value:

@@ -18,6 +18,7 @@ from app.services.ai_run_service import AIRunService
 from app.services.auth_service import AuthService
 from app.services.benchmark_service import BenchmarkService
 from app.services.cache_service import CacheService
+from app.services.asset_cache_service import AssetCacheService
 from app.services.catalog_service import CatalogService
 from app.services.data_version_service import DataVersionService
 from app.services.event_stream_service import EventStreamService
@@ -56,6 +57,10 @@ def get_session_service(request: Request) -> SessionService:
 
 def get_cache_service(request: Request) -> CacheService:
     return request.app.state.cache_service
+
+
+def get_asset_cache_service(request: Request) -> AssetCacheService:
+    return request.app.state.asset_cache_service
 
 
 def get_leaderboard_service(request: Request) -> LeaderboardService:

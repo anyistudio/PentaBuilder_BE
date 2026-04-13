@@ -19,13 +19,20 @@ class StorageService:
     def read_optional_json_from_root(self, root: str, relative_path: str) -> Any | None:
         try:
             return self.read_json_from_root(root, relative_path)
-        except FileNotFoundError:
-            return None
+        except Exception as e:
+            if getattr(e, "response", {}).get("Error", {}).get("Code") == "NoSuchKey" or e.__class__.__name__ == "NoSuchKey" or isinstance(e, FileNotFoundError):
+                return None
+            raise
 
     def read_text_from_root(self, root: str, relative_path: str) -> str:
         if self._should_use_s3(root):
             return self._read_text_from_s3(root, relative_path)
         return self._read_text_from_local(root, relative_path)
+
+    def read_bytes_from_root(self, root: str, relative_path: str) -> bytes:
+        if self._should_use_s3(root):
+            return self._read_bytes_from_s3(root, relative_path)
+        return self._read_bytes_from_local(root, relative_path)
 
     def write_json(self, object_key: str, payload: Any) -> str:
         serialized = json.dumps(payload, ensure_ascii=False, indent=2)
@@ -47,6 +54,11 @@ class StorageService:
             return self._read_text_from_s3("", object_key)
         return self._read_text_from_local_artifact_root(object_key)
 
+    def read_bytes_object(self, object_key: str) -> bytes:
+        if self.settings.game_data_source == "s3":
+            return self._read_bytes_from_s3("", object_key)
+        return self._read_bytes_from_local_artifact_root(object_key)
+
     def delete_object(self, object_key: str) -> None:
         if self.settings.game_data_source == "s3":
             self.s3_client.delete_object(Bucket=self.settings.s3_bucket, Key=object_key)
@@ -66,11 +78,24 @@ class StorageService:
         file_path = base_path / relative_path
         return file_path.read_text(encoding="utf-8")
 
+    def _read_bytes_from_local(self, root: str, relative_path: str) -> bytes:
+        base_path = Path(root)
+        if not base_path.is_absolute():
+            base_path = BASE_DIR / base_path
+        file_path = base_path / relative_path
+        return file_path.read_bytes()
+
     def _read_text_from_s3(self, root: str, relative_path: str) -> str:
         prefix = root.removeprefix("s3://")
         key = "/".join(part for part in (prefix.rstrip("/"), relative_path.lstrip("/")) if part)
         response = self.s3_client.get_object(Bucket=self.settings.s3_bucket, Key=key)
         return response["Body"].read().decode("utf-8")
+
+    def _read_bytes_from_s3(self, root: str, relative_path: str) -> bytes:
+        prefix = root.removeprefix("s3://")
+        key = "/".join(part for part in (prefix.rstrip("/"), relative_path.lstrip("/")) if part)
+        response = self.s3_client.get_object(Bucket=self.settings.s3_bucket, Key=key)
+        return response["Body"].read()
 
     def _write_text_to_s3(self, object_key: str, content: str) -> None:
         self.s3_client.put_object(
@@ -88,6 +113,10 @@ class StorageService:
     def _read_text_from_local_artifact_root(self, object_key: str) -> str:
         file_path = self.local_artifact_root / object_key
         return file_path.read_text(encoding="utf-8")
+
+    def _read_bytes_from_local_artifact_root(self, object_key: str) -> bytes:
+        file_path = self.local_artifact_root / object_key
+        return file_path.read_bytes()
 
     @property
     def s3_client(self) -> BaseClient:

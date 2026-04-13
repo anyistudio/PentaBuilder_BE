@@ -54,11 +54,12 @@ class Settings(BaseSettings):
 
     google_api_key: SecretStr = SecretStr("replace-me")
     primary_reasoning_provider: str = "google"
-    primary_reasoning_model: str = "gemini-3.1-pro"
+    primary_reasoning_model: str = "gemini-3.1-pro-preview"
     fast_reasoning_provider: str = "google"
-    fast_reasoning_model: str = "gemini-3.1-pro"
+    fast_reasoning_model: str = "gemini-3.1-pro-preview"
     calibration_provider: str = "google"
-    calibration_model: str = "gemini-3.1-pro"
+    calibration_model: str = "gemini-3.1-pro-preview"
+    debug_llm: bool = True
 
     @property
     def is_local(self) -> bool:

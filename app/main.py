@@ -21,6 +21,7 @@ from app.services.leaderboard_service import LeaderboardService
 from app.services.metrics_service import MetricsService
 from app.services.session_service import SessionService
 from app.services.storage_service import StorageService
+from app.services.asset_cache_service import AssetCacheService
 
 
 def create_app() -> FastAPI:
@@ -48,6 +49,10 @@ def create_app() -> FastAPI:
         registry=application.state.game_data_registry,
     )
     application.state.cache_service = CacheService()
+    application.state.asset_cache_service = AssetCacheService(
+        settings,
+        application.state.storage_service,
+    )
     application.state.leaderboard_service = LeaderboardService()
     application.state.session_service = SessionService(application.state.storage_service)
     application.state.auth_service = AuthService(
