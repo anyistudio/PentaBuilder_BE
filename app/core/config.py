@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import SecretStr, field_validator
+from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -67,6 +67,26 @@ class Settings(BaseSettings):
     @property
     def cors_allowed_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_allowed_origins.split(",") if origin.strip()]
+
+    @model_validator(mode="after")
+    def validate_production_auth_settings(self) -> "Settings":
+        if self.is_local:
+            return self
+
+        missing: list[str] = []
+        if not self.clerk_jwks_url or "example.clerk.accounts.dev" in self.clerk_jwks_url:
+            missing.append("CLERK_JWKS_URL")
+        if not self.clerk_issuer or self.clerk_issuer == "https://example.clerk.accounts.dev":
+            missing.append("CLERK_ISSUER")
+
+        if missing:
+            raise ValueError(
+                "Missing production Clerk configuration: "
+                + ", ".join(missing)
+                + ". Set the real Clerk domain values in Railway before deploy."
+            )
+
+        return self
 
 
 @lru_cache(maxsize=1)
