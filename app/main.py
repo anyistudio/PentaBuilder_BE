@@ -82,7 +82,7 @@ def create_app() -> FastAPI:
         ai_run_service=application.state.ai_run_service,
     )
 
-    allowed_origins = list(settings.cors_allowed_origins)
+    allowed_origins = settings.cors_allowed_origins_list
     if settings.is_local and not allowed_origins:
         allowed_origins = [
             "http://localhost:3000",

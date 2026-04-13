@@ -61,6 +61,7 @@ Minimum production variables:
 3. Attach PostgreSQL.
 4. Set all production env vars.
    - Example: `CORS_ALLOWED_ORIGINS=https://your-frontend.up.railway.app`
+   - Multiple origins use a comma-separated string
 5. Deploy and wait for `healthcheckPath=/healthz` to pass.
 6. Trigger admin jobs:
    - `POST /api/v1/admin/jobs/precompute-baselines`
