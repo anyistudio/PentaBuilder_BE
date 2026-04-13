@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from functools import lru_cache
 from pathlib import Path
 
@@ -21,6 +22,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     access_token_ttl_seconds: int = 3600
     dev_auth_enabled: bool = True
+    cors_allowed_origins: list[str] = []
 
     database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/pentabuilder"
 
@@ -58,6 +60,17 @@ class Settings(BaseSettings):
     fast_reasoning_model: str = "gemini-3.1-pro"
     calibration_provider: str = "google"
     calibration_model: str = "gemini-3.1-pro"
+
+    @field_validator("cors_allowed_origins", mode="before")
+    @classmethod
+    def parse_cors_allowed_origins(cls, v: str | Sequence[str] | None) -> list[str]:
+        if v is None:
+            return []
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        if isinstance(v, Sequence):
+            return [str(origin).strip() for origin in v if str(origin).strip()]
+        raise TypeError("cors_allowed_origins must be a comma-separated string or list.")
 
     @property
     def is_local(self) -> bool:

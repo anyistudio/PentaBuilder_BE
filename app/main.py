@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.catalog.registry import GameDataRegistry
@@ -80,6 +81,21 @@ def create_app() -> FastAPI:
         benchmark_service=application.state.benchmark_service,
         ai_run_service=application.state.ai_run_service,
     )
+
+    allowed_origins = list(settings.cors_allowed_origins)
+    if settings.is_local and not allowed_origins:
+        allowed_origins = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
+    if allowed_origins:
+        application.add_middleware(
+            CORSMiddleware,
+            allow_origins=allowed_origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
     application.add_middleware(RequestIDMiddleware)
     application.include_router(api_router)
