@@ -11,6 +11,15 @@ class CatalogEntityType(str, Enum):
     RUNE = "rune"
 
 
+class CatalogAbilitySummary(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    skill: str | None = None
+    name: str
+    blurb: str | None = None
+    damage_type: str | None = None
+
+
 class CatalogEntitySummary(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -18,6 +27,16 @@ class CatalogEntitySummary(BaseModel):
     name: str
     aliases: list[str] = Field(default_factory=list)
     icon_url: str | None = None
+    summary: str | None = None
+    class_text: str | None = None
+    position_tags: list[str] = Field(default_factory=list)
+    range_type: str | None = None
+    resource: str | None = None
+    abilities: list[CatalogAbilitySummary] = Field(default_factory=list)
+    cost: str | None = None
+    description: str | None = None
+    stats: list[str] = Field(default_factory=list)
+    main_attributes: list[str] = Field(default_factory=list)
 
 
 class CatalogLookupResult(CatalogEntitySummary):

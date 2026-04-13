@@ -56,6 +56,19 @@ def test_catalog_endpoints_bootstrap_and_lookup_localized_aliases(monkeypatch, t
         wild_rift_response = client.get("/api/v1/catalog/wild_rift/champions")
         assert wild_rift_response.status_code == 200
         assert wild_rift_response.json()["data"]["champions"][0]["slug"].startswith("wr-")
+        wild_rift_champions = wild_rift_response.json()["data"]["champions"]
+        aatrox = next(champion for champion in wild_rift_champions if champion["slug"] == "wr-aatrox")
+        assert "top" in aatrox["position_tags"]
+        assert aatrox["abilities"]
+        assert aatrox["summary"]
+
+        items_response = client.get("/api/v1/catalog/lol/items")
+        assert items_response.status_code == 200
+        lol_items = items_response.json()["data"]["items"]
+        abyssal_mask = next(item for item in lol_items if item["slug"] == "lol-abyssal-mask")
+        assert abyssal_mask["cost"] == "2650"
+        assert abyssal_mask["stats"]
+        assert abyssal_mask["main_attributes"]
 
         lookup_response = client.get(
             "/api/v1/catalog/lol/lookup",
@@ -65,3 +78,4 @@ def test_catalog_endpoints_bootstrap_and_lookup_localized_aliases(monkeypatch, t
         first_result = lookup_response.json()["data"]["results"][0]
         assert first_result["slug"] == "lol-ahri"
         assert first_result["name"] == "阿狸"
+        assert first_result["summary"]
