@@ -15,6 +15,7 @@ class RunGraphState(TypedDict, total=False):
     need_tools: bool
     tool_context_ready: bool
     tool_decision_reason: str | None
+    retry_tool_planning: bool
 
     provider_usage_payloads: list[dict[str, Any]]
     prompt: dict[str, Any]

@@ -498,6 +498,9 @@ game_localization/
 - `data_version`
 - `own_champion_slug`
 - `recommended_build` JSONB
+  - 保存 `recommend_full_build` 的 ordered build path
+  - 长度允许 `6` 或 `7`
+  - `7` 仅用于鞋子与附魔分开建模的情况
 - `recommended_runes` JSONB
 - `model_name`
 - `source_run_id`
@@ -756,11 +759,19 @@ class BaseLLMClient(ABC):
 - `get_rune(game, slug)`
 - `batch_get_entities(game, entity_type, slugs)`
 - `search_catalog(game, entity_type, query_or_tags)`
+- `list_catalog_candidates(game, entity_type, filters)`
+- `resolve_catalog_slug(game, entity_type, raw_name, filters)`
 
 `baseline`、`calibration summary`、`reference cache summary`、`session memory summary`
 这类上下文由服务层先注入，不作为 model-visible tools。
 
 工具只访问进程内已加载的只读索引，不直接打数据库重查询。
+
+额外约束：
+
+- 主 LLM 只在 slug 已确认时才调用 `get_*` / `batch_get_entities`
+- slug 未确认时，优先调用 `resolve_catalog_slug`
+- `resolve_catalog_slug` 内部允许先按 filter 做 `list_catalog_candidates`，再用 deterministic ranking + cheap selector model 收敛到一个 canonical slug
 
 ## 11.3 Agent 设计
 
@@ -977,7 +988,7 @@ admin 接口不依赖 Clerk role，v1 直接使用环境变量里的固定账号
 建议模式：
 
 - `POST /ai/runs` 创建 run
-- 仅 `explain_slot` 与 `chat_followup` 建议使用 `stream=true`
+- `recommend_full_build` / `explain_slot` / `chat_followup` 建议使用 `stream=true`
 - 其他以结构化 JSON 为主的 run 默认直接走非流式响应
 - 若 `stream=true`，返回 `run_id` 和 SSE URL
 - FE 再订阅 `GET /ai/runs/{run_id}/events`

@@ -16,13 +16,13 @@ from app.domain.match_context import MatchContext, ResponsePreferences, validate
 
 TOOL_ROUND_LIMITS = {
     RunType.EVALUATE_BUILD: 2,
-    RunType.RECOMMEND_FULL_BUILD: 2,
+    RunType.RECOMMEND_FULL_BUILD: 4,
     RunType.RECOMMEND_SLOT: 3,
     RunType.EXPLAIN_SLOT: 3,
     RunType.COMPARE_BUILDS: 3,
     RunType.CHAT_FOLLOWUP: 4,
 }
-TOTAL_TOOL_CALL_LIMIT = 6
+TOTAL_TOOL_CALL_LIMIT = 8
 MAX_REPAIR_ATTEMPTS = 1
 
 
@@ -38,6 +38,7 @@ def prepare_context_node(state: dict[str, Any]) -> dict[str, Any]:
         "seen_tool_call_keys": list(state.get("seen_tool_call_keys", [])),
         "pending_tool_calls": list(state.get("pending_tool_calls", [])),
         "tool_context_ready": bool(state.get("tool_context_ready", False)),
+        "retry_tool_planning": bool(state.get("retry_tool_planning", False)),
         "provider_usage_payloads": list(state.get("provider_usage_payloads", [])),
         "repair_attempt_count": state.get("repair_attempt_count", 0),
         "validation_errors": list(state.get("validation_errors", [])),
@@ -68,13 +69,36 @@ def decide_tool_need_node(
                 "tool_context_ready": True,
                 "tool_decision_reason": "tool_call_limit_reached",
             }
+        if state.get("retry_tool_planning"):
+            return {
+                "need_tools": True,
+                "tool_context_ready": False,
+                "tool_decision_reason": "retry_after_invalid_tool_plan",
+                "retry_tool_planning": False,
+            }
         need_tools, reason = _default_tool_need(
             run_type=run_type,
             context=context,
             operation_context=state.get("operation_context", {}),
             baseline=baseline,
         )
-        return {"need_tools": need_tools, "tool_decision_reason": reason}
+        if need_tools:
+            return {"need_tools": True, "tool_decision_reason": reason}
+        tool_trace = list(state.get("tool_trace", []))
+        tool_trace.append(
+            {
+                "phase": "planning",
+                "status": "skipped",
+                "summary": _tool_decision_summary(reason),
+                "decision_reason": reason,
+                "tool_calls": [],
+            }
+        )
+        return {
+            "need_tools": False,
+            "tool_decision_reason": reason,
+            "tool_trace": tool_trace,
+        }
 
     return _node
 
@@ -124,6 +148,7 @@ def tool_select_node(
             error_message="Model returned an invalid tool plan.",
         )
         tool_plan = validate_tool_plan(raw_result)
+        planned_calls = list(tool_plan.tool_calls)
         sanitized_calls = _sanitize_tool_calls(
             plan=tool_plan.model_dump(mode="json"),
             seen_tool_call_keys=state.get("seen_tool_call_keys", []),
@@ -133,16 +158,55 @@ def tool_select_node(
         )
         provider_usage_payloads = list(state.get("provider_usage_payloads", []))
         provider_usage_payloads.append(usage_payload)
+        tool_trace = list(state.get("tool_trace", []))
+        tool_trace.append(
+            {
+                "phase": "planning",
+                "status": "ready" if sanitized_calls else "done",
+                "summary": _tool_plan_summary(
+                    reasoning_summary=tool_plan.reasoning_summary,
+                    tool_calls=sanitized_calls,
+                    done=tool_plan.done or not sanitized_calls,
+                ),
+                "tool_calls": [
+                    {
+                        "tool_name": tool_call["tool_name"],
+                        "arguments": dict(tool_call["arguments"]),
+                    }
+                    for tool_call in sanitized_calls
+                ],
+                "done": bool(tool_plan.done or not sanitized_calls),
+            }
+        )
+        if not tool_plan.done and planned_calls and not sanitized_calls:
+            tool_trace[-1]["status"] = "blocked"
+            tool_trace[-1]["done"] = False
+            tool_trace[-1]["summary"] = (
+                "The previous tool plan used unresolved or invalid arguments. "
+                "Retry planning with `resolve_catalog_slug` or a filtered candidate listing."
+            )
+            return {
+                "pending_tool_calls": [],
+                "tool_context_ready": False,
+                "provider_usage_payloads": provider_usage_payloads,
+                "tool_trace": tool_trace,
+                "retry_tool_planning": True,
+                "tool_round_count": state.get("tool_round_count", 0) + 1,
+            }
         if tool_plan.done or not sanitized_calls:
             return {
                 "pending_tool_calls": [],
                 "tool_context_ready": True,
                 "provider_usage_payloads": provider_usage_payloads,
+                "tool_trace": tool_trace,
+                "retry_tool_planning": False,
             }
         return {
             "pending_tool_calls": sanitized_calls,
             "tool_context_ready": False,
             "provider_usage_payloads": provider_usage_payloads,
+            "tool_trace": tool_trace,
+            "retry_tool_planning": False,
         }
 
     return _node
@@ -166,9 +230,10 @@ def tool_execute_node(
             for tool_name, entries in dict(state.get("tool_facts", {})).items()
         }
         seen_tool_call_keys = list(state.get("seen_tool_call_keys", []))
+        provider_usage_payloads = list(state.get("provider_usage_payloads", []))
         executed_calls = 0
         for tool_call in pending_tool_calls:
-            result, trace_entry = _execute_tool_call(
+            result, trace_entry, usage_payloads = _execute_tool_call(
                 session=session,
                 context=context,
                 snapshot=snapshot,
@@ -178,6 +243,7 @@ def tool_execute_node(
             tool_trace.append(trace_entry)
             tool_facts.setdefault(tool_call["tool_name"], []).append(result)
             seen_tool_call_keys.append(tool_call["call_key"])
+            provider_usage_payloads.extend(usage_payloads)
             executed_calls += 1
 
         return {
@@ -188,6 +254,7 @@ def tool_execute_node(
             "tool_facts": tool_facts,
             "seen_tool_call_keys": seen_tool_call_keys,
             "tool_context_ready": False,
+            "provider_usage_payloads": provider_usage_payloads,
         }
 
     return _node
@@ -507,6 +574,13 @@ def _sanitize_tool_call(
                 validated_slug = validate_slug_for_game(context.game, raw_slug)
             except ValueError:
                 continue
+            if not _entity_exists_for_type(
+                entity_type=entity_type,
+                slug=validated_slug,
+                context=context,
+                snapshot=snapshot,
+            ):
+                continue
             validated_slugs.append(validated_slug)
         if not validated_slugs:
             return None
@@ -515,6 +589,44 @@ def _sanitize_tool_call(
             "arguments": {
                 "entity_type": entity_type,
                 "slugs": validated_slugs,
+            },
+        }
+
+    if tool_name == "list_catalog_candidates":
+        game = arguments.get("game")
+        entity_type = arguments.get("entity_type")
+        filters = _sanitize_candidate_filters(arguments.get("filters"))
+        if game != context.game.value or entity_type not in {"champion", "item", "rune"}:
+            return None
+        if not filters:
+            return None
+        return {
+            "tool_name": tool_name,
+            "arguments": {
+                "game": game,
+                "entity_type": entity_type,
+                "filters": filters,
+            },
+        }
+
+    if tool_name == "resolve_catalog_slug":
+        game = arguments.get("game")
+        entity_type = arguments.get("entity_type")
+        raw_name = arguments.get("raw_name")
+        if game != context.game.value or entity_type not in {"champion", "item", "rune"}:
+            return None
+        if not isinstance(raw_name, str):
+            return None
+        cleaned_name = " ".join(raw_name.split())[:120]
+        if not cleaned_name:
+            return None
+        return {
+            "tool_name": tool_name,
+            "arguments": {
+                "game": game,
+                "entity_type": entity_type,
+                "raw_name": cleaned_name,
+                "filters": _sanitize_candidate_filters(arguments.get("filters")),
             },
         }
 
@@ -548,31 +660,40 @@ def _execute_tool_call(
     snapshot: CatalogSnapshot,
     toolset: CatalogToolset,
     tool_call: dict[str, Any],
-) -> tuple[dict[str, Any], dict[str, Any]]:
+) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
     tool_name = tool_call["tool_name"]
     arguments = dict(tool_call["arguments"])
 
     if tool_name == "get_champion":
         result = toolset.get_champion(snapshot, arguments["slug"])
         return result, {
+            "phase": "execution",
             "tool": tool_name,
             "status": "completed",
+            "summary": f"Loaded champion facts for `{arguments['slug']}`.",
+            "arguments": {"slug": arguments["slug"]},
             "champion_slug": arguments["slug"],
-        }
+        }, []
     if tool_name == "get_item":
         result = toolset.get_item(snapshot, arguments["slug"])
         return result, {
+            "phase": "execution",
             "tool": tool_name,
             "status": "completed",
+            "summary": f"Loaded item facts for `{arguments['slug']}`.",
+            "arguments": {"slug": arguments["slug"]},
             "item_slug": arguments["slug"],
-        }
+        }, []
     if tool_name == "get_rune":
         result = toolset.get_rune(snapshot, arguments["slug"])
         return result, {
+            "phase": "execution",
             "tool": tool_name,
             "status": "completed",
+            "summary": f"Loaded rune facts for `{arguments['slug']}`.",
+            "arguments": {"slug": arguments["slug"]},
             "rune_slug": arguments["slug"],
-        }
+        }, []
     if tool_name == "batch_get_entities":
         result = toolset.batch_get_entities(
             snapshot,
@@ -580,12 +701,88 @@ def _execute_tool_call(
             slugs=arguments["slugs"],
         )
         return result, {
+            "phase": "execution",
             "tool": tool_name,
             "status": "completed",
+            "summary": (
+                f"Loaded {len(result.get('entities') or [])} {arguments['entity_type']} entries "
+                "for direct comparison."
+            ),
+            "arguments": {
+                "entity_type": arguments["entity_type"],
+                "slugs": list(arguments["slugs"]),
+            },
             "entity_type": arguments["entity_type"],
             "slug_count": len(arguments["slugs"]),
+            "resolved_slugs": [
+                entity.get("slug")
+                for entity in result.get("entities") or []
+                if isinstance(entity, dict) and entity.get("slug")
+            ],
             "missing_slugs": result.get("missing_slugs") or [],
-        }
+        }, []
+    if tool_name == "list_catalog_candidates":
+        result = toolset.list_catalog_candidates(
+            snapshot,
+            game=context.game,
+            entity_type=arguments["entity_type"],
+            filters=arguments.get("filters"),
+        )
+        return result, {
+            "phase": "execution",
+            "tool": tool_name,
+            "status": "completed",
+            "summary": (
+                f"Listed {result.get('candidate_count', 0)} filtered "
+                f"{arguments['entity_type']} candidates."
+            ),
+            "arguments": {
+                "game": arguments["game"],
+                "entity_type": arguments["entity_type"],
+                "filters": dict(arguments.get("filters") or {}),
+            },
+            "entity_type": arguments["entity_type"],
+            "candidate_count": result.get("candidate_count", 0),
+            "candidate_slugs": [
+                candidate.get("slug")
+                for candidate in result.get("candidates") or []
+                if isinstance(candidate, dict) and candidate.get("slug")
+            ][:20],
+        }, []
+    if tool_name == "resolve_catalog_slug":
+        result, usage_payloads = toolset.resolve_catalog_slug(
+            snapshot,
+            game=context.game,
+            entity_type=arguments["entity_type"],
+            raw_name=arguments["raw_name"],
+            filters=arguments.get("filters"),
+        )
+        summary = (
+            f"Resolved `{arguments['raw_name']}` to `{result.get('resolved_slug')}`."
+            if result.get("resolved_slug")
+            else f"Could not fully resolve `{arguments['raw_name']}` yet."
+        )
+        return result, {
+            "phase": "execution",
+            "tool": tool_name,
+            "status": "completed",
+            "summary": summary,
+            "arguments": {
+                "game": arguments["game"],
+                "entity_type": arguments["entity_type"],
+                "raw_name": arguments["raw_name"],
+                "filters": dict(arguments.get("filters") or {}),
+            },
+            "entity_type": arguments["entity_type"],
+            "resolution_status": result.get("resolution_status"),
+            "resolved_slug": result.get("resolved_slug"),
+            "candidate_count": result.get("candidate_count", 0),
+            "candidate_slugs": [
+                candidate.get("slug")
+                for candidate in result.get("candidates") or []
+                if isinstance(candidate, dict) and candidate.get("slug")
+            ],
+        }, usage_payloads
     result = toolset.search_catalog(
         session,
         game=context.game,
@@ -595,12 +792,27 @@ def _execute_tool_call(
         limit=arguments["limit"],
     )
     return result, {
+        "phase": "execution",
         "tool": tool_name,
         "status": "completed",
+        "summary": (
+            f"Searched the {arguments['entity_type']} catalog for "
+            f"`{arguments['query']}` and found {len(result.get('matches') or [])} matches."
+        ),
+        "arguments": {
+            "entity_type": arguments["entity_type"],
+            "query": arguments["query"],
+            "limit": arguments["limit"],
+        },
         "entity_type": arguments["entity_type"],
         "query": arguments["query"],
         "match_count": len(result.get("matches") or []),
-    }
+        "match_slugs": [
+            match.get("slug")
+            for match in result.get("matches") or []
+            if isinstance(match, dict) and match.get("slug")
+        ],
+    }, []
 
 
 def _entity_exists(
@@ -616,6 +828,58 @@ def _entity_exists(
     if tool_name == "get_item":
         return slug in catalog.items_by_slug
     return slug in catalog.runes_by_slug
+
+
+def _entity_exists_for_type(
+    *,
+    entity_type: str,
+    slug: str,
+    context: MatchContext,
+    snapshot: CatalogSnapshot,
+) -> bool:
+    catalog = snapshot.catalogs[context.game]
+    if entity_type == "champion":
+        return slug in catalog.champions_by_slug
+    if entity_type == "item":
+        return slug in catalog.items_by_slug
+    return slug in catalog.runes_by_slug
+
+
+def _sanitize_candidate_filters(raw_filters: Any) -> dict[str, Any]:
+    if not isinstance(raw_filters, dict):
+        return {}
+    allowed_keys = {
+        "position",
+        "lane",
+        "role",
+        "class",
+        "class_name",
+        "category",
+        "subtype",
+        "path",
+        "slot",
+        "keyword",
+        "keywords",
+    }
+    sanitized: dict[str, Any] = {}
+    for raw_key, raw_value in raw_filters.items():
+        key = str(raw_key).strip().lower()
+        if key not in allowed_keys:
+            continue
+        if isinstance(raw_value, str):
+            cleaned = " ".join(raw_value.split())[:60]
+            if cleaned:
+                sanitized[key] = cleaned
+            continue
+        if isinstance(raw_value, list):
+            cleaned_items = [
+                " ".join(str(item).split())[:60]
+                for item in raw_value[:8]
+                if isinstance(item, str) and item.strip()
+            ]
+            if cleaned_items:
+                sanitized[key] = cleaned_items
+    return sanitized
 
 
 def _tool_call_key(tool_name: str, arguments: dict[str, Any]) -> str:
@@ -639,6 +903,36 @@ def _extract_validation_errors(exc: ApiError) -> list[str]:
         else:
             messages.append(str(issue))
     return messages or [str(exc)]
+
+
+def _tool_decision_summary(reason: str) -> str:
+    if reason == "baseline_is_sufficient":
+        return "Injected context and baseline were enough, so no extra tool calls were needed."
+    if reason == "injected_context_is_sufficient":
+        return "Injected match context was already sufficient, so generation can start directly."
+    if reason == "tool_round_limit_reached":
+        return "Tool round limit reached. Proceeding with the facts already collected."
+    if reason == "tool_call_limit_reached":
+        return "Tool call limit reached. Proceeding with the facts already collected."
+    return "No additional tool calls were needed before generation."
+
+
+def _tool_plan_summary(
+    *,
+    reasoning_summary: str,
+    tool_calls: list[dict[str, Any]],
+    done: bool,
+) -> str:
+    cleaned = " ".join(reasoning_summary.split())
+    if cleaned:
+        return cleaned[:280]
+    if done:
+        return (
+            "Current injected context and gathered facts are enough. "
+            "Moving on to answer generation."
+        )
+    tool_names = ", ".join(tool_call["tool_name"] for tool_call in tool_calls) or "no tools"
+    return f"Need a little more grounded data before answering. Next tool calls: {tool_names}."
 
 
 def _aggregate_provider_usage(payloads: list[dict[str, Any]]) -> dict[str, Any]:

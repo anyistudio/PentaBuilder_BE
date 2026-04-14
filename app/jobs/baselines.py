@@ -73,7 +73,12 @@ def precompute_baselines(
                 game=game.value,
                 data_version=version.data_version,
                 own_champion_slug=champion_slug,
-                recommended_build=result.get("recommended_build") or result.get("build") or [],
+                recommended_build=(
+                    result.get("recommended_build_order")
+                    or result.get("recommended_build")
+                    or result.get("build")
+                    or []
+                ),
                 recommended_runes=result.get("recommended_runes") or result.get("runes") or {},
                 provider_name=provider_name,
                 model_name=model_name,
@@ -82,7 +87,10 @@ def precompute_baselines(
             created_count += 1
         else:
             existing.recommended_build = (
-                result.get("recommended_build") or result.get("build") or []
+                result.get("recommended_build_order")
+                or result.get("recommended_build")
+                or result.get("build")
+                or []
             )
             existing.recommended_runes = (
                 result.get("recommended_runes") or result.get("runes") or {}

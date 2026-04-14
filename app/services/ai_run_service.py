@@ -36,7 +36,11 @@ from app.services.session_service import SessionService
 from app.services.storage_service import StorageService
 
 LOGGER = logging.getLogger(__name__)
-STREAMABLE_RUN_TYPES = {RunType.EXPLAIN_SLOT, RunType.CHAT_FOLLOWUP}
+STREAMABLE_RUN_TYPES = {
+    RunType.RECOMMEND_FULL_BUILD,
+    RunType.EXPLAIN_SLOT,
+    RunType.CHAT_FOLLOWUP,
+}
 
 
 @dataclass
@@ -353,18 +357,48 @@ class AIRunService:
                 provider_name_override=provider_name_override,
                 model_name_override=model_name_override,
             )
+            self.event_stream_service.publish(
+                str(run.id),
+                "tool_event",
+                {
+                    "phase": "planning",
+                    "status": "started",
+                    "summary": (
+                        "Inspecting the current context and deciding whether "
+                        "extra grounded data is needed."
+                    ),
+                },
+            )
             graph_state = prepared.graph.collect_tool_context(
                 {
                     "context": context.model_dump(mode="json"),
                     "operation_context": operation_context,
                 }
             )
-            for tool_event in graph_state.get("tool_trace", []):
+            tool_trace = list(graph_state.get("tool_trace", []))
+            if not tool_trace:
+                tool_trace = [
+                    {
+                        "phase": "planning",
+                        "status": "completed",
+                        "summary": "Injected context was sufficient, so no tool calls were needed.",
+                    }
+                ]
+            for tool_event in tool_trace:
                 self.event_stream_service.publish(
                     str(run.id),
                     "tool_event",
                     tool_event,
                 )
+            self.event_stream_service.publish(
+                str(run.id),
+                "tool_event",
+                {
+                    "phase": "drafting",
+                    "status": "started",
+                    "summary": "Tool context is ready. Streaming the user-visible draft now.",
+                },
+            )
             preview_prompt = prepared.graph.build_prompt_package(
                 operation_context=operation_context,
                 output_mode="stream_text",
@@ -375,6 +409,15 @@ class AIRunService:
                 llm_client=prepared.llm_client,
                 prompt_package=preview_prompt,
                 response_preferences=response_preferences,
+            )
+            self.event_stream_service.publish(
+                str(run.id),
+                "tool_event",
+                {
+                    "phase": "drafting",
+                    "status": "completed",
+                    "summary": "Draft stream completed. Finalizing the structured result.",
+                },
             )
             result = self.execute_run(
                 session,
@@ -564,6 +607,11 @@ class AIRunService:
                 code="provider_not_configured",
                 status_code=503,
             )
+        selector_llm_client = create_llm_client(
+            settings=self.settings,
+            provider_name=self.settings.fast_reasoning_provider,
+            model_name=self.settings.fast_reasoning_model,
+        )
         graph = OnlineRunGraph(
             run_type=RunType(run.run_type),
             context=context,
@@ -576,7 +624,10 @@ class AIRunService:
             reply_to_run_summary=reply_to_run_summary,
             llm_client=llm_client,
             session=session,
-            toolset=CatalogToolset(catalog_service=self.catalog_service),
+            toolset=CatalogToolset(
+                catalog_service=self.catalog_service,
+                selector_llm_client=selector_llm_client or llm_client,
+            ),
         )
         return PreparedRun(
             snapshot=snapshot,
@@ -616,8 +667,10 @@ class AIRunService:
         record = session.scalar(stmt)
         if record is None:
             return None
+        build_order = record.recommended_build
         return {
-            "recommended_build": record.recommended_build,
+            "recommended_build_order": build_order,
+            "recommended_build": build_order,
             "recommended_runes": record.recommended_runes,
             "summary": "Loaded precomputed baseline build.",
         }
@@ -707,6 +760,27 @@ class AIRunService:
     ) -> None:
         result = run.structured_result or {}
         channel = "answer" if run.run_type == RunType.CHAT_FOLLOWUP.value else "summary"
+        self.event_stream_service.publish(
+            str(run.id),
+            "tool_event",
+            {
+                "phase": "planning",
+                "status": "cached",
+                "summary": (
+                    "Served from strong cache. No new tool calls or "
+                    "model planning were needed."
+                ),
+            },
+        )
+        self.event_stream_service.publish(
+            str(run.id),
+            "tool_event",
+            {
+                "phase": "drafting",
+                "status": "cached",
+                "summary": "Replaying the cached user-visible text stream.",
+            },
+        )
         preview_text = str(result.get(channel) or result.get("summary") or "")
         for chunk in self._chunk_text(preview_text):
             self.event_stream_service.publish(

@@ -6,3 +6,4 @@ Output rules:
 - Keep explanations grounded in the current match context, not vague "generally strong" statements.
 - If you mention alternatives, make it clear why they are secondary under this exact context.
 - If a field is required by the schema, fill it with a grounded answer instead of omitting it.
+- If a build field is an ordered path, keep its sequencing consistent with the explanation text.

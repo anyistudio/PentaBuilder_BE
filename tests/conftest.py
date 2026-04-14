@@ -175,7 +175,7 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
         }
     if run_type == "recommend_full_build":
         return {
-            "recommended_build": filled_build,
+            "recommended_build_order": filled_build,
             "recommended_runes": runes_template,
             "summary": "这套 build 兼顾了当前对局的爆发、成型节奏和容错。",
             "slot_notes": [

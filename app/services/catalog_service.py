@@ -1,5 +1,7 @@
 import re
+from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from sqlalchemy.orm import Session
 
@@ -12,8 +14,6 @@ from app.api.schemas.catalog import (
 from app.catalog.registry import CatalogEntity, GameDataRegistry
 from app.domain.enums import Game, Language, TerminologyStyle
 from app.domain.match_context import normalize_lookup_text, slugify_name
-from urllib.parse import urlparse
-from pathlib import Path
 from app.services.data_version_service import DataVersionService
 
 POSITION_ORDER = ("top", "jungle", "mid", "adc", "support")
@@ -145,6 +145,24 @@ class CatalogService:
         ]
         return version.data_version, payload
 
+    def summarize_entity(
+        self,
+        entity: CatalogEntity,
+        *,
+        data_version: str,
+        language: Language,
+        terminology_style: TerminologyStyle,
+    ) -> CatalogEntitySummary:
+        return self._format_entity(
+            entity,
+            language=language,
+            terminology_style=terminology_style,
+            data_version=data_version,
+        )
+
+    def score_entity_match(self, *, query: str, entity: CatalogEntity) -> int:
+        return self._score_entity(query=query, entity=entity)
+
     def _resolve_version(self, session: Session, *, data_version: str | None):
         if data_version is None:
             return self.data_version_service.get_active_version(session)
@@ -168,7 +186,10 @@ class CatalogService:
             suffix = Path(urlparse(icon_url).path).suffix.lower() or ".png"
             folder_name = f"{entity.entity_type}_icons"
             file_name = f"{slugify_name(entity.english_name)}{suffix}"
-            icon_url = f"/api/v1/assets/{data_version}/{entity.game.value}/{folder_name}/{file_name}"
+            icon_url = (
+                f"/api/v1/assets/{data_version}/{entity.game.value}/"
+                f"{folder_name}/{file_name}"
+            )
 
         base_payload: dict[str, Any] = {
             "slug": entity.slug,
@@ -270,7 +291,11 @@ class CatalogService:
                 tags.append("adc")
             if range_type == "Ranged" and magic_hits >= physical_hits:
                 tags.append("mid")
-            if "assassin" in class_text or "stealth champion" in category_text or "energy" in resource:
+            if (
+                "assassin" in class_text
+                or "stealth champion" in category_text
+                or "energy" in resource
+            ):
                 tags.append("jungle")
             if attack_range < 300 or any(
                 token in class_text
@@ -348,12 +373,18 @@ class CatalogService:
             for ability in self._list_of_dicts(raw_payload.get("abilities"))
             if self._text_or_none(ability.get("name"))
         ]
-        ordered = sorted(abilities, key=lambda ability: self._ability_sort_key(ability.get("skill")))
+        ordered = sorted(
+            abilities,
+            key=lambda ability: self._ability_sort_key(ability.get("skill")),
+        )
         return [
             CatalogAbilitySummary(
                 skill=self._normalize_skill(ability.get("skill")),
                 name=self._text_or_none(ability.get("name")) or "Unknown Ability",
-                blurb=self._text_or_none(ability.get("blurb")) or self._text_or_none(ability.get("description")),
+                blurb=(
+                    self._text_or_none(ability.get("blurb"))
+                    or self._text_or_none(ability.get("description"))
+                ),
                 damage_type=self._text_or_none(ability.get("damage_type")),
             )
             for ability in ordered[:5]
@@ -381,7 +412,11 @@ class CatalogService:
                 else f"Common roles: {position_text}"
             )
         if class_text:
-            parts.append(f"定位：{class_text}" if language == Language.ZH_CN else f"Class: {class_text}")
+            parts.append(
+                f"定位：{class_text}"
+                if language == Language.ZH_CN
+                else f"Class: {class_text}"
+            )
         if range_type:
             display_range = (
                 "远程"
@@ -396,12 +431,20 @@ class CatalogService:
                 else f"Range type: {display_range}"
             )
         if resource:
-            parts.append(f"资源：{resource}" if language == Language.ZH_CN else f"Resource: {resource}")
+            parts.append(
+                f"资源：{resource}"
+                if language == Language.ZH_CN
+                else f"Resource: {resource}"
+            )
 
         traits = self._extract_trait_hints(raw_payload, language=language)
         if traits:
             trait_text = "、".join(traits) if language == Language.ZH_CN else ", ".join(traits)
-            parts.append(f"特性：{trait_text}" if language == Language.ZH_CN else f"Traits: {trait_text}")
+            parts.append(
+                f"特性：{trait_text}"
+                if language == Language.ZH_CN
+                else f"Traits: {trait_text}"
+            )
 
         return " · ".join(parts[:5]) if parts else None
 

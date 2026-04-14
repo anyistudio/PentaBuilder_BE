@@ -685,13 +685,12 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
 
 - 登录用户若传入 `session_id`，该 run 会进入持久化 session
 - 匿名用户可以不传 `session_id`
-- `stream=true` 仅适用于长文本回答型 run：
+- `stream=true` 适用于需要前端展示推理进度、tool call 和正文预览的 run：
+  - `recommend_full_build`
   - `explain_slot`
   - `chat_followup`
-- 若其他 run type 传入 `stream=true`，后端可返回 `400 stream_not_supported_for_run_type`
 - 对纯结构化结果为主的 run：
   - `evaluate_build`
-  - `recommend_full_build`
   - `recommend_slot`
   - `compare_builds`
   不建议开启 SSE 正文流
@@ -712,6 +711,9 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
 #### `recommend_full_build`
 
 - `payload` 可为空
+- 返回结果中的 `recommended_build_order` 表示有序出装步骤
+- 长度允许 `6` 或 `7`
+- 长度为 `7` 时，必须是“鞋子 + 独立附魔”拆成两个步骤
 
 #### `explain_slot`
 
@@ -901,8 +903,22 @@ data: {"channel":"answer","language":"zh-CN","delta":"这一局更推荐先做"}
 
 ```text
 event: tool_event
-data: {"tool":"get_item","status":"completed","item_slug":"lol-zhonyas-hourglass"}
+data: {
+  "phase":"planning",
+  "status":"ready",
+  "summary":"Need item facts for the next spike comparison.",
+  "tool_calls":[
+    {"tool_name":"search_catalog","arguments":{"entity_type":"item","query":"stasis ap item","limit":5}}
+  ]
+}
 ```
+
+规则：
+
+- `tool_event` 会承载 planning / execution / drafting 三类阶段事件
+- planning 事件可带 `summary` 与 `tool_calls`
+- execution 事件可带 `tool`、`arguments`、`match_slugs`、`resolved_slugs`
+- drafting 事件用于提示“开始流正文”与“正文预览结束”
 
 #### `run_completed`
 
@@ -935,11 +951,12 @@ data: {
 
 补充规则：
 
-- `message_delta` 只在长文本回答型 run 中出现，v1 主要是：
+- `message_delta` 只在开启了 `stream=true` 的预览正文 run 中出现，当前主要是：
+  - `recommend_full_build`
   - `explain_slot`
   - `chat_followup`
 - `message_delta` 直接来自目标语言生成过程，不存在单独翻译阶段
-- 对推荐/评分这类以结构化 JSON 为主的 run，前端应直接等待 `run_completed`
+- 即使前端实时显示了 `message_delta`，完整结构化结果仍以 `run_completed` 为准
 
 ## 8. Leaderboard API
 

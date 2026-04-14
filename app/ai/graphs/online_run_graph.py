@@ -116,7 +116,13 @@ class OnlineRunGraph:
         )
         graph.add_conditional_edges(
             "tool_select",
-            lambda state: "tool_execute" if state.get("pending_tool_calls") else "generate_result",
+            lambda state: (
+                "tool_execute"
+                if state.get("pending_tool_calls")
+                else "decide_tool_need"
+                if state.get("retry_tool_planning")
+                else "generate_result"
+            ),
         )
         graph.add_edge("tool_execute", "decide_tool_need")
         graph.add_edge("generate_result", "validate_result")
@@ -139,6 +145,8 @@ class OnlineRunGraph:
                 merged_state["tool_context_ready"] = True
                 return merged_state
             merged_state.update(self._tool_select(merged_state))
+            if merged_state.get("retry_tool_planning"):
+                continue
             if not merged_state.get("pending_tool_calls"):
                 merged_state["tool_context_ready"] = True
                 return merged_state

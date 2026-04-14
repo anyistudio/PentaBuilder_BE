@@ -10,6 +10,8 @@ ToolName = Literal[
     "get_rune",
     "batch_get_entities",
     "search_catalog",
+    "list_catalog_candidates",
+    "resolve_catalog_slug",
 ]
 
 
@@ -23,6 +25,7 @@ class ToolCallSpec(BaseModel):
 class ToolSelectionResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
+    reasoning_summary: str = ""
     tool_calls: list[ToolCallSpec] = Field(default_factory=list, max_length=2)
     done: bool = False
 
@@ -31,6 +34,14 @@ def get_tool_plan_response_schema() -> dict[str, Any]:
     return {
         "type": "object",
         "properties": {
+            "reasoning_summary": {
+                "type": "string",
+                "description": (
+                    "A short user-visible progress summary explaining what facts are still needed "
+                    "and why the next tool calls were selected. "
+                    "Do not reveal hidden chain-of-thought."
+                ),
+            },
             "tool_calls": {
                 "type": "array",
                 "description": "The next minimal set of tool calls needed for this round.",
@@ -46,6 +57,8 @@ def get_tool_plan_response_schema() -> dict[str, Any]:
                                 "get_rune",
                                 "batch_get_entities",
                                 "search_catalog",
+                                "list_catalog_candidates",
+                                "resolve_catalog_slug",
                             ],
                         },
                         "arguments": {
@@ -65,7 +78,7 @@ def get_tool_plan_response_schema() -> dict[str, Any]:
                 ),
             },
         },
-        "required": ["tool_calls", "done"],
+        "required": ["reasoning_summary", "tool_calls", "done"],
         "additionalProperties": False,
     }
 

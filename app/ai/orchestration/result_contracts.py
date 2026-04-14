@@ -1,11 +1,19 @@
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
 
 from app.catalog.registry import CatalogSnapshot
 from app.core.errors import ApiError
 from app.domain.enums import RunType
-from app.domain.match_context import MatchContext, RuneSelection, validate_slug_for_game
+from app.domain.match_context import (
+    MatchContext,
+    RuneSelection,
+    normalize_lookup_text,
+    validate_slug_for_game,
+)
+
+RECOMMEND_FULL_BUILD_MIN_STEPS = 6
+RECOMMEND_FULL_BUILD_MAX_STEPS = 7
 
 
 class RuneSelectionResult(BaseModel):
@@ -18,7 +26,7 @@ class RuneSelectionResult(BaseModel):
 class SlotNote(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    slot_index: int = Field(ge=0, le=5)
+    slot_index: int = Field(ge=0, le=RECOMMEND_FULL_BUILD_MAX_STEPS - 1)
     text: str = Field(min_length=1)
 
 
@@ -57,7 +65,11 @@ class EvaluateBuildResult(BaseModel):
 class RecommendFullBuildResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    recommended_build: list[str] = Field(min_length=6, max_length=6)
+    recommended_build_order: list[str] = Field(
+        min_length=RECOMMEND_FULL_BUILD_MIN_STEPS,
+        max_length=RECOMMEND_FULL_BUILD_MAX_STEPS,
+        validation_alias=AliasChoices("recommended_build_order", "recommended_build"),
+    )
     recommended_runes: RuneSelectionResult = Field(default_factory=RuneSelectionResult)
     summary: str = Field(min_length=1)
     slot_notes: list[SlotNote] = Field(default_factory=list)
@@ -163,8 +175,14 @@ def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "recommended_build": _build_array_schema(
-                    description="The single best six-slot build using canonical item slugs."
+                "recommended_build_order": _build_array_schema(
+                    description=(
+                        "The single best ordered item purchase path using canonical item slugs. "
+                        "Return 6 steps for a standard path, or 7 steps only when a boots item "
+                        "and a separate enchant item both appear."
+                    ),
+                    min_items=RECOMMEND_FULL_BUILD_MIN_STEPS,
+                    max_items=RECOMMEND_FULL_BUILD_MAX_STEPS,
                 ),
                 "recommended_runes": _rune_selection_schema(
                     description="The single best rune setup using canonical rune slugs."
@@ -182,8 +200,8 @@ def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
                             "slot_index": {
                                 "type": "integer",
                                 "minimum": 0,
-                                "maximum": 5,
-                                "description": "The affected slot index.",
+                                "maximum": RECOMMEND_FULL_BUILD_MAX_STEPS - 1,
+                                "description": "The affected build-order step index.",
                             },
                             "text": {
                                 "type": "string",
@@ -195,7 +213,7 @@ def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
                     },
                 },
             },
-            "required": ["recommended_build", "recommended_runes", "summary", "slot_notes"],
+            "required": ["recommended_build_order", "recommended_runes", "summary", "slot_notes"],
             "additionalProperties": False,
         }
     if run_type == RunType.RECOMMEND_SLOT:
@@ -419,11 +437,13 @@ def validate_run_result(
             snapshot=snapshot,
             build=result["recommended_build"],
             allow_null=True,
+            loc=["recommended_build"],
         )
         recommended_runes = _validate_rune_selection(
             context=context,
             snapshot=snapshot,
             rune_selection=result["recommended_runes"],
+            loc=["recommended_runes"],
         )
         result["recommended_build"] = recommended_build
         result["recommended_runes"] = recommended_runes
@@ -437,28 +457,39 @@ def validate_run_result(
         return result
 
     if run_type == RunType.RECOMMEND_FULL_BUILD:
-        recommended_build = _validate_build_slots(
+        recommended_build_order = _validate_build_slots(
             context=context,
             snapshot=snapshot,
-            build=result["recommended_build"],
+            build=result["recommended_build_order"],
             allow_null=False,
+            loc=["recommended_build_order"],
+            min_slots=RECOMMEND_FULL_BUILD_MIN_STEPS,
+            max_slots=RECOMMEND_FULL_BUILD_MAX_STEPS,
         )
         _ensure_filled_slots_preserved(
             current_build=context.own_build,
-            proposed_build=recommended_build,
+            proposed_build=recommended_build_order,
+        )
+        _ensure_recommend_full_build_order_is_consistent(
+            context=context,
+            snapshot=snapshot,
+            build_order=recommended_build_order,
+            loc=["recommended_build_order"],
         )
         recommended_runes = _validate_rune_selection(
             context=context,
             snapshot=snapshot,
             rune_selection=result["recommended_runes"],
+            loc=["recommended_runes"],
         )
-        result["recommended_build"] = recommended_build
+        result["recommended_build_order"] = recommended_build_order
+        result["recommended_build"] = recommended_build_order
         result["recommended_runes"] = recommended_runes
         result["score"] = None
-        result["build"] = recommended_build
+        result["build"] = recommended_build_order
         result["runes"] = recommended_runes
         result["explanations"] = [
-            {"target": f"slot:{note['slot_index']}", "text": note["text"]}
+            {"target": f"step:{note['slot_index'] + 1}", "text": note["text"]}
             for note in result["slot_notes"]
         ]
         result["alternatives"] = []
@@ -467,11 +498,15 @@ def validate_run_result(
     if run_type == RunType.RECOMMEND_SLOT:
         requested_slot_index = int(operation_context.get("slot_index", -1))
         if result["slot_index"] != requested_slot_index:
-            raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+            _raise_invalid_ai_result(
+                message=f"slot_index must equal requested slot {requested_slot_index}.",
+                loc=["slot_index"],
+            )
         recommended_item_slug = _validate_item_slug(
             context=context,
             snapshot=snapshot,
             item_slug=result["recommended_item_slug"],
+            loc=["recommended_item_slug"],
         )
         build = list(context.own_build)
         build[requested_slot_index] = recommended_item_slug
@@ -494,26 +529,34 @@ def validate_run_result(
                     context=context,
                     snapshot=snapshot,
                     item_slug=alternative["item_slug"],
+                    loc=["alternatives", index, "item_slug"],
                 ),
                 "reason": alternative["reason"],
             }
-            for alternative in result["alternatives"]
+            for index, alternative in enumerate(result["alternatives"])
         ]
         return result
 
     if run_type == RunType.EXPLAIN_SLOT:
         requested_slot_index = int(operation_context.get("slot_index", -1))
         if result["slot_index"] != requested_slot_index:
-            raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+            _raise_invalid_ai_result(
+                message=f"slot_index must equal requested slot {requested_slot_index}.",
+                loc=["slot_index"],
+            )
         current_item_slug = context.own_build[requested_slot_index]
         if result["current_item_slug"] is not None:
             validated_current_item = _validate_item_slug(
                 context=context,
                 snapshot=snapshot,
                 item_slug=result["current_item_slug"],
+                loc=["current_item_slug"],
             )
             if current_item_slug is not None and validated_current_item != current_item_slug:
-                raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+                _raise_invalid_ai_result(
+                    message="current_item_slug must match the injected current slot item.",
+                    loc=["current_item_slug"],
+                )
             result["current_item_slug"] = validated_current_item
         else:
             result["current_item_slug"] = current_item_slug
@@ -522,6 +565,7 @@ def validate_run_result(
                 context=context,
                 snapshot=snapshot,
                 item_slug=result["best_item_slug"],
+                loc=["best_item_slug"],
             )
         result["score"] = None
         result["build"] = list(context.own_build)
@@ -558,11 +602,13 @@ def validate_run_result(
             snapshot=snapshot,
             build=comparison_context.get("own_build") or [],
             allow_null=True,
+            loc=["comparison_context", "own_build"],
         )
         runes_b = _validate_rune_selection(
             context=context,
             snapshot=snapshot,
             rune_selection=comparison_context.get("own_runes") or {},
+            loc=["comparison_context", "own_runes"],
         )
         result["score"] = None
         result["build"] = list(context.own_build if result["winner"] == "build_a" else build_b)
@@ -590,22 +636,32 @@ def validate_run_result(
     return result
 
 
-def _build_array_schema(*, description: str) -> dict[str, Any]:
+def _build_array_schema(
+    *,
+    description: str,
+    min_items: int = 6,
+    max_items: int = 6,
+) -> dict[str, Any]:
     return {
         "type": "array",
         "description": description,
-        "minItems": 6,
-        "maxItems": 6,
+        "minItems": min_items,
+        "maxItems": max_items,
         "items": {"type": "string"},
     }
 
 
-def _nullable_build_array_schema(*, description: str) -> dict[str, Any]:
+def _nullable_build_array_schema(
+    *,
+    description: str,
+    min_items: int = 6,
+    max_items: int = 6,
+) -> dict[str, Any]:
     return {
         "type": "array",
         "description": description,
-        "minItems": 6,
-        "maxItems": 6,
+        "minItems": min_items,
+        "maxItems": max_items,
         "items": {"type": ["string", "null"]},
     }
 
@@ -631,15 +687,43 @@ def _rune_selection_schema(*, description: str) -> dict[str, Any]:
     }
 
 
+def _raise_invalid_ai_result(
+    *,
+    message: str,
+    loc: list[str | int] | None = None,
+) -> None:
+    details = {
+        "issues": [
+            {
+                "loc": loc or [],
+                "msg": message,
+            }
+        ]
+    }
+    raise ApiError(
+        "Invalid AI result.",
+        code="provider_error",
+        status_code=502,
+        details=details,
+    )
+
+
 def _validate_item_slug(
     *,
     context: MatchContext,
     snapshot: CatalogSnapshot,
     item_slug: str,
+    loc: list[str | int] | None = None,
 ) -> str:
-    validated_slug = validate_slug_for_game(context.game, item_slug)
+    try:
+        validated_slug = validate_slug_for_game(context.game, item_slug)
+    except ValueError as exc:
+        _raise_invalid_ai_result(message=str(exc), loc=loc)
     if validated_slug not in snapshot.catalogs[context.game].items_by_slug:
-        raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+        _raise_invalid_ai_result(
+            message=f"Unknown item slug `{validated_slug}` for game `{context.game.value}`.",
+            loc=loc,
+        )
     return validated_slug
 
 
@@ -648,19 +732,38 @@ def _validate_rune_selection(
     context: MatchContext,
     snapshot: CatalogSnapshot,
     rune_selection: dict[str, Any],
+    loc: list[str | int] | None = None,
 ) -> dict[str, Any]:
     selection = RuneSelection(**rune_selection)
     validated_primary = []
     validated_secondary = []
-    for rune_slug in selection.primary:
-        validated_slug = validate_slug_for_game(context.game, rune_slug)
+    for index, rune_slug in enumerate(selection.primary):
+        try:
+            validated_slug = validate_slug_for_game(context.game, rune_slug)
+        except ValueError as exc:
+            _raise_invalid_ai_result(
+                message=str(exc),
+                loc=[*(loc or []), "primary", index],
+            )
         if validated_slug not in snapshot.catalogs[context.game].runes_by_slug:
-            raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+            _raise_invalid_ai_result(
+                message=f"Unknown rune slug `{validated_slug}` for game `{context.game.value}`.",
+                loc=[*(loc or []), "primary", index],
+            )
         validated_primary.append(validated_slug)
-    for rune_slug in selection.secondary:
-        validated_slug = validate_slug_for_game(context.game, rune_slug)
+    for index, rune_slug in enumerate(selection.secondary):
+        try:
+            validated_slug = validate_slug_for_game(context.game, rune_slug)
+        except ValueError as exc:
+            _raise_invalid_ai_result(
+                message=str(exc),
+                loc=[*(loc or []), "secondary", index],
+            )
         if validated_slug not in snapshot.catalogs[context.game].runes_by_slug:
-            raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+            _raise_invalid_ai_result(
+                message=f"Unknown rune slug `{validated_slug}` for game `{context.game.value}`.",
+                loc=[*(loc or []), "secondary", index],
+            )
         validated_secondary.append(validated_slug)
     return {"primary": validated_primary, "secondary": validated_secondary}
 
@@ -671,20 +774,35 @@ def _validate_build_slots(
     snapshot: CatalogSnapshot,
     build: list[str | None],
     allow_null: bool,
+    loc: list[str | int] | None = None,
+    min_slots: int = 6,
+    max_slots: int = 6,
 ) -> list[str | None]:
-    if len(build) != 6:
-        raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+    if len(build) < min_slots or len(build) > max_slots:
+        expected = (
+            f"exactly {min_slots} slots"
+            if min_slots == max_slots
+            else f"between {min_slots} and {max_slots} slots"
+        )
+        _raise_invalid_ai_result(
+            message=f"Build arrays must contain {expected}.",
+            loc=loc,
+        )
     validated_build: list[str | None] = []
-    for slot in build:
+    for index, slot in enumerate(build):
         if slot is None:
             if not allow_null:
-                raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+                _raise_invalid_ai_result(
+                    message="Build slot cannot be null for this run type.",
+                    loc=[*(loc or []), index],
+                )
             validated_build.append(None)
             continue
         validated_slot = _validate_item_slug(
             context=context,
             snapshot=snapshot,
             item_slug=slot,
+            loc=[*(loc or []), index],
         )
         validated_build.append(validated_slot)
     return validated_build
@@ -697,7 +815,10 @@ def _ensure_filled_slots_preserved(
 ) -> None:
     for index, current_item in enumerate(current_build):
         if current_item is not None and proposed_build[index] != current_item:
-            raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+            _raise_invalid_ai_result(
+                message="Filled build slots must stay unchanged.",
+                loc=["recommended_build_order", index],
+            )
 
 
 def _ensure_only_target_slot_changed(
@@ -710,4 +831,104 @@ def _ensure_only_target_slot_changed(
         if index == slot_index:
             continue
         if current_item != proposed_build[index]:
-            raise ApiError("Invalid AI result.", code="provider_error", status_code=502)
+            _raise_invalid_ai_result(
+                message="Only the requested slot may change.",
+                loc=["build", index],
+            )
+
+
+def _ensure_recommend_full_build_order_is_consistent(
+    *,
+    context: MatchContext,
+    snapshot: CatalogSnapshot,
+    build_order: list[str | None],
+    loc: list[str | int] | None = None,
+) -> None:
+    boots_indices: list[int] = []
+    enchant_indices: list[int] = []
+
+    for index, item_slug in enumerate(build_order):
+        if item_slug is None:
+            continue
+        item_kind = _item_kind(
+            context=context,
+            snapshot=snapshot,
+            item_slug=item_slug,
+        )
+        if item_kind == "boots":
+            boots_indices.append(index)
+        elif item_kind == "enchant":
+            enchant_indices.append(index)
+
+    if len(boots_indices) > 1:
+        _raise_invalid_ai_result(
+            message="recommended_build_order can contain at most one boots item.",
+            loc=[*(loc or []), boots_indices[1]],
+        )
+    if len(enchant_indices) > 1:
+        _raise_invalid_ai_result(
+            message="recommended_build_order can contain at most one enchant item.",
+            loc=[*(loc or []), enchant_indices[1]],
+        )
+
+    has_boots = bool(boots_indices)
+    has_enchant = bool(enchant_indices)
+
+    if has_enchant and not has_boots:
+        _raise_invalid_ai_result(
+            message="An enchant step requires a boots item in the same recommended_build_order.",
+            loc=[*(loc or []), enchant_indices[0]],
+        )
+    if has_boots and has_enchant and boots_indices[0] > enchant_indices[0]:
+        _raise_invalid_ai_result(
+            message=(
+                "The boots item must appear before the enchant step "
+                "in recommended_build_order."
+            ),
+            loc=[*(loc or []), enchant_indices[0]],
+        )
+    if len(build_order) == RECOMMEND_FULL_BUILD_MAX_STEPS and not (has_boots and has_enchant):
+        _raise_invalid_ai_result(
+            message=(
+                "A 7-step recommended_build_order is allowed only when it includes "
+                "one boots item and one separate enchant item."
+            ),
+            loc=loc,
+        )
+    if len(build_order) == RECOMMEND_FULL_BUILD_MIN_STEPS and has_boots and has_enchant:
+        _raise_invalid_ai_result(
+            message=(
+                "When both boots and enchant are present, recommended_build_order must "
+                "use 7 separate steps."
+            ),
+            loc=loc,
+        )
+
+
+def _item_kind(
+    *,
+    context: MatchContext,
+    snapshot: CatalogSnapshot,
+    item_slug: str,
+) -> Literal["boots", "enchant"] | None:
+    entity = snapshot.catalogs[context.game].items_by_slug.get(item_slug)
+    if entity is None:
+        return None
+
+    raw_tokens = normalize_lookup_text(
+        " ".join(
+            part
+            for part in [
+                entity.slug,
+                entity.source_slug,
+                entity.english_name,
+                str(entity.raw_payload.get("name") or ""),
+            ]
+            if part
+        )
+    )
+    if "enchant" in raw_tokens:
+        return "enchant"
+    if any(token in raw_tokens for token in ("boots", "greaves", "shoes")):
+        return "boots"
+    return None

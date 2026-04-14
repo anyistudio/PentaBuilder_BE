@@ -127,6 +127,8 @@ def _load_prompt(relative_path: str) -> str:
 
 
 def _stream_channel_for_run_type(run_type: RunType) -> str | None:
+    if run_type == RunType.RECOMMEND_FULL_BUILD:
+        return "summary"
     if run_type == RunType.EXPLAIN_SLOT:
         return "summary"
     if run_type == RunType.CHAT_FOLLOWUP:
@@ -154,6 +156,9 @@ def _output_mode_block(
         return (
             "Tool planning mode:\n"
             "- Return only the next minimal JSON tool plan.\n"
+            "- Fill `reasoning_summary` with a short user-visible progress update.\n"
+            "- The summary must explain what facts are missing and why these tool calls help.\n"
+            "- Never reveal hidden chain-of-thought or private reasoning; keep it concise.\n"
             "- If the injected context and current tool facts are already enough, return "
             "`done=true` and an empty `tool_calls` list.\n"
             "- Prefer one or two high-value calls over broad fishing."
@@ -343,9 +348,14 @@ def _baseline_block(
     if not baseline:
         return ""
     sections = ["## Baseline Build Reference"]
+    baseline_build_order = (
+        baseline.get("recommended_build_order")
+        or baseline.get("recommended_build")
+        or []
+    )
     sections.extend(
-        _format_build_slots(
-            build=baseline.get("recommended_build") or [],
+        _format_build_order(
+            build_order=baseline_build_order,
             context=context,
             response_preferences=response_preferences,
             snapshot=snapshot,
@@ -398,6 +408,19 @@ def _available_tools_block(*, context: MatchContext, output_mode: str) -> str:
                 "- `search_catalog`: fuzzy search one entity type and return "
                 "light candidate summaries."
             ),
+            (
+                "- `list_catalog_candidates`: list filtered candidate slugs for one "
+                "entity type. Requires `game`, `entity_type`, and at least one filter."
+            ),
+            (
+                "- `resolve_catalog_slug`: resolve one raw name into a canonical slug "
+                "using exact match, deterministic ranking, filtered candidate listing, "
+                "and an internal selector model if needed."
+            ),
+            (
+                "- Prefer `resolve_catalog_slug` before any direct slug lookup "
+                "when the slug is not already confirmed."
+            ),
             "- Prefer one search plus one batch lookup when you need to compare candidates.",
         ]
     )
@@ -437,7 +460,15 @@ def _localization_bundle_block(
         *(context.own_runes.secondary or []),
     }
     if baseline:
-        relevant_slugs.update(slug for slug in baseline.get("recommended_build") or [] if slug)
+        relevant_slugs.update(
+            slug
+            for slug in (
+                baseline.get("recommended_build_order")
+                or baseline.get("recommended_build")
+                or []
+            )
+            if slug
+        )
         rune_selection = baseline.get("recommended_runes") or {}
         relevant_slugs.update(rune_selection.get("primary") or [])
         relevant_slugs.update(rune_selection.get("secondary") or [])
@@ -477,6 +508,9 @@ def _format_tool_result(tool_name: str, result: dict[str, Any]) -> list[str]:
                 f"- {match.get('name', 'Unknown')} (`{match.get('slug', '')}`) | "
                 f"matched={', '.join(match.get('matched_fields') or ['name'])}"
             )
+            aliases = match.get("aliases") or []
+            if aliases:
+                base += f" | aliases={', '.join(str(alias) for alias in aliases[:4])}"
             if match.get("cost"):
                 base += f" | cost={match['cost']}"
             if match.get("stats"):
@@ -487,7 +521,64 @@ def _format_tool_result(tool_name: str, result: dict[str, Any]) -> list[str]:
                 base += f" | slot={match['slot']}"
             if match.get("class_text"):
                 base += f" | class={match['class_text']}"
+            if match.get("position_tags"):
+                base += f" | positions={', '.join(str(tag) for tag in match['position_tags'][:4])}"
             lines.append(base)
+        return lines
+    if tool_name == "list_catalog_candidates":
+        candidates = result.get("candidates") or []
+        lines = [
+            f"- Candidate count: {result.get('candidate_count', len(candidates))}",
+        ]
+        applied_filters = result.get("applied_filters") or {}
+        if applied_filters:
+            filter_text = ", ".join(
+                f"{key}={', '.join(value) if isinstance(value, list) else value}"
+                for key, value in applied_filters.items()
+            )
+            lines.append(f"- Applied filters: {filter_text}")
+        preview = candidates[:12]
+        for candidate in preview:
+            lines.extend(_format_candidate_tool_view(candidate))
+        remaining = len(candidates) - len(preview)
+        if remaining > 0:
+            lines.append(f"- ... plus {remaining} more filtered candidates.")
+        return lines
+    if tool_name == "resolve_catalog_slug":
+        lines = [
+            f"- Resolution status: {result.get('resolution_status', 'unknown')}",
+        ]
+        if result.get("raw_name"):
+            lines.append(f"- Raw name: {result['raw_name']}")
+        if result.get("resolved_slug"):
+            lines.append(
+                f"- Resolved slug: `{result['resolved_slug']}` "
+                f"({result.get('resolved_name') or 'Unknown'})"
+            )
+        if result.get("resolved_by"):
+            lines.append(
+                "- Resolved by: "
+                f"{result['resolved_by']} | confidence={result.get('confidence', 'unknown')}"
+            )
+        if result.get("selector_summary"):
+            lines.append(f"- Selector note: {result['selector_summary']}")
+        applied_filters = result.get("applied_filters") or {}
+        if applied_filters:
+            filter_text = ", ".join(
+                f"{key}={', '.join(value) if isinstance(value, list) else value}"
+                for key, value in applied_filters.items()
+            )
+            lines.append(f"- Applied filters: {filter_text}")
+        candidates = result.get("candidates") or []
+        if candidates:
+            lines.append("- Candidate preview:")
+            for candidate in candidates[:8]:
+                lines.extend(
+                    [
+                        f"  {line.removeprefix('- ')}"
+                        for line in _format_candidate_tool_view(candidate)
+                    ]
+                )
         return lines
     if tool_name == "batch_get_entities":
         entities = result.get("entities") or []
@@ -556,6 +647,38 @@ def _format_entity_tool_view(entity: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _format_candidate_tool_view(candidate: dict[str, Any]) -> list[str]:
+    if not candidate:
+        return ["- No candidate returned."]
+    lines = [f"- {candidate.get('name', 'Unknown')} (`{candidate.get('slug', '')}`)"]
+    aliases = candidate.get("aliases") or []
+    if aliases:
+        lines.append("  - Aliases: " + ", ".join(str(value) for value in aliases[:4]))
+    if candidate.get("class_text"):
+        lines.append(f"  - Class: {candidate['class_text']}")
+    if candidate.get("position_tags"):
+        lines.append(
+            "  - Positions: "
+            + ", ".join(str(tag) for tag in candidate["position_tags"][:4])
+        )
+    if candidate.get("path"):
+        lines.append(f"  - Path: {candidate['path']}")
+    if candidate.get("slot"):
+        lines.append(f"  - Slot: {candidate['slot']}")
+    if candidate.get("cost"):
+        lines.append(f"  - Cost: {candidate['cost']}")
+    if candidate.get("main_attributes"):
+        lines.append(
+            "  - Main attributes: "
+            + ", ".join(str(value) for value in candidate["main_attributes"][:4])
+        )
+    if candidate.get("description"):
+        lines.append(f"  - Description: {_trim_text(str(candidate['description']), 160)}")
+    if candidate.get("match_score") is not None:
+        lines.append(f"  - Match score: {candidate['match_score']}")
+    return lines
+
+
 def _format_candidate_lines(
     candidate_result: dict[str, Any],
     *,
@@ -588,13 +711,21 @@ def _slugs_from_tool_facts(tool_facts: dict[str, list[dict[str, Any]]] | None) -
     if not tool_facts:
         return set()
     slugs: set[str] = set()
-    for tool_results in tool_facts.values():
+    for tool_name, tool_results in tool_facts.items():
         for result in tool_results:
-            slugs.update(_extract_slugs(result))
+            slugs.update(_extract_slugs(result, tool_name=tool_name))
     return slugs
 
 
-def _extract_slugs(value: Any) -> set[str]:
+def _extract_slugs(value: Any, *, tool_name: str | None = None) -> set[str]:
+    if isinstance(value, dict) and tool_name in {"list_catalog_candidates", "resolve_catalog_slug"}:
+        slugs: set[str] = set()
+        resolved_slug = value.get("resolved_slug")
+        if isinstance(resolved_slug, str) and resolved_slug.startswith(("lol-", "wr-")):
+            slugs.add(resolved_slug)
+        for candidate in (value.get("candidates") or [])[:20]:
+            slugs.update(_extract_slugs(candidate))
+        return slugs
     if isinstance(value, str):
         return {value} if value.startswith(("lol-", "wr-")) else set()
     if isinstance(value, dict):
@@ -723,6 +854,27 @@ def _format_build_slots(
             )
         )
     return lines
+
+
+def _format_build_order(
+    *,
+    build_order: list[str | None],
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+) -> list[str]:
+    lines: list[str] = []
+    for step_index, item_slug in enumerate(build_order[:7], start=1):
+        lines.append(
+            f"- Step {step_index}: "
+            + _format_item_reference(
+                item_slug,
+                context,
+                response_preferences,
+                snapshot,
+            )
+        )
+    return lines or ["- No ordered build steps provided."]
 
 
 def _format_rune_lines(

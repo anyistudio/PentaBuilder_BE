@@ -526,6 +526,117 @@ v1 改成只暴露 5 个更直接的工具。
 - `limit <= 8`
 - search 结果只返回轻量摘要，不返回完整能力/描述大块内容
 
+### Tool 6: `list_catalog_candidates`
+
+用途：
+
+- 在主 LLM 已经知道 `game + entity_type + filter` 时，返回该过滤条件下的候选 slug 列表
+- 典型场景包括：
+  - `champion + lane`
+  - `champion + class`
+  - `item + category/subtype`
+  - `rune + path/slot`
+
+输入：
+
+```json
+{
+  "game": "wild_rift",
+  "entity_type": "champion",
+  "filters": {
+    "position": "mid"
+  }
+}
+```
+
+输出：
+
+```json
+{
+  "game": "wild_rift",
+  "entity_type": "champion",
+  "applied_filters": {
+    "position": "mid"
+  },
+  "candidate_count": 18,
+  "candidates": [
+    {
+      "slug": "wr-ahri",
+      "name": "九尾妖狐",
+      "aliases": ["狐狸"],
+      "class_text": "Burst",
+      "position_tags": ["mid"]
+    }
+  ]
+}
+```
+
+规则：
+
+- 该工具必须带 `game`
+- 该工具必须至少带一个有效 filter
+- 返回的是 light candidate summaries，不是完整详情
+
+### Tool 7: `resolve_catalog_slug`
+
+用途：
+
+- 当主 LLM 只有原始名字、别名、分路、类型提示时，把它解析成 canonical slug
+- 这是一个内部 sub-workflow，不直接污染主生成节点的大上下文
+
+内部步骤：
+
+1. 先做 exact slug / exact name / alias match
+2. 若未命中，则按主 LLM 提供的 filter 生成 candidate pool
+3. 对 candidate pool 做 deterministic ranking
+4. 若仍不够确定，则调用一个更便宜的 selector model，只允许它从候选集中选一个 slug
+5. 若仍无法确定，则返回 `ambiguous` 或 `not_found`
+
+输入：
+
+```json
+{
+  "game": "wild_rift",
+  "entity_type": "item",
+  "raw_name": "queen crown",
+  "filters": {
+    "category": "ap"
+  }
+}
+```
+
+输出：
+
+```json
+{
+  "game": "wild_rift",
+  "entity_type": "item",
+  "raw_name": "queen crown",
+  "applied_filters": {
+    "category": "ap"
+  },
+  "resolution_status": "resolved",
+  "resolved_slug": "wr-crown-of-the-shattered-queen",
+  "resolved_name": "Crown of the Shattered Queen",
+  "resolved_by": "selector_model",
+  "confidence": "medium",
+  "selector_summary": "候选里只有这一项真正符合名字语义。",
+  "candidate_count": 6,
+  "candidates": [
+    {
+      "slug": "wr-crown-of-the-shattered-queen",
+      "name": "Crown of the Shattered Queen",
+      "aliases": []
+    }
+  ]
+}
+```
+
+规则：
+
+- 主 LLM 不应再手写未确认的 slug
+- 如果 slug 未被注入、未被已有 tool 返回、也未被 `resolve_catalog_slug` 确认，就不能继续传给 `get_*` 或 `batch_get_entities`
+
 ## 5.4 不暴露给模型的内部加载器
 
 这些只由服务层使用：
@@ -543,8 +654,8 @@ v1 改成只暴露 5 个更直接的工具。
 
 每次 run 限制：
 
-- 最大 tool rounds：`3`
-- 最大总 tool calls：`6`
+- 最大 tool rounds：`4`
+- 最大总 tool calls：`8`
 - 相同 tool + 相同参数不重复调用
 
 不同 run type 的默认上限：
@@ -552,11 +663,38 @@ v1 改成只暴露 5 个更直接的工具。
 | run_type | 最大 tool rounds | 备注 |
 |---|---:|---|
 | `evaluate_build` | 2 | 通常只需补充比较项 |
-| `recommend_full_build` | 2 | baseline 已注入 |
+| `recommend_full_build` | 4 | 允许先做 slug resolve，再做 candidate comparison |
 | `recommend_slot` | 3 | 需要对比候选 item |
 | `explain_slot` | 3 | 往往要比较当前项与替代项 |
 | `compare_builds` | 3 | 可能需要查多个差异位 |
 | `chat_followup` | 4 | 问题最开放 |
+
+## 5.6 Slug Resolver 子流程
+
+```mermaid
+flowchart TD
+    A[Main LLM wants champion/item/rune facts] --> B{Already has confirmed canonical slug?}
+    B -->|yes| C[get_* or batch_get_entities]
+    B -->|no| D[resolve_catalog_slug]
+    D --> E{Exact slug/name/alias match?}
+    E -->|yes| F[Return resolved slug]
+    E -->|no| G[list_catalog_candidates with game + filters]
+    G --> H[Deterministic ranking on filtered pool]
+    H --> I{High-confidence unique candidate?}
+    I -->|yes| F
+    I -->|no| J[Cheap selector model chooses only from candidate pool]
+    J --> K{selected / ambiguous / not_found}
+    K -->|selected| F
+    K -->|ambiguous or not_found| L[Return candidate preview to main LLM]
+    F --> C
+```
+
+关键约束：
+
+- `resolve_catalog_slug` 是 tool 内部 sub-workflow，不是最终回答节点
+- selector model 只能从候选池里选，不能发明新 slug
+- `list_catalog_candidates` 要求主 LLM 提前写好 filter
+- 只有 resolved slug 才允许继续进入 `get_*` 或 `batch_get_entities`
 
 ## 6. LangGraph 设计
 
@@ -864,15 +1002,21 @@ Focus on whether the current setup helps win under this context.
 模板内容：
 
 ```text
-Task: Fill the full recommended build and rune setup for this match context.
+Task: Produce the single best ordered build path and rune setup for this match context.
 
 You must:
-1. Produce one best build.
+1. Produce one best ordered build path.
 2. Produce one best rune setup.
 3. Respect already filled slots.
 4. Explain the overall logic briefly.
 
-If multiple options are viable, choose the single best one and mention alternatives briefly.
+Important constraints:
+- `recommended_build_order` is a purchase sequence, not a final 6-slot inventory snapshot.
+- Return 6 steps for a standard path.
+- Return 7 steps only when the path includes both one boots item and one separate enchant item.
+- If both boots and enchant appear, they must be separate steps and the boots step must come first.
+- Never output an enchant step without a boots step in the same build path.
+- If multiple options are viable, choose the single best one.
 ```
 
 ### C. `recommend_slot`
@@ -1009,7 +1153,15 @@ game_localization/
 
 ```json
 {
-  "recommended_build": ["...", "...", "...", "...", "...", "..."],
+  "recommended_build_order": [
+    "wr-essence-reaver",
+    "wr-gluttonous-greaves",
+    "wr-navori-quickblades",
+    "wr-stasis-enchant",
+    "wr-infinity-edge",
+    "wr-bloodthirster",
+    "wr-mortal-reminder"
+  ],
   "recommended_runes": {
     "primary": [],
     "secondary": []
@@ -1017,12 +1169,20 @@ game_localization/
   "summary": "这套更偏中期爆发和自保。",
   "slot_notes": [
     {
-      "slot_index": 0,
-      "text": "第一件优先做核心输出。"
+      "slot_index": 3,
+      "text": "第三件鞋子后补附魔，能更稳地顶住关键开团。"
     }
   ]
 }
 ```
+
+规则：
+
+- `recommended_build_order` 长度只能是 `6` 或 `7`
+- 长度为 `7` 时，必须包含且只包含：
+  - 一双鞋
+  - 一个单独的附魔步骤
+- 若存在附魔步骤，则鞋子步骤必须更早出现
 
 ## 8.3 `recommend_slot`
 
@@ -1121,12 +1281,17 @@ game_localization/
 1. 服务层组装 context bundle
 2. 加载 baseline
 3. 进入 `OnlineRunGraph`
-4. 默认先不调工具
-5. 若模型判断 baseline 不够适合当前上下文，再调用：
+4. 若 injected context + baseline 还不够，先进入 tool planning
+5. 若还没有确认的 canonical slug，优先调用：
+   - `resolve_catalog_slug`
+   - 必要时由它内部触发 `list_catalog_candidates`
+6. slug 确认后，再调用：
    - `search_catalog`
    - `batch_get_entities`
-6. 输出完整 build/runes
-7. 校验不能改掉已填槽位
+   - 或直接 `get_item/get_rune`
+7. 输出完整 build/runes
+8. 校验不能改掉已填槽位，且 slug 必须真实存在
+9. 若输出 7 步 build order，则必须满足“鞋子 + 独立附魔”规则
 
 ## 9.3 `recommend_slot`
 
@@ -1137,10 +1302,11 @@ game_localization/
 3. 进入 graph
 4. 默认允许工具
 5. 工具典型调用顺序：
+   - `resolve_catalog_slug`
    - `search_catalog`
    - `batch_get_entities`
 6. 输出最佳 item 和替代项
-7. 校验只修改目标槽位
+7. 校验只修改目标槽位，且所有 item slug 都必须可解析
 
 ## 9.4 `explain_slot`
 
@@ -1150,6 +1316,7 @@ game_localization/
 2. graph 默认允许工具
 3. 典型工具顺序：
    - `get_item(current item)`
+   - `resolve_catalog_slug(...)`
    - `search_catalog(...)`
    - `batch_get_entities(candidate items)`
 4. 输出：
@@ -1303,17 +1470,17 @@ For this batch:
 
 ## 12. Streaming 设计
 
-streaming 只用于“长文本回答型”在线功能。
+streaming 用于需要前端同步展示推理进度、tool call 和正文预览的在线功能。
 
-v1 仅这两个 run type 支持 `stream=true`：
+当前这三个 run type 支持 `stream=true`：
 
+- `recommend_full_build`
 - `explain_slot`
 - `chat_followup`
 
 以下 run type 默认不走 SSE 正文流：
 
 - `evaluate_build`
-- `recommend_full_build`
 - `recommend_slot`
 - `compare_builds`
 
@@ -1333,6 +1500,7 @@ Graph 内部发出这些事件：
 - `message_delta` 建议只对应两个展示 channel：
   - `summary`
   - `answer`
+- `tool_event` 可以表示 planning / execution / drafting 三种阶段
 - 完整结构化结果只在 `run_completed` 事件里返回
 - `message_delta` 直接来自最终目标语言的生成过程
 - 即使结果最终是 JSON，stream 期间也只流长文本字段的自然语言预览；完整 JSON 仍然以 `run_completed` 为准

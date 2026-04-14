@@ -476,6 +476,8 @@ ai/prompts/
 - `get_rune(game, slug)`
 - `batch_get_entities(game, entity_type, slugs)`
 - `search_catalog(game, entity_type, query)`
+- `list_catalog_candidates(game, entity_type, filters)`
+- `resolve_catalog_slug(game, entity_type, raw_name, filters)`
 
 不要给模型的工具：
 
@@ -489,6 +491,29 @@ ai/prompts/
 - reference cache summary
 - calibration summary
 - localization bundle
+
+推荐规则：
+
+- 主 LLM 不直接发明 slug
+- slug 未确认时先走 `resolve_catalog_slug`
+- `resolve_catalog_slug` 内部先 exact match，再按 filter 列 candidate pool，再做 deterministic ranking，最后才允许便宜模型从候选里选
+- `list_catalog_candidates` 必须带 `game` 且至少带一个有效 filter
+
+```mermaid
+flowchart LR
+    A[Main LLM has raw name + filters] --> B[resolve_catalog_slug]
+    B --> C{Exact match?}
+    C -->|yes| D[confirmed slug]
+    C -->|no| E[list_catalog_candidates]
+    E --> F[deterministic ranking]
+    F --> G{unique enough?}
+    G -->|yes| D
+    G -->|no| H[cheap selector model]
+    H --> I{selected / ambiguous / not_found}
+    I -->|selected| D
+    I -->|ambiguous or not_found| J[return candidate preview]
+    D --> K[get_* / batch_get_entities]
+```
 
 ## 10. Session Transcript 设计
 
@@ -613,6 +638,9 @@ v1 transcript 对象不需要做增量 patch，直接整文件覆盖即可。
 2. 构造“无敌方英雄、无环境标签”的基础 context
 3. 调用 `recommend_full_build` agent
 4. 写 `baseline_builds`
+   - `recommended_build` 存 ordered build path
+   - 长度允许 `6` 或 `7`
+   - `7` 仅用于鞋子与附魔拆成两个步骤的情况
 
 ## 13.2 Calibration Generation
 
@@ -775,7 +803,7 @@ mock 掉 provider 和 object storage，覆盖：
 
 补充重点：
 
-- `stream=true` 仅对 `explain_slot` / `chat_followup` 生效
+- `stream=true` 对 `recommend_full_build` / `explain_slot` / `chat_followup` 生效
 - 结构化推荐类 run 默认走非流式
 
 ## 17. 开发顺序建议
