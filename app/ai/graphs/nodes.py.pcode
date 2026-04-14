@@ -1,11 +1,28 @@
 Function prepare_context_node:
-- pass through validated context and operation_context into graph state
+- initialize graph state for operation_context, streamed_text, tool counters, tool traces, and usage accumulation
+- preserve any precomputed tool context passed in from the streaming path
+
+Function decide_tool_need_node:
+- apply the documented rule-based defaults for whether a run type should keep planning tools
+- stop planning when the graph already has enough tool context or has reached bounded limits
+
+Function tool_select_node:
+- build a tool-planning prompt from injected context plus current tool facts
+- ask the model for the next bounded JSON tool plan
+- sanitize, dedupe, and capacity-limit tool calls before execution
+
+Function tool_execute_node:
+- execute read-only catalog tools against the in-memory snapshot
+- append stable tool_trace entries and grouped tool_facts back into graph state
 
 Function generate_result_node:
-- build the prompt from run_type, match context, preferences, baseline, reference summary, and calibration summary
-- run deterministic heuristic generation first for every run type
-- for long-form answer run types, optionally replace heuristic summary with provider output
-- attach provider usage metadata under temporary _provider_usage for the service layer
+- build the final structured-generation prompt from injected context, tool facts, and optional streamed text
+- call the model with the run-type response schema and accumulate usage
 
 Function validate_result_node:
-- enforce the minimum structured result contract before leaving the graph
+- run programmatic result validation against the documented output contracts
+- request one repair pass when the candidate is close but invalid
+
+Function repair_result_node:
+- build a repair prompt with validation errors and the failed candidate result
+- call the model once more to fix contract issues without changing task intent

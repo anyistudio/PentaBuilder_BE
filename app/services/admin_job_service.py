@@ -133,6 +133,7 @@ class AdminJobService:
                 session,
                 data_version_service=self.data_version_service,
                 registry=self.registry,
+                ai_run_service=self.ai_run_service,
                 game=Game(payload["game"]),
                 data_version=payload["data_version"],
                 provider_name=payload["provider_name"],

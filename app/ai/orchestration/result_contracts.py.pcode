@@ -1,0 +1,5 @@
+Module result_contracts.py:
+- define the strict structured output contracts for every online run type
+- expose JSON schemas for provider-side structured generation
+- validate slugs, build-slot invariants, rune selections, and compare-build winner payloads before results leave the graph
+- normalize validated outputs into the backward-compatible API shape with score, build, runes, explanations, and alternatives

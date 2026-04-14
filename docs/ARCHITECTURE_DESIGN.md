@@ -756,8 +756,9 @@ class BaseLLMClient(ABC):
 - `get_rune(game, slug)`
 - `batch_get_entities(game, entity_type, slugs)`
 - `search_catalog(game, entity_type, query_or_tags)`
-- `get_baseline_build(game, data_version, own_champion_slug)`
-- `get_calibration_summary(game, data_version, model_name)`
+
+`baseline`、`calibration summary`、`reference cache summary`、`session memory summary`
+这类上下文由服务层先注入，不作为 model-visible tools。
 
 工具只访问进程内已加载的只读索引，不直接打数据库重查询。
 

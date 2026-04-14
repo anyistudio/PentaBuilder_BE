@@ -1,5 +1,5 @@
-Function build_prompt:
-- inject run type, target game label, target language, terminology style, data version, and structured context
-- include baseline/reference/calibration summaries when available
-- explicitly tell the model not to mix LoL PC and Wild Rift
-- keep generation in the user's selected language
+Function build_prompt_package:
+- assemble shared prompts plus run-specific prompts for four modes: tool planning, stream preview, final JSON generation, and repair
+- inject only useful context blocks: match overview, context bundle, task-specific fields, baseline, calibration, reference summary, session memory, tool facts, and localization mappings
+- include compare_builds build-B runes and tool-derived slugs so prompts stay aligned with the documented workflow
+- keep output-language and localization rules explicit while avoiding raw JSON dumps of backend objects

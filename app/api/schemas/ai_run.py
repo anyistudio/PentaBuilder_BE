@@ -16,6 +16,9 @@ class AIRunSummarySchema(BaseModel):
     cache_resolution: str
     provider_name: str | None = None
     model_name: str | None = None
+    tokens_input: int | None = None
+    tokens_output: int | None = None
+    cost_usd: float | None = None
     latency_ms: int | None = None
     score_value: int | None = None
     created_at: str | None = None
@@ -37,3 +40,10 @@ class AIRunPayload(BaseModel):
 
     run: AIRunSummarySchema
     result: dict[str, Any] | None = None
+
+
+class AIRunStreamingPayload(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    run: AIRunSummarySchema
+    stream_url: str

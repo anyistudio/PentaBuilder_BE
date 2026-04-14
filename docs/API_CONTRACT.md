@@ -797,7 +797,7 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
       "alternatives": [
         {
           "target": "slot:1",
-          "name": "lol-banshees-veil",
+          "item_slug": "lol-banshees-veil",
           "reason": "如果对面主要是 AP 控制，可以考虑女妖。"
         }
       ]

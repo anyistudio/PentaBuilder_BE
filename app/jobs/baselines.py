@@ -3,11 +3,11 @@ from datetime import datetime, timezone
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
-from app.ai.heuristics import generate_run_result
 from app.catalog.registry import GameDataRegistry
 from app.db.models import BaselineBuild
 from app.domain.enums import Game, RunType
 from app.domain.match_context import MatchContext, ResponsePreferences
+from app.services.ai_run_service import AIRunService
 from app.services.data_version_service import DataVersionService
 
 
@@ -16,6 +16,7 @@ def precompute_baselines(
     *,
     data_version_service: DataVersionService,
     registry: GameDataRegistry,
+    ai_run_service: AIRunService,
     game: Game,
     data_version: str,
     provider_name: str,
@@ -40,16 +41,26 @@ def precompute_baselines(
             own_champion_slug=champion_slug,
             environment={"tags": [], "free_text": ""},
         )
-        result = generate_run_result(
+        run, _ = ai_run_service.create_run(
+            session,
+            user=None,
+            session_id=None,
             run_type=RunType.RECOMMEND_FULL_BUILD,
             context=context,
             response_preferences=ResponsePreferences(),
             operation_context={},
-            snapshot=snapshot,
-            baseline=None,
-            reference_summary=None,
-            calibration_summary=None,
-        ).result
+            stream=False,
+            use_cache=False,
+        )
+        result = ai_run_service.execute_run(
+            session,
+            run=run,
+            context=context,
+            response_preferences=ResponsePreferences(),
+            operation_context={},
+            provider_name_override=provider_name,
+            model_name_override=model_name,
+        )
         existing = session.scalar(
             sa.select(BaselineBuild).where(
                 BaselineBuild.game == game.value,
@@ -62,17 +73,23 @@ def precompute_baselines(
                 game=game.value,
                 data_version=version.data_version,
                 own_champion_slug=champion_slug,
-                recommended_build=result.get("build") or [],
-                recommended_runes=result.get("runes") or {},
+                recommended_build=result.get("recommended_build") or result.get("build") or [],
+                recommended_runes=result.get("recommended_runes") or result.get("runes") or {},
                 provider_name=provider_name,
                 model_name=model_name,
+                source_run_id=run.id,
             )
             created_count += 1
         else:
-            existing.recommended_build = result.get("build") or []
-            existing.recommended_runes = result.get("runes") or {}
+            existing.recommended_build = (
+                result.get("recommended_build") or result.get("build") or []
+            )
+            existing.recommended_runes = (
+                result.get("recommended_runes") or result.get("runes") or {}
+            )
             existing.provider_name = provider_name
             existing.model_name = model_name
+            existing.source_run_id = run.id
             updated_count += 1
         session.add(existing)
 

@@ -2,11 +2,11 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_ai_run_service, get_current_user, get_db_session
-from app.api.schemas.ai_run import AIRunCreateRequest, AIRunPayload
+from app.api.schemas.ai_run import AIRunCreateRequest, AIRunPayload, AIRunStreamingPayload
 from app.api.schemas.common import ApiResponse
 from app.db.models import User
 from app.services.ai_run_service import AIRunService
@@ -50,13 +50,16 @@ def create_ai_run(
             response_preferences=payload.response_preferences,
             operation_context=payload.payload,
         )
-        return {
-            "request_id": request.state.request_id,
-            "data": {
-                "run": ai_run_service.to_summary_schema(run).model_dump(mode="json"),
-                "stream_url": f"/api/v1/ai/runs/{run.id}/events",
-            },
-        }
+        return JSONResponse(
+            status_code=202,
+            content=ApiResponse[AIRunStreamingPayload](
+                request_id=request.state.request_id,
+                data=AIRunStreamingPayload(
+                    run=ai_run_service.to_summary_schema(run),
+                    stream_url=f"/api/v1/ai/runs/{run.id}/events",
+                ),
+            ).model_dump(mode="json"),
+        )
 
     result = ai_run_service.execute_run(
         session,

@@ -1,17 +1,77 @@
+import json
+
 from fastapi.testclient import TestClient
 
-from app.ai.providers.base import LLMResult, LLMUsage
+from app.ai.providers.base import LLMResult, LLMStreamEvent, LLMUsage
 
 
 class FakeLLMClient:
     provider_name = "google"
     model_name = "gemini-test"
 
-    def generate_text(self, *, prompt: str, system_prompt: str | None = None) -> LLMResult:
-        del prompt, system_prompt
+    def generate_text(
+        self,
+        *,
+        prompt: str,
+        system_prompt: str | None = None,
+        response_mime_type: str | None = None,
+        response_schema: dict | None = None,
+        temperature: float | None = None,
+    ) -> LLMResult:
+        combined_prompt = "\n".join(part for part in [system_prompt or "", prompt] if part)
+        del response_schema, temperature
+        if response_mime_type == "application/json" and "Tool planning mode:" in combined_prompt:
+            text = json.dumps(
+                {
+                    "tool_calls": [
+                        {
+                            "tool_name": "search_catalog",
+                            "arguments": {
+                                "entity_type": "item",
+                                "query": "defensive mage item against burst",
+                                "limit": 4,
+                            },
+                        }
+                    ]
+                    if "## Tool Facts" not in prompt
+                    else [],
+                    "done": "## Tool Facts" in prompt,
+                },
+                ensure_ascii=False,
+            )
+        elif response_mime_type == "application/json":
+            text = (
+                '{"slot_index":1,"current_item_slug":null,"is_current_choice_good":false,'
+                '"best_item_slug":"lol-zhonya-s-hourglass","summary":"这件装备能更稳地顶住爆发，然后把中期团战接起来。",'
+                '"why_current_choice":"当前这个位置还没有成型。","why_best_choice":"中娅能直接补上当前最缺的容错。",'
+                '"linked_adjustments":[]}'
+            )
+        else:
+            text = "这件装备能更稳地顶住爆发，然后把中期团战接起来。"
+        del prompt
         return LLMResult(
-            text="这件装备能更稳地顶住爆发，然后把中期团战接起来。",
+            text=text,
             usage=LLMUsage(input_tokens=10, output_tokens=12, latency_ms=5, cost_usd=0.001),
+            provider_name=self.provider_name,
+            model_name=self.model_name,
+        )
+
+    def stream_text(
+        self,
+        *,
+        prompt: str,
+        system_prompt: str | None = None,
+        response_mime_type: str | None = None,
+        response_schema: dict | None = None,
+        temperature: float | None = None,
+    ):
+        del prompt, system_prompt, response_mime_type, response_schema, temperature
+        text = "这件装备能更稳地顶住爆发，然后把中期团战接起来。"
+        for index in range(0, len(text), 8):
+            yield LLMStreamEvent(event_type="text_delta", delta=text[index : index + 8])
+        yield LLMStreamEvent(
+            event_type="completed",
+            usage=LLMUsage(input_tokens=8, output_tokens=10, latency_ms=4, cost_usd=0.0005),
             provider_name=self.provider_name,
             model_name=self.model_name,
         )
@@ -66,7 +126,7 @@ def test_streaming_explain_slot_uses_sse(configured_client: TestClient, monkeypa
             "payload": {"slot_index": 1},
         },
     )
-    assert response.status_code == 200
+    assert response.status_code == 202
     stream_url = response.json()["data"]["stream_url"]
 
     with configured_client.stream("GET", stream_url, headers=headers) as stream_response:

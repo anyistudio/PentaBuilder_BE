@@ -1,5 +1,5 @@
 Class AIRunSummarySchema:
-- lightweight metadata for one ai_run row
+- lightweight metadata for one ai_run row, including provider usage counters and cost
 
 Class AIRunCreateRequest:
 - generic POST /ai/runs request shape

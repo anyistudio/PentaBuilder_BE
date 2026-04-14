@@ -1,5 +1,7 @@
 Class OnlineRunGraph:
-- build a small LangGraph state machine
-- run prepare_context -> generate_result -> validate_result
-- keep orchestration linear and inspectable for v1
-- expose invoke() so the service layer can reuse the same pipeline for online runs and offline jobs
+- build the documented LangGraph flow:
+  prepare_context -> decide_tool_need -> tool_select -> tool_execute -> generate_result -> validate_result -> repair_result
+- keep tool planning bounded and loop back through decide_tool_need after each execute round
+- expose collect_tool_context() so the streaming path can reuse the exact same tool loop before preview streaming
+- expose invoke() for the full structured generation and validation flow
+- expose build_prompt_package() so services can build stream previews from the same injected context and tool facts

@@ -1,3 +1,4 @@
 TypedDict RunGraphState:
-- hold graph-level context, payload, prompt, reasoning text, and final structured result
-- keep the graph state explicit instead of hiding data in closures
+- hold context, payload, prompt, model candidate result, final validated result, and streamed preview text
+- track bounded tool-planning state including rounds, call count, tool_trace, tool_facts, and dedupe keys
+- accumulate provider usage across tool planning, final generation, and optional repair calls

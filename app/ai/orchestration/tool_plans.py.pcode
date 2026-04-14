@@ -1,0 +1,4 @@
+Module tool_plans.py:
+- define the bounded model-visible tool names
+- validate tool selection JSON from the model against a strict two-call-per-round contract
+- expose the JSON schema used for tool planning responses

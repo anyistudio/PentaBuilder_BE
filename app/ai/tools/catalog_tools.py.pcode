@@ -1,4 +1,6 @@
 Class CatalogToolset:
 - expose bounded read-only catalog helpers for champions, items, runes, batch lookups, and search
 - route all slug lookups through the in-memory catalog snapshot
+- return documented ToolView payloads instead of raw catalog payloads
+- keep batch/search helpers capped and stable so model-visible tool usage stays bounded
 - keep tool behavior deterministic and side-effect free
