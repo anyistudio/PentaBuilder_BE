@@ -314,7 +314,7 @@ erDiagram
 | `game` | `TEXT` | NOT NULL | 游戏 |
 | `data_version` | `TEXT` | NOT NULL FK data_versions(data_version) | 数据版本 |
 | `own_champion_slug` | `TEXT` | NOT NULL | 我方英雄 |
-| `recommended_build` | `JSONB` | NOT NULL | `recommend_full_build` 的 ordered build path，长度 6 或 7；7 步仅用于鞋子 + 独立附魔 |
+| `recommended_build` | `JSONB` | NOT NULL | `recommend_full_build` 的 ordered build path；LoL 固定 6 步，Wild Rift 固定 7 步，且 WR 的第 7 步建模鞋子 + 独立附魔 |
 | `recommended_runes` | `JSONB` | NOT NULL | 默认符文 |
 | `provider_name` | `TEXT` | NULL | 来源 provider |
 | `model_name` | `TEXT` | NULL | 来源模型 |

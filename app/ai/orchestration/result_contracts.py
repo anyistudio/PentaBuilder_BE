@@ -4,16 +4,18 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
 
 from app.catalog.registry import CatalogSnapshot
 from app.core.errors import ApiError
-from app.domain.enums import RunType
+from app.domain.enums import Game, RunType
 from app.domain.match_context import (
+    MAX_BUILD_SLOT_COUNT,
     MatchContext,
     RuneSelection,
+    build_slot_count_for_game,
     normalize_lookup_text,
     validate_slug_for_game,
 )
 
-RECOMMEND_FULL_BUILD_MIN_STEPS = 6
-RECOMMEND_FULL_BUILD_MAX_STEPS = 7
+RECOMMEND_FULL_BUILD_MIN_STEPS = build_slot_count_for_game(Game.LOL)
+RECOMMEND_FULL_BUILD_MAX_STEPS = build_slot_count_for_game(Game.WILD_RIFT)
 
 
 class RuneSelectionResult(BaseModel):
@@ -26,7 +28,7 @@ class RuneSelectionResult(BaseModel):
 class SlotNote(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    slot_index: int = Field(ge=0, le=RECOMMEND_FULL_BUILD_MAX_STEPS - 1)
+    slot_index: int = Field(ge=0, le=MAX_BUILD_SLOT_COUNT - 1)
     text: str = Field(min_length=1)
 
 
@@ -58,7 +60,10 @@ class EvaluateBuildResult(BaseModel):
     summary: str = Field(min_length=1)
     strengths: list[str] = Field(default_factory=list)
     weaknesses: list[str] = Field(default_factory=list)
-    recommended_build: list[str | None] = Field(min_length=6, max_length=6)
+    recommended_build: list[str | None] = Field(
+        min_length=RECOMMEND_FULL_BUILD_MIN_STEPS,
+        max_length=RECOMMEND_FULL_BUILD_MAX_STEPS,
+    )
     recommended_runes: RuneSelectionResult = Field(default_factory=RuneSelectionResult)
 
 
@@ -78,7 +83,7 @@ class RecommendFullBuildResult(BaseModel):
 class RecommendSlotResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    slot_index: int = Field(ge=0, le=5)
+    slot_index: int = Field(ge=0, le=MAX_BUILD_SLOT_COUNT - 1)
     recommended_item_slug: str = Field(min_length=1)
     summary: str = Field(min_length=1)
     reasoning: list[str] = Field(default_factory=list)
@@ -88,7 +93,7 @@ class RecommendSlotResult(BaseModel):
 class ExplainSlotResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    slot_index: int = Field(ge=0, le=5)
+    slot_index: int = Field(ge=0, le=MAX_BUILD_SLOT_COUNT - 1)
     current_item_slug: str | None = None
     is_current_choice_good: bool
     best_item_slug: str | None = None
@@ -126,7 +131,8 @@ CONTRACT_MODELS: dict[RunType, type[BaseModel]] = {
 }
 
 
-def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
+def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> dict[str, Any]:
+    build_slot_count = build_slot_count_for_game(context.game)
     if run_type == RunType.EVALUATE_BUILD:
         return {
             "type": "object",
@@ -155,7 +161,9 @@ def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
                     description=(
                         "A better build direction for this match context. "
                         "Use canonical slugs or null."
-                    )
+                    ),
+                    min_items=build_slot_count,
+                    max_items=build_slot_count,
                 ),
                 "recommended_runes": _rune_selection_schema(
                     description="A better rune direction for this match context."
@@ -172,17 +180,20 @@ def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
             "additionalProperties": False,
         }
     if run_type == RunType.RECOMMEND_FULL_BUILD:
+        build_description = (
+            "The single best ordered item purchase path using canonical item slugs. "
+            "For League of Legends PC, return exactly 6 item steps. "
+            "For Wild Rift, return exactly 7 steps consisting of 5 normal items, "
+            "1 boots item, and 1 separate enchant item. In Wild Rift, the boots "
+            "step must come before the enchant step."
+        )
         return {
             "type": "object",
             "properties": {
                 "recommended_build_order": _build_array_schema(
-                    description=(
-                        "The single best ordered item purchase path using canonical item slugs. "
-                        "Return 6 steps for a standard path, or 7 steps only when a boots item "
-                        "and a separate enchant item both appear."
-                    ),
-                    min_items=RECOMMEND_FULL_BUILD_MIN_STEPS,
-                    max_items=RECOMMEND_FULL_BUILD_MAX_STEPS,
+                    description=build_description,
+                    min_items=build_slot_count,
+                    max_items=build_slot_count,
                 ),
                 "recommended_runes": _rune_selection_schema(
                     description="The single best rune setup using canonical rune slugs."
@@ -200,7 +211,7 @@ def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
                             "slot_index": {
                                 "type": "integer",
                                 "minimum": 0,
-                                "maximum": RECOMMEND_FULL_BUILD_MAX_STEPS - 1,
+                                "maximum": build_slot_count - 1,
                                 "description": "The affected build-order step index.",
                             },
                             "text": {
@@ -223,7 +234,7 @@ def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
                 "slot_index": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 5,
+                    "maximum": build_slot_count - 1,
                     "description": "The requested slot index. It must match the requested payload.",
                 },
                 "recommended_item_slug": {
@@ -275,7 +286,7 @@ def get_result_response_schema(run_type: RunType) -> dict[str, Any]:
                 "slot_index": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 5,
+                    "maximum": build_slot_count - 1,
                     "description": "The explained slot index. It must match the requested payload.",
                 },
                 "current_item_slug": {
@@ -463,8 +474,6 @@ def validate_run_result(
             build=result["recommended_build_order"],
             allow_null=False,
             loc=["recommended_build_order"],
-            min_slots=RECOMMEND_FULL_BUILD_MIN_STEPS,
-            max_slots=RECOMMEND_FULL_BUILD_MAX_STEPS,
         )
         _ensure_filled_slots_preserved(
             current_build=context.own_build,
@@ -475,6 +484,10 @@ def validate_run_result(
             snapshot=snapshot,
             build_order=recommended_build_order,
             loc=["recommended_build_order"],
+        )
+        _ensure_slot_notes_fit_build_order(
+            slot_notes=result["slot_notes"],
+            build_length=len(recommended_build_order),
         )
         recommended_runes = _validate_rune_selection(
             context=context,
@@ -775,14 +788,17 @@ def _validate_build_slots(
     build: list[str | None],
     allow_null: bool,
     loc: list[str | int] | None = None,
-    min_slots: int = 6,
-    max_slots: int = 6,
+    min_slots: int | None = None,
+    max_slots: int | None = None,
 ) -> list[str | None]:
-    if len(build) < min_slots or len(build) > max_slots:
+    expected_slot_count = build_slot_count_for_game(context.game)
+    resolved_min_slots = expected_slot_count if min_slots is None else min_slots
+    resolved_max_slots = expected_slot_count if max_slots is None else max_slots
+    if len(build) < resolved_min_slots or len(build) > resolved_max_slots:
         expected = (
-            f"exactly {min_slots} slots"
-            if min_slots == max_slots
-            else f"between {min_slots} and {max_slots} slots"
+            f"exactly {resolved_min_slots} slots"
+            if resolved_min_slots == resolved_max_slots
+            else f"between {resolved_min_slots} and {resolved_max_slots} slots"
         )
         _raise_invalid_ai_result(
             message=f"Build arrays must contain {expected}.",
@@ -837,6 +853,20 @@ def _ensure_only_target_slot_changed(
             )
 
 
+def _ensure_slot_notes_fit_build_order(
+    *,
+    slot_notes: list[dict[str, Any]],
+    build_length: int,
+) -> None:
+    for index, note in enumerate(slot_notes):
+        slot_index = int(note["slot_index"])
+        if not 0 <= slot_index < build_length:
+            _raise_invalid_ai_result(
+                message=f"slot_notes.slot_index must be between 0 and {build_length - 1}.",
+                loc=["slot_notes", index, "slot_index"],
+            )
+
+
 def _ensure_recommend_full_build_order_is_consistent(
     *,
     context: MatchContext,
@@ -874,34 +904,38 @@ def _ensure_recommend_full_build_order_is_consistent(
     has_boots = bool(boots_indices)
     has_enchant = bool(enchant_indices)
 
-    if has_enchant and not has_boots:
-        _raise_invalid_ai_result(
-            message="An enchant step requires a boots item in the same recommended_build_order.",
-            loc=[*(loc or []), enchant_indices[0]],
-        )
-    if has_boots and has_enchant and boots_indices[0] > enchant_indices[0]:
+    if context.game == Game.WILD_RIFT:
+        if not has_boots:
+            _raise_invalid_ai_result(
+                message=(
+                    "Wild Rift recommended_build_order must include exactly one boots step."
+                ),
+                loc=loc,
+            )
+        if not has_enchant:
+            _raise_invalid_ai_result(
+                message=(
+                    "Wild Rift recommended_build_order must include exactly one enchant step."
+                ),
+                loc=loc,
+            )
+        if boots_indices[0] > enchant_indices[0]:
+            _raise_invalid_ai_result(
+                message=(
+                    "In Wild Rift, the boots item must appear before the enchant step "
+                    "in recommended_build_order."
+                ),
+                loc=[*(loc or []), enchant_indices[0]],
+            )
+        return
+
+    if has_enchant:
         _raise_invalid_ai_result(
             message=(
-                "The boots item must appear before the enchant step "
-                "in recommended_build_order."
+                "League of Legends PC recommended_build_order must not include a separate "
+                "enchant step."
             ),
             loc=[*(loc or []), enchant_indices[0]],
-        )
-    if len(build_order) == RECOMMEND_FULL_BUILD_MAX_STEPS and not (has_boots and has_enchant):
-        _raise_invalid_ai_result(
-            message=(
-                "A 7-step recommended_build_order is allowed only when it includes "
-                "one boots item and one separate enchant item."
-            ),
-            loc=loc,
-        )
-    if len(build_order) == RECOMMEND_FULL_BUILD_MIN_STEPS and has_boots and has_enchant:
-        _raise_invalid_ai_result(
-            message=(
-                "When both boots and enchant are present, recommended_build_order must "
-                "use 7 separate steps."
-            ),
-            loc=loc,
         )
 
 

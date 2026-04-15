@@ -85,7 +85,9 @@
 
 1. 从 `enemy_team` 提取 `enemy_champion_slugs_sorted`
 2. `environment.tags` 排序去重
-3. `own_build` 补齐为 6 槽
+3. `own_build` 按游戏补齐：
+   - LoL PC: 6 槽
+   - Wild Rift: 7 槽
 4. `own_runes` 和 `enemy_team[*].runes` 统一成稳定结构
 5. 生成：
    - `semantic_context_hash`
@@ -1011,11 +1013,11 @@ You must:
 4. Explain the overall logic briefly.
 
 Important constraints:
-- `recommended_build_order` is a purchase sequence, not a final 6-slot inventory snapshot.
-- Return 6 steps for a standard path.
-- Return 7 steps only when the path includes both one boots item and one separate enchant item.
-- If both boots and enchant appear, they must be separate steps and the boots step must come first.
-- Never output an enchant step without a boots step in the same build path.
+- `recommended_build_order` is a purchase sequence, not a static final inventory snapshot.
+- For LoL PC, return exactly 6 item steps.
+- For Wild Rift, return exactly 7 steps.
+- In Wild Rift, the 7 steps must contain exactly 5 normal items, 1 boots step, and 1 separate enchant step.
+- In Wild Rift, the boots step must come before the enchant step.
 - If multiple options are viable, choose the single best one.
 ```
 
@@ -1178,11 +1180,12 @@ game_localization/
 
 规则：
 
-- `recommended_build_order` 长度只能是 `6` 或 `7`
-- 长度为 `7` 时，必须包含且只包含：
+- LoL PC: `recommended_build_order` 长度固定为 `6`
+- Wild Rift: `recommended_build_order` 长度固定为 `7`
+- Wild Rift 的 `7` 步必须且只允许包含：
   - 一双鞋
   - 一个单独的附魔步骤
-- 若存在附魔步骤，则鞋子步骤必须更早出现
+- Wild Rift 中附魔步骤不能早于鞋子步骤
 
 ## 8.3 `recommend_slot`
 
@@ -1291,7 +1294,7 @@ game_localization/
    - 或直接 `get_item/get_rune`
 7. 输出完整 build/runes
 8. 校验不能改掉已填槽位，且 slug 必须真实存在
-9. 若输出 7 步 build order，则必须满足“鞋子 + 独立附魔”规则
+9. LoL 输出固定 6 步；Wild Rift 输出固定 7 步，且必须满足“鞋子 + 独立附魔”规则
 
 ## 9.3 `recommend_slot`
 

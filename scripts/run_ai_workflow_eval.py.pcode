@@ -1,0 +1,6 @@
+Function main:
+- parse optional CLI overrides for model refs, run-type filters, data_version, output path, and debug logging
+- reuse the normal backend application wiring so the evaluation script runs against the same services/config as local development
+- resolve the active data version when none is provided
+- run the local workflow evaluation suite and write the markdown report to disk
+- print the final report path for easy manual review

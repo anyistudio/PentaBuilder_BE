@@ -2,6 +2,7 @@ import json
 import logging
 import time
 from collections.abc import Iterator
+from functools import lru_cache
 from typing import Any
 
 import httpx
@@ -15,12 +16,26 @@ MAX_RETRIES = 3
 RETRY_DELAYS = [5, 15, 30]  # seconds
 
 
+@lru_cache(maxsize=1)
+def _http2_enabled() -> bool:
+    try:
+        import h2  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
 class GeminiClient(BaseLLMClient):
     provider_name = "google"
 
     def __init__(self, model_name: str, api_key: str) -> None:
         super().__init__(model_name)
         self.api_key = api_key
+        self._client = httpx.Client(
+            http2=_http2_enabled(),
+            timeout=120.0,
+            limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+        )
 
     def generate_text(
         self,
@@ -99,12 +114,11 @@ class GeminiClient(BaseLLMClient):
             )
 
         usage = LLMUsage(latency_ms=0)
-        with httpx.stream(
+        with self._client.stream(
             "POST",
             url,
             headers=self._headers(),
             json=payload,
-            timeout=120.0,
         ) as response:
             response.raise_for_status()
             for line in response.iter_lines():
@@ -130,6 +144,9 @@ class GeminiClient(BaseLLMClient):
             provider_name=self.provider_name,
             model_name=self.model_name,
         )
+
+    def close(self) -> None:
+        self._client.close()
 
     def _build_payload(
         self,
@@ -182,11 +199,10 @@ class GeminiClient(BaseLLMClient):
         last_error: httpx.HTTPError | None = None
         for attempt in range(MAX_RETRIES):
             try:
-                response = httpx.post(
+                response = self._client.post(
                     url,
                     headers=self._headers(),
                     json=payload,
-                    timeout=120.0,
                 )
                 if response.status_code == 429:
                     delay = RETRY_DELAYS[min(attempt, len(RETRY_DELAYS) - 1)]

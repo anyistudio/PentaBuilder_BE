@@ -12,8 +12,9 @@ from app.domain.match_context import MatchContext
 WR_BUILD_TEMPLATE = [
     "wr-luden-s-echo",
     "wr-ionian-boots-of-lucidity",
-    "wr-infinity-orb",
     "wr-stormsurge",
+    "wr-stasis-enchant",
+    "wr-infinity-orb",
     "wr-rabadon-s-deathcap",
     "wr-void-staff",
 ]
@@ -116,7 +117,7 @@ def test_validate_run_result_reports_field_level_slug_errors(configured_app) -> 
         data_version=snapshot.data_version,
         own_champion_slug="wr-ahri",
         enemy_team=[],
-        own_build=[None, None, None, None, None, None],
+        own_build=[None, None, None, None, None, None, None],
         own_runes={"primary": [], "secondary": []},
         environment={"tags": [], "free_text": ""},
     )
@@ -152,7 +153,7 @@ def test_validate_run_result_accepts_seven_step_build_order_with_boots_and_encha
         data_version=snapshot.data_version,
         own_champion_slug="wr-lucian",
         enemy_team=[],
-        own_build=[None, None, None, None, None, None],
+        own_build=[None, None, None, None, None, None, None],
         own_runes={"primary": [], "secondary": []},
         environment={"tags": [], "free_text": ""},
     )
@@ -176,7 +177,7 @@ def test_validate_run_result_accepts_seven_step_build_order_with_boots_and_encha
     assert result["explanations"][0]["target"] == "step:4"
 
 
-def test_validate_run_result_rejects_six_step_build_order_with_separate_enchant(
+def test_validate_run_result_rejects_wild_rift_build_order_without_seven_steps(
     configured_app,
 ) -> None:
     snapshot = _load_snapshot(configured_app)
@@ -185,7 +186,7 @@ def test_validate_run_result_rejects_six_step_build_order_with_separate_enchant(
         data_version=snapshot.data_version,
         own_champion_slug="wr-lucian",
         enemy_team=[],
-        own_build=[None, None, None, None, None, None],
+        own_build=[None, None, None, None, None, None, None],
         own_runes={"primary": [], "secondary": []},
         environment={"tags": [], "free_text": ""},
     )
@@ -206,4 +207,47 @@ def test_validate_run_result_rejects_six_step_build_order_with_separate_enchant(
 
     issues = exc_info.value.details["issues"]
     assert issues[0]["loc"] == ["recommended_build_order"]
-    assert "must use 7 separate steps" in issues[0]["msg"]
+    assert "exactly 7 slots" in issues[0]["msg"]
+
+
+def test_validate_run_result_rejects_lol_recommend_full_build_with_enchant_step(
+    configured_app,
+) -> None:
+    snapshot = _load_snapshot(configured_app)
+    context = MatchContext(
+        game=Game.LOL,
+        data_version=snapshot.data_version,
+        own_champion_slug="lol-ahri",
+        enemy_team=[],
+        own_build=[None, None, None, None, None, None],
+        own_runes={"primary": [], "secondary": []},
+        environment={"tags": [], "free_text": ""},
+    )
+
+    with pytest.raises(ApiError) as exc_info:
+        validate_run_result(
+            run_type=RunType.RECOMMEND_FULL_BUILD,
+            raw_result={
+                "recommended_build_order": [
+                    "lol-luden-s-companion",
+                    "lol-sorcerer-s-shoes",
+                    "lol-enchantment-homeguard",
+                    "lol-shadowflame",
+                    "lol-rabadon-s-deathcap",
+                    "lol-void-staff",
+                ],
+                "recommended_runes": {
+                    "primary": ["lol-electrocute"],
+                    "secondary": ["lol-manaflow-band"],
+                },
+                "summary": "invalid lol enchant build",
+                "slot_notes": [],
+            },
+            context=context,
+            operation_context={},
+            snapshot=snapshot,
+        )
+
+    issues = exc_info.value.details["issues"]
+    assert issues[0]["loc"] == ["recommended_build_order", 2]
+    assert "must not include a separate enchant step" in issues[0]["msg"]

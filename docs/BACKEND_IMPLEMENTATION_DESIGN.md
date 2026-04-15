@@ -639,8 +639,9 @@ v1 transcript 对象不需要做增量 patch，直接整文件覆盖即可。
 3. 调用 `recommend_full_build` agent
 4. 写 `baseline_builds`
    - `recommended_build` 存 ordered build path
-   - 长度允许 `6` 或 `7`
-   - `7` 仅用于鞋子与附魔拆成两个步骤的情况
+   - LoL PC: 长度固定为 `6`
+   - Wild Rift: 长度固定为 `7`
+   - Wild Rift 的 `7` 步表示鞋子与附魔拆成两个步骤
 
 ## 13.2 Calibration Generation
 

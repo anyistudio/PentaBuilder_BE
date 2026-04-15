@@ -499,8 +499,9 @@ game_localization/
 - `own_champion_slug`
 - `recommended_build` JSONB
   - 保存 `recommend_full_build` 的 ordered build path
-  - 长度允许 `6` 或 `7`
-  - `7` 仅用于鞋子与附魔分开建模的情况
+  - LoL PC: 长度固定为 `6`
+  - Wild Rift: 长度固定为 `7`
+  - Wild Rift 的 `7` 步表示鞋子与附魔分开建模
 - `recommended_runes` JSONB
 - `model_name`
 - `source_run_id`

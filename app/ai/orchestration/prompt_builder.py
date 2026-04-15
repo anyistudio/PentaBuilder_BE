@@ -1,11 +1,17 @@
+import json
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 from app.catalog.registry import CatalogEntity, CatalogSnapshot
-from app.domain.enums import Language, RunType
-from app.domain.match_context import MatchContext, ResponsePreferences, RuneSelection
+from app.domain.enums import Game, Language, RunType
+from app.domain.match_context import (
+    MatchContext,
+    ResponsePreferences,
+    RuneSelection,
+    build_slot_count_for_game,
+)
 
 PROMPTS_ROOT = Path(__file__).resolve().parents[1] / "prompts"
 
@@ -31,6 +37,7 @@ def build_prompt_package(
     snapshot: CatalogSnapshot,
     tool_facts: dict[str, list[dict[str, Any]]] | None = None,
     output_mode: str = "json",
+    response_schema: dict[str, Any] | None = None,
     streamed_text: str | None = None,
     validation_errors: list[str] | None = None,
     candidate_result: dict[str, Any] | None = None,
@@ -62,6 +69,7 @@ def build_prompt_package(
         _output_mode_block(
             output_mode=output_mode,
             stream_channel=stream_channel,
+            response_schema=response_schema,
             streamed_text=streamed_text,
         )
     )
@@ -140,8 +148,28 @@ def _output_mode_block(
     *,
     output_mode: str,
     stream_channel: str | None,
+    response_schema: dict[str, Any] | None,
     streamed_text: str | None,
 ) -> str:
+    if output_mode == "stream_sections":
+        if stream_channel is None:
+            raise ValueError("stream_sections mode requires a streamable run type.")
+        if response_schema is None:
+            raise ValueError("stream_sections mode requires a response schema.")
+        compact_schema = json.dumps(response_schema, ensure_ascii=False, separators=(",", ":"))
+        return (
+            "Streaming + structured mode:\n"
+            "- Output exactly two top-level HTML-like sections in this exact order.\n"
+            f"- First output `<display>` then only the final user-visible `{stream_channel}` text, "
+            f"then `</display>`.\n"
+            "- After that, output `<json>` then one valid JSON object, then `</json>`.\n"
+            "- Do not output any text before `<display>`, between `</display>` and `<json>`, "
+            "or after `</json>`.\n"
+            f"- The JSON object's `{stream_channel}` field must exactly match the text inside "
+            f"`<display>...</display>`.\n"
+            "- Do not wrap the JSON in markdown fences.\n"
+            f"- The JSON object must match this schema exactly:\n{compact_schema}"
+        )
     if output_mode == "stream_text":
         if stream_channel is None:
             raise ValueError("stream_text mode requires a streamable run type.")
@@ -275,6 +303,26 @@ def _operation_block(
     reply_to_run_summary: str | None,
 ) -> str:
     sections = ["## Task-Specific Context"]
+    if run_type == RunType.RECOMMEND_FULL_BUILD:
+        if context.game == Game.WILD_RIFT:
+            sections.extend(
+                [
+                    "- Build order contract: return exactly 7 steps.",
+                    (
+                        "- Wild Rift build shape: 5 normal items + 1 boots item + "
+                        "1 separate enchant item."
+                    ),
+                    "- In Wild Rift, boots and enchant are two separate ordered steps.",
+                    "- The boots step must appear before the enchant step.",
+                ]
+            )
+        else:
+            sections.extend(
+                [
+                    "- Build order contract: return exactly 6 item steps.",
+                    "- League of Legends PC does not use a separate enchant step in this contract.",
+                ]
+            )
     if run_type in {RunType.RECOMMEND_SLOT, RunType.EXPLAIN_SLOT}:
         slot_index = int(operation_context.get("slot_index", 0))
         current_item = context.own_build[slot_index]
@@ -418,9 +466,10 @@ def _available_tools_block(*, context: MatchContext, output_mode: str) -> str:
                 "and an internal selector model if needed."
             ),
             (
-                "- Prefer `resolve_catalog_slug` before any direct slug lookup "
-                "when the slug is not already confirmed."
+                "- Direct canonical slugs are allowed only when you are already highly "
+                "confident they exactly match the real catalog slug for this game."
             ),
+            "- If the slug is uncertain or a lookup may fail, call `resolve_catalog_slug` first.",
             "- Prefer one search plus one batch lookup when you need to compare candidates.",
         ]
     )
@@ -504,26 +553,26 @@ def _format_tool_result(tool_name: str, result: dict[str, Any]) -> list[str]:
             return ["- No matches returned."]
         lines = []
         for match in matches:
-            base = (
-                f"- {match.get('name', 'Unknown')} (`{match.get('slug', '')}`) | "
-                f"matched={', '.join(match.get('matched_fields') or ['name'])}"
-            )
-            aliases = match.get("aliases") or []
-            if aliases:
-                base += f" | aliases={', '.join(str(alias) for alias in aliases[:4])}"
+            matched_fields = ", ".join(match.get("matched_fields") or ["name"])
+            hints: list[str] = [f"matched={matched_fields}"]
             if match.get("cost"):
-                base += f" | cost={match['cost']}"
+                hints.append(f"cost={match['cost']}")
             if match.get("stats"):
-                base += f" | stats={', '.join(str(item) for item in match['stats'][:3])}"
+                hints.append("stats=" + ", ".join(str(item) for item in match["stats"][:2]))
             if match.get("path"):
-                base += f" | path={match['path']}"
+                hints.append(f"path={match['path']}")
             if match.get("slot"):
-                base += f" | slot={match['slot']}"
+                hints.append(f"slot={match['slot']}")
             if match.get("class_text"):
-                base += f" | class={match['class_text']}"
+                hints.append(f"class={match['class_text']}")
             if match.get("position_tags"):
-                base += f" | positions={', '.join(str(tag) for tag in match['position_tags'][:4])}"
-            lines.append(base)
+                hints.append(
+                    "positions=" + ", ".join(str(tag) for tag in match["position_tags"][:3])
+                )
+            lines.append(
+                f"- {match.get('name', 'Unknown')} (`{match.get('slug', '')}`) | "
+                + " | ".join(hints)
+            )
         return lines
     if tool_name == "list_catalog_candidates":
         candidates = result.get("candidates") or []
@@ -537,17 +586,15 @@ def _format_tool_result(tool_name: str, result: dict[str, Any]) -> list[str]:
                 for key, value in applied_filters.items()
             )
             lines.append(f"- Applied filters: {filter_text}")
-        preview = candidates[:12]
-        for candidate in preview:
-            lines.extend(_format_candidate_tool_view(candidate))
+        preview = candidates[:10]
+        if preview:
+            lines.append("- Candidate preview: " + _inline_candidate_preview(preview))
         remaining = len(candidates) - len(preview)
         if remaining > 0:
             lines.append(f"- ... plus {remaining} more filtered candidates.")
         return lines
     if tool_name == "resolve_catalog_slug":
-        lines = [
-            f"- Resolution status: {result.get('resolution_status', 'unknown')}",
-        ]
+        lines = [f"- Resolution status: {result.get('resolution_status', 'unknown')}"]
         if result.get("raw_name"):
             lines.append(f"- Raw name: {result['raw_name']}")
         if result.get("resolved_slug"):
@@ -571,21 +618,14 @@ def _format_tool_result(tool_name: str, result: dict[str, Any]) -> list[str]:
             lines.append(f"- Applied filters: {filter_text}")
         candidates = result.get("candidates") or []
         if candidates:
-            lines.append("- Candidate preview:")
-            for candidate in candidates[:8]:
-                lines.extend(
-                    [
-                        f"  {line.removeprefix('- ')}"
-                        for line in _format_candidate_tool_view(candidate)
-                    ]
-                )
+            lines.append("- Candidate preview: " + _inline_candidate_preview(candidates[:8]))
         return lines
     if tool_name == "batch_get_entities":
         entities = result.get("entities") or []
         missing_slugs = result.get("missing_slugs") or []
         lines = []
         for entity in entities:
-            lines.extend(_format_entity_tool_view(entity))
+            lines.append(_entity_fact_line(entity))
         if missing_slugs:
             lines.append("- Missing slugs: " + ", ".join(f"`{slug}`" for slug in missing_slugs))
         return lines or ["- No entities returned."]
@@ -595,88 +635,81 @@ def _format_tool_result(tool_name: str, result: dict[str, Any]) -> list[str]:
         or result.get("rune")
         or {}
     )
-    return _format_entity_tool_view(payload)
+    return [_entity_fact_line(payload)]
 
 
-def _format_entity_tool_view(entity: dict[str, Any]) -> list[str]:
+def _entity_fact_line(entity: dict[str, Any]) -> str:
     if not entity:
-        return ["- No entity returned."]
-    lines = [f"- {entity.get('name', 'Unknown')} (`{entity.get('slug', '')}`)"]
+        return "- No entity returned."
+    parts = [f"- {entity.get('name', 'Unknown')} (`{entity.get('slug', '')}`)"]
     if entity.get("class_text"):
-        lines.append(f"  - Class: {entity['class_text']}")
+        parts.append(f"class={entity['class_text']}")
     if entity.get("position_text"):
-        lines.append(f"  - Positions: {entity['position_text']}")
+        parts.append(f"positions={entity['position_text']}")
     if entity.get("adaptive_type"):
-        lines.append(f"  - Adaptive type: {entity['adaptive_type']}")
+        parts.append(f"adaptive={entity['adaptive_type']}")
     if entity.get("range_type"):
-        lines.append(f"  - Range: {entity['range_type']}")
+        parts.append(f"range={entity['range_type']}")
     if entity.get("resource"):
-        lines.append(f"  - Resource: {entity['resource']}")
+        parts.append(f"resource={entity['resource']}")
     if entity.get("cost"):
-        lines.append(f"  - Cost: {entity['cost']}")
-    if entity.get("sell"):
-        lines.append(f"  - Sell: {entity['sell']}")
+        parts.append(f"cost={entity['cost']}")
     if entity.get("stats"):
-        lines.append("  - Stats: " + ", ".join(str(value) for value in entity["stats"][:4]))
-    if entity.get("description"):
-        lines.append(f"  - Description: {_trim_text(str(entity['description']), 180)}")
-    if entity.get("similar_item_names"):
-        lines.append(
-            "  - Similar items: "
-            + ", ".join(str(value) for value in entity["similar_item_names"][:4])
-        )
+        parts.append("stats=" + ", ".join(str(value) for value in entity["stats"][:2]))
     if entity.get("path"):
-        lines.append(f"  - Path: {entity['path']}")
+        parts.append(f"path={entity['path']}")
     if entity.get("slot"):
-        lines.append(f"  - Slot: {entity['slot']}")
+        parts.append(f"slot={entity['slot']}")
+    short_effect = _short_effect_text(entity)
+    if short_effect:
+        parts.append(f"effect={short_effect}")
     abilities = entity.get("abilities") or []
     for ability in abilities[:3]:
-        lines.append(
-            "  - Ability: "
+        parts.append(
+            "ability="
             + " | ".join(
-                part
-                for part in [
+                value
+                for value in [
                     str(ability.get("skill") or "?"),
                     str(ability.get("name") or "Unnamed"),
                     str(ability.get("damage_type") or "mixed"),
-                    _trim_text(str(ability.get("blurb") or ""), 120),
                 ]
-                if part
+                if value
             )
         )
-    return lines
+    return " | ".join(parts)
+
+def _inline_candidate_preview(candidates: list[dict[str, Any]]) -> str:
+    preview_parts: list[str] = []
+    for candidate in candidates:
+        if not candidate:
+            continue
+        hints: list[str] = []
+        if candidate.get("class_text"):
+            hints.append(str(candidate["class_text"]))
+        if candidate.get("position_tags"):
+            hints.append("/".join(str(tag) for tag in candidate["position_tags"][:2]))
+        if candidate.get("path"):
+            hints.append(str(candidate["path"]))
+        if candidate.get("slot"):
+            hints.append(str(candidate["slot"]))
+        if candidate.get("cost"):
+            hints.append(f"cost={candidate['cost']}")
+        if candidate.get("main_attributes"):
+            hints.append(", ".join(str(value) for value in candidate["main_attributes"][:2]))
+        label = f"{candidate.get('name', 'Unknown')} (`{candidate.get('slug', '')}`)"
+        if hints:
+            label += f" [{'; '.join(hints)}]"
+        preview_parts.append(label)
+    return " || ".join(preview_parts) if preview_parts else "none"
 
 
-def _format_candidate_tool_view(candidate: dict[str, Any]) -> list[str]:
-    if not candidate:
-        return ["- No candidate returned."]
-    lines = [f"- {candidate.get('name', 'Unknown')} (`{candidate.get('slug', '')}`)"]
-    aliases = candidate.get("aliases") or []
-    if aliases:
-        lines.append("  - Aliases: " + ", ".join(str(value) for value in aliases[:4]))
-    if candidate.get("class_text"):
-        lines.append(f"  - Class: {candidate['class_text']}")
-    if candidate.get("position_tags"):
-        lines.append(
-            "  - Positions: "
-            + ", ".join(str(tag) for tag in candidate["position_tags"][:4])
-        )
-    if candidate.get("path"):
-        lines.append(f"  - Path: {candidate['path']}")
-    if candidate.get("slot"):
-        lines.append(f"  - Slot: {candidate['slot']}")
-    if candidate.get("cost"):
-        lines.append(f"  - Cost: {candidate['cost']}")
-    if candidate.get("main_attributes"):
-        lines.append(
-            "  - Main attributes: "
-            + ", ".join(str(value) for value in candidate["main_attributes"][:4])
-        )
-    if candidate.get("description"):
-        lines.append(f"  - Description: {_trim_text(str(candidate['description']), 160)}")
-    if candidate.get("match_score") is not None:
-        lines.append(f"  - Match score: {candidate['match_score']}")
-    return lines
+def _short_effect_text(entity: dict[str, Any]) -> str | None:
+    raw_text = str(entity.get("description") or "").strip()
+    if not raw_text:
+        return None
+    first_sentence = raw_text.split(". ", 1)[0].strip()
+    return _trim_text(first_sentence, 90) if first_sentence else None
 
 
 def _format_candidate_lines(
@@ -841,9 +874,10 @@ def _format_build_slots(
     response_preferences: ResponsePreferences,
     snapshot: CatalogSnapshot,
 ) -> list[str]:
-    slots = list(build[:6]) + [None] * max(0, 6 - len(build))
+    build_slot_count = build_slot_count_for_game(context.game)
+    slots = list(build[:build_slot_count]) + [None] * max(0, build_slot_count - len(build))
     lines: list[str] = []
-    for slot_index, item_slug in enumerate(slots[:6], start=1):
+    for slot_index, item_slug in enumerate(slots[:build_slot_count], start=1):
         lines.append(
             f"- Slot {slot_index}: "
             + _format_item_reference(
@@ -863,8 +897,9 @@ def _format_build_order(
     response_preferences: ResponsePreferences,
     snapshot: CatalogSnapshot,
 ) -> list[str]:
+    build_slot_count = build_slot_count_for_game(context.game)
     lines: list[str] = []
-    for step_index, item_slug in enumerate(build_order[:7], start=1):
+    for step_index, item_slug in enumerate(build_order[:build_slot_count], start=1):
         lines.append(
             f"- Step {step_index}: "
             + _format_item_reference(

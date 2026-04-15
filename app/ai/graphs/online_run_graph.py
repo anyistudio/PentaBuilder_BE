@@ -157,6 +157,7 @@ class OnlineRunGraph:
         *,
         operation_context: dict,
         output_mode: str = "json",
+        response_schema: dict[str, object] | None = None,
         streamed_text: str | None = None,
         tool_facts: dict[str, list[dict[str, object]]] | None = None,
     ) -> PromptPackage:
@@ -173,5 +174,15 @@ class OnlineRunGraph:
             snapshot=self.snapshot,
             tool_facts=tool_facts,
             output_mode=output_mode,
+            response_schema=response_schema,
             streamed_text=streamed_text,
         )
+
+    def finalize_existing_result(self, state: RunGraphState) -> RunGraphState:
+        merged_state: RunGraphState = dict(state)
+        merged_state.update(self._prepare_context(merged_state))
+        merged_state.update(self._validate_result(merged_state))
+        while merged_state.get("repair_requested"):
+            merged_state.update(self._repair_result(merged_state))
+            merged_state.update(self._validate_result(merged_state))
+        return merged_state

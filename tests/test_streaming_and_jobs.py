@@ -3,6 +3,7 @@ import json
 from fastapi.testclient import TestClient
 
 from app.ai.providers.base import LLMResult, LLMStreamEvent, LLMUsage
+from app.services.ai_run_service import _SectionedStreamParser
 
 
 class FakeLLMClient:
@@ -65,8 +66,19 @@ class FakeLLMClient:
         response_schema: dict | None = None,
         temperature: float | None = None,
     ):
-        del prompt, system_prompt, response_mime_type, response_schema, temperature
+        del response_mime_type, response_schema, temperature
         text = "这件装备能更稳地顶住爆发，然后把中期团战接起来。"
+        if system_prompt and "Streaming + structured mode:" in system_prompt:
+            text = (
+                "<display>这件装备能更稳地顶住爆发，然后把中期团战接起来。</display>"
+                "<json>"
+                '{"slot_index":1,"current_item_slug":null,"is_current_choice_good":false,'
+                '"best_item_slug":"lol-zhonya-s-hourglass","summary":"这件装备能更稳地顶住爆发，然后把中期团战接起来。",'
+                '"why_current_choice":"当前这个位置还没有成型。","why_best_choice":"中娅能直接补上当前最缺的容错。",'
+                '"linked_adjustments":[]}'
+                "</json>"
+            )
+        del prompt
         for index in range(0, len(text), 8):
             yield LLMStreamEvent(event_type="text_delta", delta=text[index : index + 8])
         yield LLMStreamEvent(
@@ -139,7 +151,23 @@ def test_streaming_explain_slot_uses_sse(configured_client: TestClient, monkeypa
     assert "event: tool_event" in body
     assert "event: message_delta" in body
     assert "event: run_completed" in body
+    assert '"status":"fallback"' not in body
     assert "gemini-test" not in body
+
+
+def test_sectioned_stream_parser_extracts_display_and_json() -> None:
+    parser = _SectionedStreamParser()
+    deltas = [
+        "<displ",
+        "ay>用户可见内容</display><js",
+        'on>{"summary":"用户可见内容"}</json>',
+    ]
+    emitted = "".join(parser.push(delta) for delta in deltas)
+    parser.finish()
+
+    assert emitted == "用户可见内容"
+    assert parser.display_text == "用户可见内容"
+    assert json.loads(parser.json_text) == {"summary": "用户可见内容"}
 
 
 def test_admin_jobs_cover_baselines_calibrations_benchmarks_and_cache(

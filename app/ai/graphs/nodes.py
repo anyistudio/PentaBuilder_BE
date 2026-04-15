@@ -296,7 +296,7 @@ def generate_result_node(
             tool_facts=state.get("tool_facts"),
             streamed_text=state.get("streamed_text"),
         )
-        response_schema = get_result_response_schema(run_type)
+        response_schema = get_result_response_schema(run_type=run_type, context=context)
         raw_result, usage_payload = _call_json_model(
             llm_client=llm_client,
             prompt=prompt_package.user_prompt,
@@ -400,7 +400,7 @@ def repair_result_node(
             validation_errors=state.get("validation_errors"),
             candidate_result=state.get("model_result"),
         )
-        response_schema = get_result_response_schema(run_type)
+        response_schema = get_result_response_schema(run_type=run_type, context=context)
         raw_result, usage_payload = _call_json_model(
             llm_client=llm_client,
             prompt=prompt_package.user_prompt,

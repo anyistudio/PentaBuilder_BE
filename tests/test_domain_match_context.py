@@ -50,6 +50,16 @@ def test_match_context_rejects_mismatched_slug_prefix() -> None:
         )
 
 
+def test_wild_rift_context_defaults_to_seven_build_slots() -> None:
+    context = MatchContext(
+        game=Game.WILD_RIFT,
+        data_version="full-20260411",
+        own_champion_slug="wr-ahri",
+    )
+
+    assert len(context.own_build) == 7
+
+
 def test_semantic_hash_ignores_free_text_and_input_order() -> None:
     context_a = make_match_context(free_text="前期压力很大")
     context_b = MatchContext(

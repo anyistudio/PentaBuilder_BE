@@ -53,6 +53,11 @@ class Settings(BaseSettings):
     admin_password: SecretStr = SecretStr("replace-me")
 
     google_api_key: SecretStr = SecretStr("replace-me")
+    openai_api_key: SecretStr = SecretStr("replace-me")
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_organization_id: str | None = None
+    openai_project_id: str | None = None
+    all_models: str = ""
     primary_reasoning_provider: str = "google"
     primary_reasoning_model: str = "gemini-3.1-pro-preview"
     fast_reasoning_provider: str = "google"
@@ -68,6 +73,10 @@ class Settings(BaseSettings):
     @property
     def cors_allowed_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_allowed_origins.split(",") if origin.strip()]
+
+    @property
+    def all_models_list(self) -> list[str]:
+        return [model.strip() for model in self.all_models.split(",") if model.strip()]
 
     @model_validator(mode="after")
     def validate_production_auth_settings(self) -> "Settings":

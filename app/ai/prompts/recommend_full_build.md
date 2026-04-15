@@ -13,10 +13,12 @@ Important constraints:
 - Keep the plan internally coherent across early, mid, and late steps.
 - Use the baseline as the starting reference when it fits, but depart from it if the actual enemy pressure or environment tags clearly justify it.
 - Make slot notes useful: mention timing, matchup pressure, or build sequencing, not generic item praise.
-- `recommended_build_order` is a purchase sequence, not a final six-slot inventory snapshot.
-- Return 6 steps for a normal path with no separate enchant step.
-- You may return 7 steps only when the build path includes both:
-  1. one boots item, and
-  2. one separate enchant item.
-- If both boots and enchant appear, they must occupy separate steps and the boots step must come first.
-- Never output an enchant step without a boots step in the same build path.
+- `recommended_build_order` is a purchase sequence, not a static final inventory snapshot.
+- For League of Legends PC:
+  1. Return exactly 6 item steps.
+  2. Do not output a separate enchant step.
+- For Wild Rift:
+  1. Return exactly 7 steps.
+  2. The 7 steps must contain exactly 5 normal items, 1 boots item, and 1 separate enchant item.
+  3. The boots step and the enchant step must occupy different positions.
+  4. The boots step must come before the enchant step.

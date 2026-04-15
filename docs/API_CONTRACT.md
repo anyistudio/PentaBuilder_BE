@@ -706,14 +706,18 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
 #### `recommend_slot`
 
 - `payload.slot_index` required
-- `slot_index` 范围 0-5
+- `slot_index` 范围按 `game` 决定：
+  - LoL PC: `0-5`
+  - Wild Rift: `0-6`
 
 #### `recommend_full_build`
 
 - `payload` 可为空
 - 返回结果中的 `recommended_build_order` 表示有序出装步骤
-- 长度允许 `6` 或 `7`
-- 长度为 `7` 时，必须是“鞋子 + 独立附魔”拆成两个步骤
+- LoL PC: 长度固定为 `6`
+- Wild Rift: 长度固定为 `7`
+- Wild Rift 的 `7` 步必须是 `5` 件普通装备 + `1` 双鞋子 + `1` 个独立附魔
+- Wild Rift 中鞋子步骤必须早于附魔步骤
 
 #### `explain_slot`
 

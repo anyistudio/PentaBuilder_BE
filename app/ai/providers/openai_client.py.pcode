@@ -1,0 +1,29 @@
+Class OpenAIClient:
+- implement the BaseLLMClient contract against OpenAI's chat completions HTTP API
+- support plain text generation plus JSON-schema constrained generation for structured run outputs
+- emit SSE-compatible text deltas for streaming preview text
+- normalize usage metadata into the shared LLMUsage shape
+- reuse the same debug logging style as Gemini so model IO stays inspectable in local development
+
+Method generate_text:
+- build the chat completion payload from system + user prompts
+- attach JSON schema response_format when the caller requests application/json
+- post to the OpenAI API
+- extract the assistant text and token usage
+
+Method stream_text:
+- send a streaming chat completion request
+- parse SSE data lines
+- yield shared text_delta events for preview text
+- finish with one completed event carrying normalized usage
+
+Method _build_payload:
+- map the backend prompt contract into OpenAI chat-completions request fields
+- optionally attach strict json_schema response formatting
+- enable stream usage reporting for streaming mode
+
+Method _extract_text / _extract_stream_delta / _normalize_content:
+- normalize OpenAI content fields into plain strings for the rest of the backend
+
+Method _extract_usage:
+- map prompt/completion tokens and elapsed latency into LLMUsage

@@ -8,7 +8,11 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from app.domain.enums import Game, Language, RunType, TerminologyStyle
 
-BUILD_SLOT_COUNT = 6
+GAME_BUILD_SLOT_COUNTS = {
+    Game.LOL: 6,
+    Game.WILD_RIFT: 7,
+}
+MAX_BUILD_SLOT_COUNT = max(GAME_BUILD_SLOT_COUNTS.values())
 MAX_FREE_TEXT_LENGTH = 500
 ENVIRONMENT_TAG_WHITELIST = (
     "aram",
@@ -60,6 +64,15 @@ def sanitize_free_text(value: str) -> str:
     cleaned = " ".join(cleaned.split())
     return cleaned[:MAX_FREE_TEXT_LENGTH]
 
+
+def build_slot_count_for_game(game: Game) -> int:
+    return GAME_BUILD_SLOT_COUNTS[game]
+
+
+def empty_build_for_game(game: Game) -> list[str | None]:
+    return [None] * build_slot_count_for_game(game)
+
+
 def slugify_name(name: str) -> str:
     collapsed = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
     return collapsed or "unknown"
@@ -100,10 +113,6 @@ def validate_slug_for_game(game: Game, slug: str) -> str:
     return canonical_slug
 
 
-def _default_build_slots() -> list[str | None]:
-    return [None] * BUILD_SLOT_COUNT
-
-
 class RuneSelection(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -115,15 +124,8 @@ class EnemyChampionContext(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     champion_slug: str
-    build: list[str | None] = Field(default_factory=_default_build_slots)
+    build: list[str | None] = Field(default_factory=list)
     runes: RuneSelection = Field(default_factory=RuneSelection)
-
-    @field_validator("build")
-    @classmethod
-    def validate_build_slots(cls, value: list[str | None]) -> list[str | None]:
-        if len(value) != BUILD_SLOT_COUNT:
-            raise ValueError(f"Build must contain exactly {BUILD_SLOT_COUNT} slots.")
-        return value
 
 
 class EnvironmentContext(BaseModel):
@@ -164,24 +166,23 @@ class MatchContext(BaseModel):
     data_version: str
     own_champion_slug: str
     enemy_team: list[EnemyChampionContext] = Field(default_factory=list)
-    own_build: list[str | None] = Field(default_factory=_default_build_slots)
+    own_build: list[str | None] = Field(default_factory=list)
     own_runes: RuneSelection = Field(default_factory=RuneSelection)
     environment: EnvironmentContext = Field(default_factory=EnvironmentContext)
 
-    @field_validator("own_build")
-    @classmethod
-    def validate_own_build_slots(cls, value: list[str | None]) -> list[str | None]:
-        if len(value) != BUILD_SLOT_COUNT:
-            raise ValueError(f"Build must contain exactly {BUILD_SLOT_COUNT} slots.")
-        return value
-
     @model_validator(mode="after")
     def validate_context(self) -> "MatchContext":
+        build_slot_count = build_slot_count_for_game(self.game)
         self.own_champion_slug = validate_slug_for_game(self.game, self.own_champion_slug)
 
         if len(self.enemy_team) > 5:
             raise ValueError("enemy_team must contain between 0 and 5 champions.")
 
+        self.own_build = _normalize_build_slots(
+            build=self.own_build,
+            build_slot_count=build_slot_count,
+            field_name="own_build",
+        )
         self.own_build = [
             validate_slug_for_game(self.game, slot) if slot else None for slot in self.own_build
         ]
@@ -190,6 +191,11 @@ class MatchContext(BaseModel):
 
         for enemy in self.enemy_team:
             enemy.champion_slug = validate_slug_for_game(self.game, enemy.champion_slug)
+            enemy.build = _normalize_build_slots(
+                build=enemy.build,
+                build_slot_count=build_slot_count,
+                field_name="enemy.build",
+            )
             enemy.build = [
                 validate_slug_for_game(self.game, slot) if slot else None for slot in enemy.build
             ]
@@ -241,6 +247,19 @@ def canonicalize_environment_tags(tags: Sequence[str]) -> tuple[str, ...]:
 def build_normalized_environment_key(tags: Sequence[str]) -> str:
     normalized = canonicalize_environment_tags(tags)
     return "|".join(normalized) if normalized else "_none"
+
+
+def _normalize_build_slots(
+    *,
+    build: list[str | None],
+    build_slot_count: int,
+    field_name: str,
+) -> list[str | None]:
+    if not build:
+        return [None] * build_slot_count
+    if len(build) != build_slot_count:
+        raise ValueError(f"{field_name} must contain exactly {build_slot_count} slots.")
+    return list(build)
 
 
 def build_semantic_context_hash(

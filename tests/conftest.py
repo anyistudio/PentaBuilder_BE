@@ -31,8 +31,9 @@ LOL_RUNES_TEMPLATE = {
 WR_BUILD_TEMPLATE = [
     "wr-luden-s-echo",
     "wr-ionian-boots-of-lucidity",
-    "wr-infinity-orb",
     "wr-stormsurge",
+    "wr-stasis-enchant",
+    "wr-infinity-orb",
     "wr-rabadon-s-deathcap",
     "wr-void-staff",
 ]
@@ -84,8 +85,19 @@ class TestLLMClient:
         response_schema: dict | None = None,
         temperature: float | None = None,
     ):
-        del system_prompt, response_mime_type, response_schema, temperature
-        text = _build_preview_text(prompt=prompt, run_type=_extract_run_type(prompt))
+        del response_mime_type, response_schema, temperature
+        run_type = _extract_run_type(prompt)
+        text = _build_preview_text(prompt=prompt, run_type=run_type)
+        if system_prompt and "Streaming + structured mode:" in system_prompt:
+            payload = _build_structured_payload(prompt=prompt, run_type=run_type)
+            if run_type == "chat_followup":
+                payload["answer"] = text
+            else:
+                payload["summary"] = text
+            text = (
+                f"<display>{text}</display>"
+                f"<json>{json.dumps(payload, ensure_ascii=False)}</json>"
+            )
         for index in range(0, len(text), 8):
             yield LLMStreamEvent(event_type="text_delta", delta=text[index : index + 8])
         yield LLMStreamEvent(
@@ -111,8 +123,12 @@ def _extract_target_slot(prompt: str) -> int:
     return int(match.group(1)) if match else 0
 
 
+def _build_slot_count(game: str) -> int:
+    return 7 if game == "wild_rift" else 6
+
+
 def _extract_current_build(prompt: str) -> list[str | None]:
-    build: list[str | None] = [None] * 6
+    build: list[str | None] = [None] * _build_slot_count(_extract_game(prompt))
     for slot, value in re.findall(r"- Slot (\d+): .*?`((?:lol|wr)-[^`]+)`", prompt):
         build[int(slot) - 1] = value
     return build
@@ -168,7 +184,7 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
             "reasoning": ["对面爆发压力高", "当前 build 需要更平衡的中期战斗力"],
             "alternatives": [
                 {
-                    "item_slug": build_template[min(slot_index + 1, 5)],
+                    "item_slug": build_template[min(slot_index + 1, len(build_template) - 1)],
                     "reason": "如果你想更偏伤害，也可以往后顺延一件输出装。",
                 }
             ],
@@ -195,7 +211,10 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
             "why_current_choice": "现在的选择不是完全不能出，但对当前压力点的覆盖不够好。",
             "why_best_choice": "这个替代项更适合当前对局节奏，也更能补足生存和关键回合价值。",
             "linked_adjustments": [
-                {"target": f"slot:{min(slot_index + 1, 5)}", "text": "后续槽位可以再补纯输出。"}
+                {
+                    "target": f"slot:{min(slot_index + 1, len(build_template) - 1)}",
+                    "text": "后续槽位可以再补纯输出。",
+                }
             ],
         }
     if run_type == "compare_builds":

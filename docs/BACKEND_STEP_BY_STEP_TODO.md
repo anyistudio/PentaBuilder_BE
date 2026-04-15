@@ -149,7 +149,9 @@
   - `late-game`
 - [x] 明确输入校验：
   - enemy hero 数量 0-5
-  - slot index 0-5
+  - slot index 按游戏决定：
+    - LoL PC: 0-5
+    - Wild Rift: 0-6
   - score 0-100
   - slug 前缀必须和 `game` 一致：
     - `lol-*` 对应 `lol`

@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from dataclasses import dataclass
@@ -9,6 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 from app.ai.graphs.online_run_graph import OnlineRunGraph
+from app.ai.orchestration.result_contracts import get_result_response_schema
 from app.ai.providers.base import BaseLLMClient, LLMUsage
 from app.ai.providers.factory import create_llm_client
 from app.ai.tools.catalog_tools import CatalogToolset
@@ -24,6 +26,7 @@ from app.domain.match_context import (
     RuneSelection,
     build_response_variant_hash,
     build_semantic_context_hash,
+    build_slot_count_for_game,
     validate_slug_for_game,
 )
 from app.services.cache_service import CACHEABLE_RUN_TYPES, CacheService
@@ -36,6 +39,10 @@ from app.services.session_service import SessionService
 from app.services.storage_service import StorageService
 
 LOGGER = logging.getLogger(__name__)
+DISPLAY_OPEN_TAG = "<display>"
+DISPLAY_CLOSE_TAG = "</display>"
+JSON_OPEN_TAG = "<json>"
+JSON_CLOSE_TAG = "</json>"
 STREAMABLE_RUN_TYPES = {
     RunType.RECOMMEND_FULL_BUILD,
     RunType.EXPLAIN_SLOT,
@@ -55,6 +62,99 @@ class PreparedRun:
     model_name: str
     llm_client: BaseLLMClient
     graph: OnlineRunGraph
+
+
+@dataclass
+class SectionedStreamResult:
+    display_text: str
+    structured_result: dict[str, Any]
+    usage: LLMUsage | None
+
+
+class _SectionedStreamParser:
+    def __init__(self) -> None:
+        self.mode = "seek_display"
+        self.buffer = ""
+        self.display_parts: list[str] = []
+        self.json_parts: list[str] = []
+
+    @property
+    def display_text(self) -> str:
+        return "".join(self.display_parts).strip()
+
+    @property
+    def json_text(self) -> str:
+        return "".join(self.json_parts).strip()
+
+    def push(self, chunk: str) -> str:
+        self.buffer += chunk
+        visible_parts: list[str] = []
+        while True:
+            if self.mode == "seek_display":
+                index = self.buffer.find(DISPLAY_OPEN_TAG)
+                if index < 0:
+                    self.buffer = self.buffer[-(len(DISPLAY_OPEN_TAG) - 1) :]
+                    break
+                self.buffer = self.buffer[index + len(DISPLAY_OPEN_TAG) :]
+                self.mode = "in_display"
+                continue
+
+            if self.mode == "in_display":
+                index = self.buffer.find(DISPLAY_CLOSE_TAG)
+                if index < 0:
+                    safe_length = max(0, len(self.buffer) - (len(DISPLAY_CLOSE_TAG) - 1))
+                    if safe_length == 0:
+                        break
+                    visible = self.buffer[:safe_length]
+                    visible_parts.append(visible)
+                    self.display_parts.append(visible)
+                    self.buffer = self.buffer[safe_length:]
+                    break
+                visible = self.buffer[:index]
+                if visible:
+                    visible_parts.append(visible)
+                    self.display_parts.append(visible)
+                self.buffer = self.buffer[index + len(DISPLAY_CLOSE_TAG) :]
+                self.mode = "seek_json"
+                continue
+
+            if self.mode == "seek_json":
+                index = self.buffer.find(JSON_OPEN_TAG)
+                if index < 0:
+                    self.buffer = self.buffer[-(len(JSON_OPEN_TAG) - 1) :]
+                    break
+                self.buffer = self.buffer[index + len(JSON_OPEN_TAG) :]
+                self.mode = "in_json"
+                continue
+
+            if self.mode == "in_json":
+                index = self.buffer.find(JSON_CLOSE_TAG)
+                if index < 0:
+                    safe_length = max(0, len(self.buffer) - (len(JSON_CLOSE_TAG) - 1))
+                    if safe_length == 0:
+                        break
+                    self.json_parts.append(self.buffer[:safe_length])
+                    self.buffer = self.buffer[safe_length:]
+                    break
+                json_chunk = self.buffer[:index]
+                if json_chunk:
+                    self.json_parts.append(json_chunk)
+                self.buffer = self.buffer[index + len(JSON_CLOSE_TAG) :]
+                self.mode = "done"
+                self.buffer = ""
+                break
+
+            self.buffer = ""
+            break
+        return "".join(visible_parts)
+
+    def finish(self) -> None:
+        if self.mode != "done":
+            raise ApiError(
+                "Streaming output did not contain the required <display> and <json> sections.",
+                code="provider_error",
+                status_code=502,
+            )
 
 
 class AIRunService:
@@ -238,70 +338,18 @@ class AIRunService:
                 provider_name=prepared.provider_name,
                 model_name=prepared.model_name,
             )
-
-            run.status = RunStatus.COMPLETED.value
-            run.provider_name = provider_usage.get("provider_name") or prepared.provider_name
-            run.model_name = provider_usage.get("model_name") or prepared.model_name
-            run.tokens_input = provider_usage.get("tokens_input")
-            run.tokens_output = provider_usage.get("tokens_output")
-            run.cost_usd = provider_usage.get("cost_usd")
-            run.latency_ms = provider_usage.get("latency_ms") or round(
-                (time.perf_counter() - started_at) * 1000
-            )
-            run.score_value = result.get("score")
-            run.structured_result = result
-            run.artifact_object_key = f"runs/{run.id}.json"
-            run.error_code = None
-            run.error_message = None
-            self.storage_service.write_json(
-                run.artifact_object_key,
-                {
-                    "run_id": str(run.id),
-                    "run_type": run.run_type,
-                    "context": context.model_dump(mode="json"),
-                    "payload": operation_context,
-                    "tool_trace": graph_result.get("tool_trace") or [],
-                    "tool_facts": graph_result.get("tool_facts") or {},
-                    "result": result,
-                    "prompt": graph_result.get("prompt"),
-                },
-            )
-            session.add(run)
-            session.commit()
-            session.refresh(run)
-
-            if (
-                run.run_type in CACHEABLE_RUN_TYPES
-                and not context.environment.free_text
-                and run.cache_resolution != "bypass"
-            ):
-                self.cache_service.save_cache_entry(
-                    session,
-                    run_type=run.run_type,
-                    game=run.game,
-                    data_version=run.data_version,
-                    own_champion_slug=run.own_champion_slug or "",
-                    enemy_comp_key=run.enemy_comp_key or "_none",
-                    enemy_count=(
-                        0
-                        if run.enemy_comp_key in {None, "_none"}
-                        else len((run.enemy_comp_key or "").split("|"))
-                    ),
-                    normalized_environment_key=run.normalized_environment_key or "_none",
-                    semantic_context_hash=run.semantic_context_hash or "",
-                    response_variant_hash=run.response_variant_hash or "",
-                    language=response_preferences.language.value,
-                    terminology_style=response_preferences.terminology_style.value,
-                    structured_result=result,
-                    artifact_object_key=run.artifact_object_key,
-                    source_run_id=run.id,
-                )
-            self._finalize_completed_run(
+            self._complete_run(
                 session,
                 run=run,
                 context=context,
                 response_preferences=response_preferences,
+                operation_context=operation_context,
                 result=result,
+                provider_usage=provider_usage,
+                tool_trace=graph_result.get("tool_trace") or [],
+                tool_facts=graph_result.get("tool_facts") or {},
+                prompt_artifact=graph_result.get("prompt"),
+                started_at=started_at,
             )
             return result
         except Exception as exc:
@@ -399,38 +447,113 @@ class AIRunService:
                     "summary": "Tool context is ready. Streaming the user-visible draft now.",
                 },
             )
+            response_schema = get_result_response_schema(
+                run_type=RunType(run.run_type),
+                context=context,
+            )
             preview_prompt = prepared.graph.build_prompt_package(
                 operation_context=operation_context,
-                output_mode="stream_text",
+                output_mode="stream_sections",
+                response_schema=response_schema,
                 tool_facts=graph_state.get("tool_facts"),
             )
-            streamed_text, preview_usage = self._stream_preview_text(
-                run_id=run.id,
-                llm_client=prepared.llm_client,
-                prompt_package=preview_prompt,
-                response_preferences=response_preferences,
-            )
-            self.event_stream_service.publish(
-                str(run.id),
-                "tool_event",
-                {
-                    "phase": "drafting",
-                    "status": "completed",
-                    "summary": "Draft stream completed. Finalizing the structured result.",
-                },
-            )
-            result = self.execute_run(
-                session,
-                run=run,
-                context=context,
-                response_preferences=response_preferences,
-                operation_context=operation_context,
-                provider_name_override=prepared.provider_name,
-                model_name_override=prepared.model_name,
-                streamed_text=streamed_text,
-                additional_usage=preview_usage,
-                initial_graph_state=graph_state,
-            )
+            try:
+                stream_result = self._stream_sectioned_result(
+                    run_id=run.id,
+                    llm_client=prepared.llm_client,
+                    prompt_package=preview_prompt,
+                    response_preferences=response_preferences,
+                )
+                finalized_state = prepared.graph.finalize_existing_result(
+                    {
+                        **graph_state,
+                        "operation_context": operation_context,
+                        "streamed_text": stream_result.display_text,
+                        "result": stream_result.structured_result,
+                        "model_result": stream_result.structured_result,
+                        "provider_usage_payloads": [
+                            *list(graph_state.get("provider_usage_payloads", [])),
+                            {
+                                "provider_name": prepared.provider_name,
+                                "model_name": prepared.model_name,
+                                "tokens_input": (
+                                    stream_result.usage.input_tokens
+                                    if stream_result.usage
+                                    else None
+                                ),
+                                "tokens_output": (
+                                    stream_result.usage.output_tokens
+                                    if stream_result.usage
+                                    else None
+                                ),
+                                "latency_ms": (
+                                    stream_result.usage.latency_ms
+                                    if stream_result.usage
+                                    else None
+                                ),
+                                "cost_usd": (
+                                    stream_result.usage.cost_usd
+                                    if stream_result.usage
+                                    else None
+                                ),
+                            },
+                        ],
+                    }
+                )
+                result = finalized_state["result"]
+                provider_usage = result.pop("_provider_usage", {})
+                self.event_stream_service.publish(
+                    str(run.id),
+                    "tool_event",
+                    {
+                        "phase": "drafting",
+                        "status": "completed",
+                        "summary": (
+                            "Draft stream completed. Structured result extracted successfully."
+                        ),
+                    },
+                )
+                self._complete_run(
+                    session,
+                    run=run,
+                    context=context,
+                    response_preferences=response_preferences,
+                    operation_context=operation_context,
+                    result=result,
+                    provider_usage=provider_usage,
+                    tool_trace=finalized_state.get("tool_trace") or [],
+                    tool_facts=finalized_state.get("tool_facts") or {},
+                    prompt_artifact={
+                        "system_prompt": preview_prompt.system_prompt,
+                        "user_prompt": preview_prompt.user_prompt,
+                        "response_schema": response_schema,
+                        "output_mode": "stream_sections",
+                    },
+                    started_at=None,
+                )
+            except Exception:
+                self.event_stream_service.publish(
+                    str(run.id),
+                    "tool_event",
+                    {
+                        "phase": "drafting",
+                        "status": "fallback",
+                        "summary": (
+                            "Sectioned streaming output could not be finalized cleanly. "
+                            "Falling back to structured generation."
+                        ),
+                    },
+                )
+                result = self.execute_run(
+                    session,
+                    run=run,
+                    context=context,
+                    response_preferences=response_preferences,
+                    operation_context=operation_context,
+                    provider_name_override=prepared.provider_name,
+                    model_name_override=prepared.model_name,
+                    initial_graph_state=graph_state,
+                )
             self.event_stream_service.publish(
                 str(run.id),
                 "run_completed",
@@ -491,9 +614,10 @@ class AIRunService:
         context: MatchContext,
         operation_context: dict[str, Any],
     ) -> None:
+        build_slot_count = build_slot_count_for_game(context.game)
         if run_type in {RunType.RECOMMEND_SLOT, RunType.EXPLAIN_SLOT}:
             slot_index = operation_context.get("slot_index")
-            if not isinstance(slot_index, int) or not 0 <= slot_index <= 5:
+            if not isinstance(slot_index, int) or not 0 <= slot_index < build_slot_count:
                 raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
         if run_type == RunType.COMPARE_BUILDS:
             comparison_context = operation_context.get("comparison_context")
@@ -501,7 +625,7 @@ class AIRunService:
                 raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
             own_build = comparison_context.get("own_build")
             own_runes = comparison_context.get("own_runes")
-            if not isinstance(own_build, list) or len(own_build) != 6:
+            if not isinstance(own_build, list) or len(own_build) != build_slot_count:
                 raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
             if not isinstance(own_runes, dict):
                 raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
@@ -803,15 +927,15 @@ class AIRunService:
             },
         )
 
-    def _stream_preview_text(
+    def _stream_sectioned_result(
         self,
         *,
         run_id: UUID,
         llm_client: BaseLLMClient,
         prompt_package,
         response_preferences: ResponsePreferences,
-    ) -> tuple[str, LLMUsage | None]:
-        streamed_text_parts: list[str] = []
+    ) -> SectionedStreamResult:
+        parser = _SectionedStreamParser()
         final_usage: LLMUsage | None = None
         for event in llm_client.stream_text(
             prompt=prompt_package.user_prompt,
@@ -819,19 +943,34 @@ class AIRunService:
             temperature=0.35,
         ):
             if event.event_type == "text_delta" and event.delta:
-                streamed_text_parts.append(event.delta)
-                self.event_stream_service.publish(
-                    str(run_id),
-                    "message_delta",
-                    {
-                        "channel": prompt_package.stream_channel or "summary",
-                        "language": response_preferences.language.value,
-                        "delta": event.delta,
-                    },
-                )
+                visible_delta = parser.push(event.delta)
+                if visible_delta:
+                    self.event_stream_service.publish(
+                        str(run_id),
+                        "message_delta",
+                        {
+                            "channel": prompt_package.stream_channel or "summary",
+                            "language": response_preferences.language.value,
+                            "delta": visible_delta,
+                        },
+                    )
             elif event.event_type == "completed":
                 final_usage = event.usage
-        return "".join(streamed_text_parts).strip(), final_usage
+
+        parser.finish()
+        try:
+            structured_result = json.loads(parser.json_text)
+        except json.JSONDecodeError as exc:
+            raise ApiError(
+                "Streaming JSON section was invalid.",
+                code="provider_error",
+                status_code=502,
+            ) from exc
+        return SectionedStreamResult(
+            display_text=parser.display_text,
+            structured_result=structured_result,
+            usage=final_usage,
+        )
 
     def _finalize_cached_run(
         self,
@@ -846,6 +985,86 @@ class AIRunService:
         session.add(run)
         session.commit()
         session.refresh(run)
+        self._finalize_completed_run(
+            session,
+            run=run,
+            context=context,
+            response_preferences=response_preferences,
+            result=result,
+        )
+
+    def _complete_run(
+        self,
+        session: Session,
+        *,
+        run: AIRun,
+        context: MatchContext,
+        response_preferences: ResponsePreferences,
+        operation_context: dict[str, Any],
+        result: dict[str, Any],
+        provider_usage: dict[str, Any],
+        tool_trace: list[dict[str, Any]],
+        tool_facts: dict[str, Any],
+        prompt_artifact: dict[str, Any] | None,
+        started_at: float | None,
+    ) -> None:
+        run.status = RunStatus.COMPLETED.value
+        run.provider_name = provider_usage.get("provider_name") or run.provider_name
+        run.model_name = provider_usage.get("model_name") or run.model_name
+        run.tokens_input = provider_usage.get("tokens_input")
+        run.tokens_output = provider_usage.get("tokens_output")
+        run.cost_usd = provider_usage.get("cost_usd")
+        run.latency_ms = provider_usage.get("latency_ms") or (
+            round((time.perf_counter() - started_at) * 1000) if started_at is not None else None
+        )
+        run.score_value = result.get("score")
+        run.structured_result = result
+        run.artifact_object_key = f"runs/{run.id}.json"
+        run.error_code = None
+        run.error_message = None
+        self.storage_service.write_json(
+            run.artifact_object_key,
+            {
+                "run_id": str(run.id),
+                "run_type": run.run_type,
+                "context": context.model_dump(mode="json"),
+                "payload": operation_context,
+                "tool_trace": tool_trace,
+                "tool_facts": tool_facts,
+                "result": result,
+                "prompt": prompt_artifact,
+            },
+        )
+        session.add(run)
+        session.commit()
+        session.refresh(run)
+
+        if (
+            run.run_type in CACHEABLE_RUN_TYPES
+            and not context.environment.free_text
+            and run.cache_resolution != "bypass"
+        ):
+            self.cache_service.save_cache_entry(
+                session,
+                run_type=run.run_type,
+                game=run.game,
+                data_version=run.data_version,
+                own_champion_slug=run.own_champion_slug or "",
+                enemy_comp_key=run.enemy_comp_key or "_none",
+                enemy_count=(
+                    0
+                    if run.enemy_comp_key in {None, "_none"}
+                    else len((run.enemy_comp_key or "").split("|"))
+                ),
+                normalized_environment_key=run.normalized_environment_key or "_none",
+                semantic_context_hash=run.semantic_context_hash or "",
+                response_variant_hash=run.response_variant_hash or "",
+                language=response_preferences.language.value,
+                terminology_style=response_preferences.terminology_style.value,
+                structured_result=result,
+                artifact_object_key=run.artifact_object_key,
+                source_run_id=run.id,
+            )
         self._finalize_completed_run(
             session,
             run=run,

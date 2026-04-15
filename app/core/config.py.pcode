@@ -3,9 +3,10 @@ Constant BASE_DIR:
 
 Class Settings:
 - load .env and process environment variables
-- expose app, database, S3, auth, model-routing, and benchmark-local-root config
+- expose app, database, S3, auth, model-routing, benchmark-local-root, and provider API config
 - keep secrets as SecretStr
 - provide is_local helper for reload behavior
+- expose all_models_list so local evaluation can read one comma-separated model matrix from .env
 
 Function get_settings:
 - cache one Settings instance per process

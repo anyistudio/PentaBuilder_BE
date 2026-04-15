@@ -1,0 +1,54 @@
+Dataclass EvalModelRef:
+- carry one provider/model pair for the local evaluation matrix
+- expose a stable label string for report grouping
+
+Dataclass EvalSeedRun:
+- describe the optional seed run used before a follow-up case
+- keep the seed run type and payload explicit so chat cases can attach reply_to_run_id
+
+Dataclass EvalCase:
+- define one local evaluation example
+- hold the run type, context, payload, response preferences, description, and optional seed run
+
+Function default_model_refs:
+- prefer the explicit ALL_MODELS environment list when it is configured
+- build the default model matrix from current settings
+- include the configured Gemini routing targets
+- add a small OpenAI default set when an OpenAI key is configured
+- remove duplicates while preserving order
+
+Function parse_model_refs:
+- accept explicit CLI model refs in provider:model format
+- fall back to default_model_refs when no explicit list is provided
+
+Function _parse_model_ref_strings:
+- parse one or more provider:model strings into EvalModelRef records
+- validate the format and deduplicate exact repeats while preserving order
+
+Function build_eval_cases:
+- generate the curated 5-example-per-feature local evaluation suite
+- cover all six AI run types
+- mix LoL and Wild Rift cases while respecting each game's slot contract
+
+Function run_local_workflow_eval:
+- execute every case against every requested model
+- disable cache usage by always creating fresh runs
+- collect per-case structured results plus latency/tokens/cost metadata
+- aggregate average latency per feature/model
+- write a human-readable markdown report to disk
+
+Function render_markdown_report:
+- turn the raw evaluation report payload into a manual-review-friendly markdown file
+- include average latency summary and full per-case structured outputs
+
+Function create_eval_app:
+- reuse the normal FastAPI application wiring for local evaluation
+- optionally mute verbose LLM debug logging for large evaluation runs
+
+Function _run_one_case:
+- execute one evaluation case for one model in an isolated database session
+- optionally run a seed request first and pass reply_to_run_id into the target payload
+- return either the completed run metadata + result or a failure record
+
+Helper functions _summarize_results / _context / _slots / _runes / _context_brief:
+- keep the report aggregation and case construction logic compact and game-aware

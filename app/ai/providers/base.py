@@ -57,3 +57,6 @@ class BaseLLMClient:
     ) -> Iterator[LLMStreamEvent]:
         del prompt, system_prompt, response_mime_type, response_schema, temperature
         raise NotImplementedError
+
+    def close(self) -> None:
+        return None
