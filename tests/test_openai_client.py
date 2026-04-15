@@ -1,4 +1,5 @@
 from app.ai.providers.factory import create_llm_client
+from app.ai.providers.gemini_client import GeminiClient
 from app.ai.providers.openai_client import OpenAIClient
 from app.core.config import Settings
 
@@ -136,3 +137,11 @@ def test_create_llm_client_reuses_openai_instances():
     )
 
     assert first is second
+
+
+def test_gemini_client_normalizes_legacy_model_aliases():
+    preview_client = GeminiClient(model_name="gemini-3.1-pro-preview", api_key="test-key")
+    legacy_client = GeminiClient(model_name="gemini-3.1-pro", api_key="test-key")
+
+    assert preview_client.model_name == "gemini-3-pro-preview"
+    assert legacy_client.model_name == "gemini-3-pro-preview"

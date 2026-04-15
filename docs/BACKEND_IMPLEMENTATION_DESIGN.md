@@ -724,11 +724,11 @@ v1 transcript 对象不需要做增量 patch，直接整文件覆盖即可。
 v1 默认值建议：
 
 - `PRIMARY_REASONING_PROVIDER=google`
-- `PRIMARY_REASONING_MODEL=gemini-3.1-pro`
+- `PRIMARY_REASONING_MODEL=gemini-3.1-pro-preview`
 - `FAST_REASONING_PROVIDER=google`
-- `FAST_REASONING_MODEL=gemini-3.1-pro`
+- `FAST_REASONING_MODEL=gemini-3.1-pro-preview`
 - `CALIBRATION_PROVIDER=google`
-- `CALIBRATION_MODEL=gemini-3.1-pro`
+- `CALIBRATION_MODEL=gemini-3.1-pro-preview`
 
 ## 15. 错误处理设计
 

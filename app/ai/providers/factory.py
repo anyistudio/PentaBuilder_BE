@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 from app.ai.providers.base import BaseLLMClient
-from app.ai.providers.gemini_client import GeminiClient
+from app.ai.providers.gemini_client import GeminiClient, normalize_gemini_model_name
 from app.ai.providers.openai_client import OpenAIClient
 from app.core.config import Settings
 
@@ -35,7 +35,10 @@ def create_llm_client(
         "",
         "replace-me",
     }:
-        return _create_google_client(model_name, settings.google_api_key.get_secret_value())
+        return _create_google_client(
+            normalize_gemini_model_name(model_name),
+            settings.google_api_key.get_secret_value(),
+        )
     if provider_name == "openai" and settings.openai_api_key.get_secret_value() not in {
         "",
         "replace-me",

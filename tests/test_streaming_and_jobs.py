@@ -219,7 +219,7 @@ def test_admin_jobs_cover_baselines_calibrations_benchmarks_and_cache(
             "data_version": data_version,
             "game": "lol",
             "provider_name": "google",
-            "model_name": "gemini-3.1-pro",
+            "model_name": "gemini-3.1-pro-preview",
         },
     )
     assert baseline_job_response.status_code == 202
@@ -236,7 +236,7 @@ def test_admin_jobs_cover_baselines_calibrations_benchmarks_and_cache(
         json={
             "data_version": data_version,
             "games": ["lol"],
-            "models": [{"provider_name": "google", "model_name": "gemini-3.1-pro"}],
+            "models": [{"provider_name": "google", "model_name": "gemini-3.1-pro-preview"}],
         },
     )
     assert calibration_job_response.status_code == 202
@@ -261,7 +261,7 @@ def test_admin_jobs_cover_baselines_calibrations_benchmarks_and_cache(
         auth=admin_auth,
         json={
             "dataset_id": dataset_id,
-            "models": [{"provider_name": "google", "model_name": "gemini-3.1-pro"}],
+            "models": [{"provider_name": "google", "model_name": "gemini-3.1-pro-preview"}],
         },
     )
     assert benchmark_job_response.status_code == 202

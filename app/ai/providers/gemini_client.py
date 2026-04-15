@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 MAX_RETRIES = 3
 RETRY_DELAYS = [5, 15, 30]  # seconds
 
+GEMINI_MODEL_ALIASES = {
+    "gemini-3.1-pro": "gemini-3-pro-preview",
+    "gemini-3.1-pro-preview": "gemini-3-pro-preview",
+}
+
 
 @lru_cache(maxsize=1)
 def _http2_enabled() -> bool:
@@ -25,11 +30,15 @@ def _http2_enabled() -> bool:
     return True
 
 
+def normalize_gemini_model_name(model_name: str) -> str:
+    return GEMINI_MODEL_ALIASES.get(model_name, model_name)
+
+
 class GeminiClient(BaseLLMClient):
     provider_name = "google"
 
     def __init__(self, model_name: str, api_key: str) -> None:
-        super().__init__(model_name)
+        super().__init__(normalize_gemini_model_name(model_name))
         self.api_key = api_key
         self._client = httpx.Client(
             http2=_http2_enabled(),
