@@ -215,6 +215,7 @@ def tool_select_node(
 def tool_execute_node(
     *,
     context: MatchContext,
+    response_preferences: ResponsePreferences,
     snapshot: CatalogSnapshot,
     session: Session,
     toolset: CatalogToolset,
@@ -236,6 +237,7 @@ def tool_execute_node(
             result, trace_entry, usage_payloads = _execute_tool_call(
                 session=session,
                 context=context,
+                response_preferences=response_preferences,
                 snapshot=snapshot,
                 toolset=toolset,
                 tool_call=tool_call,
@@ -657,6 +659,7 @@ def _execute_tool_call(
     *,
     session: Session,
     context: MatchContext,
+    response_preferences: ResponsePreferences,
     snapshot: CatalogSnapshot,
     toolset: CatalogToolset,
     tool_call: dict[str, Any],
@@ -666,31 +669,52 @@ def _execute_tool_call(
 
     if tool_name == "get_champion":
         result = toolset.get_champion(snapshot, arguments["slug"])
+        summary = _loaded_single_entity_summary(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            entity_type="champion",
+            slug=arguments["slug"],
+        )
         return result, {
             "phase": "execution",
             "tool": tool_name,
             "status": "completed",
-            "summary": f"Loaded champion facts for `{arguments['slug']}`.",
+            "summary": summary,
             "arguments": {"slug": arguments["slug"]},
             "champion_slug": arguments["slug"],
         }, []
     if tool_name == "get_item":
         result = toolset.get_item(snapshot, arguments["slug"])
+        summary = _loaded_single_entity_summary(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            entity_type="item",
+            slug=arguments["slug"],
+        )
         return result, {
             "phase": "execution",
             "tool": tool_name,
             "status": "completed",
-            "summary": f"Loaded item facts for `{arguments['slug']}`.",
+            "summary": summary,
             "arguments": {"slug": arguments["slug"]},
             "item_slug": arguments["slug"],
         }, []
     if tool_name == "get_rune":
         result = toolset.get_rune(snapshot, arguments["slug"])
+        summary = _loaded_single_entity_summary(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            entity_type="rune",
+            slug=arguments["slug"],
+        )
         return result, {
             "phase": "execution",
             "tool": tool_name,
             "status": "completed",
-            "summary": f"Loaded rune facts for `{arguments['slug']}`.",
+            "summary": summary,
             "arguments": {"slug": arguments["slug"]},
             "rune_slug": arguments["slug"],
         }, []
@@ -700,14 +724,23 @@ def _execute_tool_call(
             entity_type=arguments["entity_type"],
             slugs=arguments["slugs"],
         )
+        summary = _loaded_batch_entities_summary(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            entity_type=arguments["entity_type"],
+            slugs=[
+                entity.get("slug")
+                for entity in result.get("entities") or []
+                if isinstance(entity, dict) and isinstance(entity.get("slug"), str)
+            ],
+            missing_slugs=result.get("missing_slugs") or [],
+        )
         return result, {
             "phase": "execution",
             "tool": tool_name,
             "status": "completed",
-            "summary": (
-                f"Loaded {len(result.get('entities') or [])} {arguments['entity_type']} entries "
-                "for direct comparison."
-            ),
+            "summary": summary,
             "arguments": {
                 "entity_type": arguments["entity_type"],
                 "slugs": list(arguments["slugs"]),
@@ -728,14 +761,24 @@ def _execute_tool_call(
             entity_type=arguments["entity_type"],
             filters=arguments.get("filters"),
         )
+        summary = _listed_candidates_summary(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            entity_type=arguments["entity_type"],
+            filters=arguments.get("filters") or {},
+            candidate_slugs=[
+                candidate.get("slug")
+                for candidate in result.get("candidates") or []
+                if isinstance(candidate, dict) and isinstance(candidate.get("slug"), str)
+            ],
+            candidate_count=int(result.get("candidate_count", 0) or 0),
+        )
         return result, {
             "phase": "execution",
             "tool": tool_name,
             "status": "completed",
-            "summary": (
-                f"Listed {result.get('candidate_count', 0)} filtered "
-                f"{arguments['entity_type']} candidates."
-            ),
+            "summary": summary,
             "arguments": {
                 "game": arguments["game"],
                 "entity_type": arguments["entity_type"],
@@ -757,10 +800,19 @@ def _execute_tool_call(
             raw_name=arguments["raw_name"],
             filters=arguments.get("filters"),
         )
-        summary = (
-            f"Resolved `{arguments['raw_name']}` to `{result.get('resolved_slug')}`."
-            if result.get("resolved_slug")
-            else f"Could not fully resolve `{arguments['raw_name']}` yet."
+        summary = _resolved_slug_summary(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            entity_type=arguments["entity_type"],
+            raw_name=arguments["raw_name"],
+            resolved_slug=result.get("resolved_slug"),
+            resolution_status=result.get("resolution_status"),
+            candidate_slugs=[
+                candidate.get("slug")
+                for candidate in result.get("candidates") or []
+                if isinstance(candidate, dict) and isinstance(candidate.get("slug"), str)
+            ],
         )
         return result, {
             "phase": "execution",
@@ -791,14 +843,23 @@ def _execute_tool_call(
         query=arguments["query"],
         limit=arguments["limit"],
     )
+    summary = _search_catalog_summary(
+        context=context,
+        response_preferences=response_preferences,
+        snapshot=snapshot,
+        entity_type=arguments["entity_type"],
+        query=arguments["query"],
+        match_slugs=[
+            match.get("slug")
+            for match in result.get("matches") or []
+            if isinstance(match, dict) and isinstance(match.get("slug"), str)
+        ],
+    )
     return result, {
         "phase": "execution",
         "tool": tool_name,
         "status": "completed",
-        "summary": (
-            f"Searched the {arguments['entity_type']} catalog for "
-            f"`{arguments['query']}` and found {len(result.get('matches') or [])} matches."
-        ),
+        "summary": summary,
         "arguments": {
             "entity_type": arguments["entity_type"],
             "query": arguments["query"],
@@ -888,6 +949,264 @@ def _tool_call_key(tool_name: str, arguments: dict[str, Any]) -> str:
         ensure_ascii=False,
         sort_keys=True,
     )
+
+
+def _loaded_single_entity_summary(
+    *,
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+    entity_type: str,
+    slug: str,
+) -> str:
+    entity_name = _preferred_entity_name(
+        context=context,
+        response_preferences=response_preferences,
+        snapshot=snapshot,
+        slug=slug,
+    )
+    if _is_zh_output(response_preferences):
+        return f"读取{_entity_type_label(entity_type, zh=True)}数据：{entity_name}。"
+    return f"Loaded {_entity_type_label(entity_type, zh=False)} facts for {entity_name}."
+
+
+def _loaded_batch_entities_summary(
+    *,
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+    entity_type: str,
+    slugs: list[str],
+    missing_slugs: list[str],
+) -> str:
+    names = [
+        _preferred_entity_name(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            slug=slug,
+        )
+        for slug in slugs
+    ]
+    if _is_zh_output(response_preferences):
+        summary = (
+            f"读取{_entity_type_label(entity_type, zh=True)}数据："
+            f"{_format_entity_name_list(names, entity_type=entity_type, zh=True)}。"
+        )
+        if missing_slugs:
+            summary += f" 未命中 {len(missing_slugs)} 个候选。"
+        return summary
+    summary = (
+        f"Loaded {_entity_type_label(entity_type, zh=False)} facts for "
+        f"{_format_entity_name_list(names, entity_type=entity_type, zh=False)}."
+    )
+    if missing_slugs:
+        summary += f" {len(missing_slugs)} candidates were not found."
+    return summary
+
+
+def _listed_candidates_summary(
+    *,
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+    entity_type: str,
+    filters: dict[str, Any],
+    candidate_slugs: list[str],
+    candidate_count: int,
+) -> str:
+    names = [
+        _preferred_entity_name(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            slug=slug,
+        )
+        for slug in candidate_slugs[:4]
+    ]
+    filter_text = _filters_text(filters)
+    if _is_zh_output(response_preferences):
+        summary = (
+            f"按筛选条件列出 {candidate_count} 个{_entity_type_label(entity_type, zh=True)}候选"
+        )
+        if filter_text:
+            summary += f"（{filter_text}）"
+        if names:
+            summary += f"：{_format_entity_name_list(names, entity_type=entity_type, zh=True)}。"
+        else:
+            summary += "。"
+        return summary
+    summary = (
+        f"Listed {candidate_count} filtered "
+        f"{_entity_type_label(entity_type, zh=False)} candidates"
+    )
+    if filter_text:
+        summary += f" ({filter_text})"
+    if names:
+        summary += (
+            f": {_format_entity_name_list(names, entity_type=entity_type, zh=False)}."
+        )
+    else:
+        summary += "."
+    return summary
+
+
+def _resolved_slug_summary(
+    *,
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+    entity_type: str,
+    raw_name: str,
+    resolved_slug: str | None,
+    resolution_status: str | None,
+    candidate_slugs: list[str],
+) -> str:
+    if resolved_slug:
+        entity_name = _preferred_entity_name(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            slug=resolved_slug,
+        )
+        if _is_zh_output(response_preferences):
+            return (
+                f"将 “{raw_name}” 解析为"
+                f"{_entity_type_label(entity_type, zh=True)}：{entity_name}。"
+            )
+        return (
+            f"Resolved “{raw_name}” to the "
+            f"{_entity_type_label(entity_type, zh=False)} {entity_name}."
+        )
+    names = [
+        _preferred_entity_name(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            slug=slug,
+        )
+        for slug in candidate_slugs[:4]
+    ]
+    if _is_zh_output(response_preferences):
+        if names:
+            return (
+                f"尝试解析 “{raw_name}”，当前接近的"
+                f"{_entity_type_label(entity_type, zh=True)}候选有："
+                f"{_format_entity_name_list(names, entity_type=entity_type, zh=True)}。"
+            )
+        return f"暂时无法稳定解析 “{raw_name}”。"
+    if names:
+        return (
+            f"Tried to resolve “{raw_name}”. Closest {_entity_type_label(entity_type, zh=False)} "
+            f"candidates: {_format_entity_name_list(names, entity_type=entity_type, zh=False)}."
+        )
+    return (
+        f"Could not confidently resolve “{raw_name}” yet"
+        + (f" ({resolution_status})." if resolution_status else ".")
+    )
+
+
+def _search_catalog_summary(
+    *,
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+    entity_type: str,
+    query: str,
+    match_slugs: list[str],
+) -> str:
+    names = [
+        _preferred_entity_name(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            slug=slug,
+        )
+        for slug in match_slugs[:4]
+    ]
+    if _is_zh_output(response_preferences):
+        if names:
+            return (
+                f"搜索{_entity_type_label(entity_type, zh=True)}目录“{query}”，找到："
+                f"{_format_entity_name_list(names, entity_type=entity_type, zh=True)}。"
+            )
+        return f"搜索{_entity_type_label(entity_type, zh=True)}目录“{query}”，暂时没有命中。"
+    if names:
+        return (
+            f"Searched the {_entity_type_label(entity_type, zh=False)} catalog for “{query}” "
+            f"and found {_format_entity_name_list(names, entity_type=entity_type, zh=False)}."
+        )
+    return (
+        f"Searched the {_entity_type_label(entity_type, zh=False)} catalog for “{query}” "
+        "but found no close matches."
+    )
+
+
+def _preferred_entity_name(
+    *,
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+    slug: str,
+) -> str:
+    catalog = snapshot.catalogs[context.game]
+    entity = (
+        catalog.champions_by_slug.get(slug)
+        or catalog.items_by_slug.get(slug)
+        or catalog.runes_by_slug.get(slug)
+    )
+    if entity is None:
+        return slug
+    return entity.preferred_name(
+        response_preferences.language,
+        response_preferences.terminology_style,
+    )
+
+
+def _format_entity_name_list(names: list[str], *, entity_type: str, zh: bool) -> str:
+    unique_names = [name for index, name in enumerate(names) if name and name not in names[:index]]
+    if not unique_names:
+        return _entity_type_label(entity_type, zh=zh)
+    if zh:
+        if len(unique_names) <= 4:
+            return "、".join(unique_names)
+        return (
+            f"{'、'.join(unique_names[:4])} 等{len(unique_names)}个"
+            f"{_entity_type_label(entity_type, zh=True)}"
+        )
+    if len(unique_names) == 1:
+        return unique_names[0]
+    if len(unique_names) == 2:
+        return f"{unique_names[0]} and {unique_names[1]}"
+    if len(unique_names) <= 4:
+        return ", ".join(unique_names[:-1]) + f", and {unique_names[-1]}"
+    return (
+        ", ".join(unique_names[:4])
+        + f", and {len(unique_names) - 4} more "
+        + f"{_entity_type_label(entity_type, zh=False)}s"
+    )
+
+
+def _entity_type_label(entity_type: str, *, zh: bool) -> str:
+    if zh:
+        return {"champion": "英雄", "item": "装备", "rune": "符文"}.get(entity_type, "数据")
+    return entity_type
+
+
+def _filters_text(filters: dict[str, Any]) -> str:
+    if not filters:
+        return ""
+    parts: list[str] = []
+    for key, value in filters.items():
+        if isinstance(value, list):
+            parts.append(f"{key}={', '.join(str(item) for item in value)}")
+        else:
+            parts.append(f"{key}={value}")
+    return "; ".join(parts[:3])
+
+
+def _is_zh_output(response_preferences: ResponsePreferences) -> bool:
+    return response_preferences.language.value.startswith("zh")
 
 
 def _extract_validation_errors(exc: ApiError) -> list[str]:
