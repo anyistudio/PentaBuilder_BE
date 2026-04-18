@@ -2,6 +2,7 @@ from typing import Any, Literal
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
 
+from app.ai.orchestration.entity_appendix import build_involved_entity_parameter_appendix
 from app.catalog.registry import CatalogSnapshot
 from app.core.errors import ApiError
 from app.domain.enums import Game, RunType
@@ -121,12 +122,42 @@ class ChatFollowupResult(BaseModel):
     followup_suggestions: list[str] = Field(default_factory=list)
 
 
+class OwnKillEstimateResult(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    enemy_champion_slug: str = Field(min_length=1)
+    estimated_minutes_per_kill: float = Field(gt=0)
+    reason: str = Field(min_length=1)
+
+
+class EnemyChampionStatusResult(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    champion_slug: str = Field(min_length=1)
+    estimated_minutes_per_kill_on_user: float = Field(gt=0)
+    kill_reason: str = Field(min_length=1)
+    tower_push_percent_per_minute: float = Field(ge=0, le=100)
+    tower_push_reason: str = Field(min_length=1)
+
+
+class GameStatusResult(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    summary: str = Field(min_length=1)
+    assumed_match_duration_minutes: int = Field(ge=1, le=60)
+    own_kill_frequency_vs_enemies: list[OwnKillEstimateResult] = Field(default_factory=list)
+    own_tower_push_percent_per_minute: float = Field(ge=0, le=100)
+    own_tower_push_reason: str = Field(min_length=1)
+    enemy_statuses: list[EnemyChampionStatusResult] = Field(default_factory=list)
+
+
 CONTRACT_MODELS: dict[RunType, type[BaseModel]] = {
     RunType.EVALUATE_BUILD: EvaluateBuildResult,
     RunType.RECOMMEND_FULL_BUILD: RecommendFullBuildResult,
     RunType.RECOMMEND_SLOT: RecommendSlotResult,
     RunType.EXPLAIN_SLOT: ExplainSlotResult,
     RunType.COMPARE_BUILDS: CompareBuildsResult,
+    RunType.GAME_STATUS: GameStatusResult,
     RunType.CHAT_FOLLOWUP: ChatFollowupResult,
 }
 
@@ -400,6 +431,141 @@ def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> d
             ],
             "additionalProperties": False,
         }
+    if run_type == RunType.GAME_STATUS:
+        return {
+            "type": "object",
+            "properties": {
+                "summary": {
+                    "type": "string",
+                    "description": "Short overview of kill cadence and tower pressure.",
+                },
+                "assumed_match_duration_minutes": {
+                    "type": "integer",
+                    "enum": [15, 30],
+                    "description": (
+                        "Must be 15 for ARAM contexts, otherwise 30 for normal/ranked contexts."
+                    ),
+                },
+                "own_kill_frequency_vs_enemies": {
+                    "type": "array",
+                    "description": (
+                        "For the user's champion, estimate how often they kill each enemy "
+                        "champion, expressed as minutes per kill."
+                    ),
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "enemy_champion_slug": {
+                                "type": "string",
+                                "description": "One enemy champion slug from the current context.",
+                            },
+                            "estimated_minutes_per_kill": {
+                                "type": "number",
+                                "exclusiveMinimum": 0,
+                                "description": (
+                                    "Estimated minutes per kill. Keep it within the assumed match "
+                                    "duration, using larger numbers when kill pressure is low."
+                                ),
+                            },
+                            "reason": {
+                                "type": "string",
+                                "description": (
+                                    "Short reason grounded first in current items/item spikes, "
+                                    "then champion kit, runes, and mode."
+                                ),
+                            },
+                        },
+                        "required": [
+                            "enemy_champion_slug",
+                            "estimated_minutes_per_kill",
+                            "reason",
+                        ],
+                        "additionalProperties": False,
+                    },
+                },
+                "own_tower_push_percent_per_minute": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": (
+                        "Estimated percent of the user's current target objective "
+                        "(first tower, second tower, or nexus) pushed per minute under the "
+                        "current build and rune setup."
+                    ),
+                },
+                "own_tower_push_reason": {
+                    "type": "string",
+                    "description": (
+                        "Short reason for the user's tower pressure estimate, grounded in "
+                        "current items, waveclear pattern, and structure damage profile."
+                    ),
+                },
+                "enemy_statuses": {
+                    "type": "array",
+                    "description": (
+                        "For each enemy champion, estimate kill cadence against the user and tower "
+                        "pressure."
+                    ),
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "champion_slug": {
+                                "type": "string",
+                                "description": "One enemy champion slug from the current context.",
+                            },
+                            "estimated_minutes_per_kill_on_user": {
+                                "type": "number",
+                                "exclusiveMinimum": 0,
+                                "description": (
+                                    "Estimated minutes per kill against the user's champion. "
+                                    "Keep it within the assumed match duration."
+                                ),
+                            },
+                            "kill_reason": {
+                                "type": "string",
+                                "description": (
+                                    "Short reason for this kill cadence estimate, grounded first "
+                                    "in current items/item spikes and then in champion threat pattern."
+                                ),
+                            },
+                            "tower_push_percent_per_minute": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100,
+                                "description": (
+                                    "Estimated percent of this enemy champion's current target "
+                                    "objective (first tower, second tower, or nexus) pushed per minute."
+                                ),
+                            },
+                            "tower_push_reason": {
+                                "type": "string",
+                                "description": (
+                                    "Short reason for this tower pressure estimate, grounded first "
+                                    "in current items and then in waveclear/structure DPS pattern."
+                                ),
+                            },
+                        },
+                        "required": [
+                            "champion_slug",
+                            "estimated_minutes_per_kill_on_user",
+                            "kill_reason",
+                            "tower_push_percent_per_minute",
+                            "tower_push_reason",
+                        ],
+                        "additionalProperties": False,
+                    },
+                },
+            },
+            "required": [
+                "summary",
+                "assumed_match_duration_minutes",
+                "own_kill_frequency_vs_enemies",
+                "own_tower_push_percent_per_minute",
+                "own_tower_push_reason",
+                "enemy_statuses",
+            ],
+            "additionalProperties": False,
+        }
     return {
         "type": "object",
         "properties": {
@@ -639,6 +805,139 @@ def validate_run_result(
         result["alternatives"] = []
         return result
 
+    if run_type == RunType.GAME_STATUS:
+        assumed_duration = _assumed_match_duration_minutes(context)
+        if result["assumed_match_duration_minutes"] != assumed_duration:
+            _raise_invalid_ai_result(
+                message=(
+                    "assumed_match_duration_minutes must be 15 for ARAM contexts "
+                    "or 30 otherwise."
+                ),
+                loc=["assumed_match_duration_minutes"],
+            )
+
+        enemy_slugs_in_order = [enemy.champion_slug for enemy in context.enemy_team]
+        own_kill_by_enemy = {
+            item["enemy_champion_slug"]: item for item in result["own_kill_frequency_vs_enemies"]
+        }
+        enemy_status_by_slug = {
+            item["champion_slug"]: item for item in result["enemy_statuses"]
+        }
+        if set(own_kill_by_enemy) != set(enemy_slugs_in_order):
+            _raise_invalid_ai_result(
+                message=(
+                    "own_kill_frequency_vs_enemies must contain exactly one entry for each "
+                    "enemy champion in the current context."
+                ),
+                loc=["own_kill_frequency_vs_enemies"],
+            )
+        if set(enemy_status_by_slug) != set(enemy_slugs_in_order):
+            _raise_invalid_ai_result(
+                message=(
+                    "enemy_statuses must contain exactly one entry for each enemy champion "
+                    "in the current context."
+                ),
+                loc=["enemy_statuses"],
+            )
+        if len(own_kill_by_enemy) != len(result["own_kill_frequency_vs_enemies"]):
+            _raise_invalid_ai_result(
+                message="Duplicate enemy_champion_slug entries are not allowed.",
+                loc=["own_kill_frequency_vs_enemies"],
+            )
+        if len(enemy_status_by_slug) != len(result["enemy_statuses"]):
+            _raise_invalid_ai_result(
+                message="Duplicate champion_slug entries are not allowed.",
+                loc=["enemy_statuses"],
+            )
+
+        normalized_own_kills: list[dict[str, Any]] = []
+        normalized_enemy_statuses: list[dict[str, Any]] = []
+        for enemy_slug in enemy_slugs_in_order:
+            validated_enemy_slug = _validate_champion_slug(
+                context=context,
+                snapshot=snapshot,
+                champion_slug=enemy_slug,
+            )
+            own_kill_entry = own_kill_by_enemy[enemy_slug]
+            own_kill_minutes = float(own_kill_entry["estimated_minutes_per_kill"])
+            if own_kill_minutes > assumed_duration:
+                _raise_invalid_ai_result(
+                    message=(
+                        "estimated_minutes_per_kill must stay within the assumed match duration."
+                    ),
+                    loc=["own_kill_frequency_vs_enemies", enemy_slug, "estimated_minutes_per_kill"],
+                )
+            normalized_own_kills.append(
+                {
+                    "enemy_champion_slug": validated_enemy_slug,
+                    "estimated_minutes_per_kill": own_kill_minutes,
+                    "reason": own_kill_entry["reason"],
+                }
+            )
+
+            enemy_status = enemy_status_by_slug[enemy_slug]
+            enemy_minutes = float(enemy_status["estimated_minutes_per_kill_on_user"])
+            if enemy_minutes > assumed_duration:
+                _raise_invalid_ai_result(
+                    message=(
+                        "estimated_minutes_per_kill_on_user must stay within the assumed match "
+                        "duration."
+                    ),
+                    loc=["enemy_statuses", enemy_slug, "estimated_minutes_per_kill_on_user"],
+                )
+            tower_push = float(enemy_status["tower_push_percent_per_minute"])
+            normalized_enemy_statuses.append(
+                {
+                    "champion_slug": validated_enemy_slug,
+                    "estimated_minutes_per_kill_on_user": enemy_minutes,
+                    "kill_reason": enemy_status["kill_reason"],
+                    "tower_push_percent_per_minute": tower_push,
+                    "tower_push_reason": enemy_status["tower_push_reason"],
+                }
+            )
+
+        result["assumed_match_duration_minutes"] = assumed_duration
+        result["own_champion_slug"] = context.own_champion_slug
+        result["own_kill_frequency_vs_enemies"] = normalized_own_kills
+        result["enemy_statuses"] = normalized_enemy_statuses
+        result["parameter_appendix"] = build_involved_entity_parameter_appendix(
+            context=context,
+            snapshot=snapshot,
+        )
+        result["score"] = None
+        result["build"] = list(context.own_build)
+        result["runes"] = context.own_runes.model_dump(mode="json")
+        result["explanations"] = [
+            {"target": "summary", "text": result["summary"]},
+            {
+                "target": "own_tower_push",
+                "text": result["own_tower_push_reason"],
+            },
+            *[
+                {
+                    "target": f"own_vs:{item['enemy_champion_slug']}",
+                    "text": item["reason"],
+                }
+                for item in normalized_own_kills
+            ],
+            *[
+                {
+                    "target": f"enemy_vs:{item['champion_slug']}",
+                    "text": item["kill_reason"],
+                }
+                for item in normalized_enemy_statuses
+            ],
+            *[
+                {
+                    "target": f"enemy_push:{item['champion_slug']}",
+                    "text": item["tower_push_reason"],
+                }
+                for item in normalized_enemy_statuses
+            ],
+        ]
+        result["alternatives"] = []
+        return result
+
     answer = result["answer"]
     result["summary"] = answer if not result["summary"] else result["summary"]
     result["score"] = None
@@ -738,6 +1037,29 @@ def _validate_item_slug(
             loc=loc,
         )
     return validated_slug
+
+
+def _validate_champion_slug(
+    *,
+    context: MatchContext,
+    snapshot: CatalogSnapshot,
+    champion_slug: str,
+    loc: list[str | int] | None = None,
+) -> str:
+    try:
+        validated_slug = validate_slug_for_game(context.game, champion_slug)
+    except ValueError as exc:
+        _raise_invalid_ai_result(message=str(exc), loc=loc)
+    if validated_slug not in snapshot.catalogs[context.game].champions_by_slug:
+        _raise_invalid_ai_result(
+            message=f"Unknown champion slug `{validated_slug}` for game `{context.game.value}`.",
+            loc=loc,
+        )
+    return validated_slug
+
+
+def _assumed_match_duration_minutes(context: MatchContext) -> int:
+    return 15 if "aram" in context.environment.tags else 30
 
 
 def _validate_rune_selection(

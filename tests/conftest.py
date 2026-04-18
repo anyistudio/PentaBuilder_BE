@@ -123,6 +123,20 @@ def _extract_target_slot(prompt: str) -> int:
     return int(match.group(1)) if match else 0
 
 
+def _extract_enemy_slugs(prompt: str) -> list[str]:
+    match = re.search(r"- Enemy champion slugs: ([^\n]+)", prompt)
+    if not match:
+        return []
+    raw_value = match.group(1).strip()
+    if raw_value == "none":
+        return []
+    return [slug.strip() for slug in raw_value.split(",") if slug.strip()]
+
+
+def _extract_assumed_match_duration(prompt: str) -> int:
+    return 15 if "Environment tags: aram" in prompt else 30
+
+
 def _build_slot_count(game: str) -> int:
     return 7 if game == "wild_rift" else 6
 
@@ -155,6 +169,8 @@ def _build_preview_text(*, prompt: str, run_type: str) -> str:
         if current_item == best_item:
             return "当前这个位置已经合理，先保证整体节奏继续往后做。"
         return "这个位置更推荐补防守与节奏兼顾的装备，能更稳地接中期团战。"
+    if run_type == "game_status":
+        return "当前局面里双方击杀节奏更依赖中期关键装，整体推塔速度属于中等。"
     if run_type == "chat_followup":
         return "这局优先级更高的是把当前核心节奏做出来，然后再根据对面威胁补针对装。"
     return "这件装备更符合当前对局。"
@@ -226,6 +242,37 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
                 {"target": "slot:1", "reason": "A 的第二件更早补到了关键容错。"}
             ],
             "when_build_b_is_better": ["如果对面爆发没那么高，B 的纯输出路线会更赚。"],
+        }
+    if run_type == "game_status":
+        enemy_slugs = _extract_enemy_slugs(prompt)
+        assumed_duration = _extract_assumed_match_duration(prompt)
+        return {
+            "summary": "当前击杀压力主要看双方中期成型后的爆发窗口，推塔速度整体中等。",
+            "assumed_match_duration_minutes": assumed_duration,
+            "own_kill_frequency_vs_enemies": [
+                {
+                    "enemy_champion_slug": slug,
+                    "estimated_minutes_per_kill": min(
+                        float(assumed_duration), round(4.0 + index * 1.2, 1)
+                    ),
+                    "reason": "当前已成型的核心输出装让爆发窗口更稳定，但仍要看对方位移和反打能力。",
+                }
+                for index, slug in enumerate(enemy_slugs)
+            ],
+            "own_tower_push_percent_per_minute": 3.8,
+            "own_tower_push_reason": "当前已购装备提供稳定清线和普攻/技能混合伤害，推塔速度属于中等偏上。",
+            "enemy_statuses": [
+                {
+                    "champion_slug": slug,
+                    "estimated_minutes_per_kill_on_user": min(
+                        float(assumed_duration), round(3.5 + index * 1.4, 1)
+                    ),
+                    "kill_reason": "敌方当前已购装备让一轮爆发和先手控制后的集火窗口更危险。",
+                    "tower_push_percent_per_minute": round(2.4 + index * 0.6, 1),
+                    "tower_push_reason": "敌方推塔速度取决于当前成装后的清线能力、持续输出和结构伤害节奏。",
+                }
+                for index, slug in enumerate(enemy_slugs)
+            ],
         }
     return {
         "summary": "当前更重要的是把核心节奏做顺。",

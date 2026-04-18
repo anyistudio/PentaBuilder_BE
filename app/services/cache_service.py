@@ -12,6 +12,7 @@ CACHEABLE_RUN_TYPES = {
     "recommend_full_build",
     "explain_slot",
     "compare_builds",
+    "game_status",
 }
 
 

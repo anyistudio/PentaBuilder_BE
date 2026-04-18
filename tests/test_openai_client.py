@@ -1,7 +1,13 @@
+from types import SimpleNamespace
+
+import httpx
+import pytest
+
 from app.ai.providers.factory import create_llm_client
 from app.ai.providers.gemini_client import GeminiClient
 from app.ai.providers.openai_client import OpenAIClient
 from app.core.config import Settings
+from app.core.errors import IntegrationError
 
 
 def test_openai_client_uses_responses_json_schema_payload():
@@ -145,3 +151,83 @@ def test_gemini_client_normalizes_legacy_model_aliases():
 
     assert preview_client.model_name == "gemini-3-pro-preview"
     assert legacy_client.model_name == "gemini-3-pro-preview"
+
+
+class _StubGeminiHttpClient:
+    def __init__(self, responses: list[httpx.Response | Exception]) -> None:
+        self._responses = responses
+        self.calls = 0
+
+    def post(self, *args, **kwargs):  # noqa: ANN002, ANN003
+        response = self._responses[self.calls]
+        self.calls += 1
+        if isinstance(response, Exception):
+            raise response
+        return response
+
+
+def test_gemini_client_retries_503_until_success(monkeypatch):
+    monkeypatch.setattr(
+        "app.ai.providers.gemini_client.get_settings",
+        lambda: SimpleNamespace(debug_llm=False),
+    )
+    monkeypatch.setattr("app.ai.providers.gemini_client.time.sleep", lambda *_args, **_kwargs: None)
+
+    request = httpx.Request("POST", "https://example.com")
+    transport = _StubGeminiHttpClient(
+        [
+            httpx.Response(503, request=request, json={"error": {"message": "busy"}}),
+            httpx.Response(503, request=request, json={"error": {"message": "busy"}}),
+            httpx.Response(
+                200,
+                request=request,
+                json={
+                    "candidates": [{"content": {"parts": [{"text": '{"ok":true}'}]}}],
+                    "usageMetadata": {
+                        "promptTokenCount": 10,
+                        "candidatesTokenCount": 6,
+                    },
+                },
+            ),
+        ]
+    )
+    client = GeminiClient(model_name="gemini-3-flash-preview", api_key="test-key")
+    client._client = transport
+
+    result = client.generate_text(prompt="Return JSON.")
+
+    assert result.text == '{"ok":true}'
+    assert transport.calls == 3
+
+
+def test_gemini_client_raises_integration_error_after_retry_exhaustion(monkeypatch):
+    monkeypatch.setattr(
+        "app.ai.providers.gemini_client.get_settings",
+        lambda: SimpleNamespace(debug_llm=False),
+    )
+    monkeypatch.setattr("app.ai.providers.gemini_client.time.sleep", lambda *_args, **_kwargs: None)
+
+    request = httpx.Request("POST", "https://example.com")
+    transport = _StubGeminiHttpClient(
+        [
+            httpx.Response(503, request=request, json={"error": {"message": "busy"}}),
+            httpx.Response(503, request=request, json={"error": {"message": "busy"}}),
+            httpx.Response(503, request=request, json={"error": {"message": "busy"}}),
+            httpx.Response(503, request=request, json={"error": {"message": "busy"}}),
+        ]
+    )
+    client = GeminiClient(model_name="gemini-3-flash-preview", api_key="test-key")
+    client._client = transport
+
+    with pytest.raises(IntegrationError) as exc_info:
+        client.generate_text(prompt="Return JSON.")
+
+    assert exc_info.value.status_code == 503
+    assert exc_info.value.code == "provider_unavailable"
+    assert exc_info.value.details == {
+        "provider": "google",
+        "model_name": "gemini-3-flash-preview",
+        "upstream_status_code": 503,
+        "response_excerpt": '{"error":{"message":"busy"}}',
+    }
+    assert transport.calls == 4

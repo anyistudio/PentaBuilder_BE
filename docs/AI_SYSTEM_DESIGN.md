@@ -17,14 +17,15 @@
 
 ## 2.1 在线功能
 
-在线 run type 固定为这 6 个：
+在线 run type 固定为这 7 个：
 
 1. `evaluate_build`
 2. `recommend_full_build`
 3. `recommend_slot`
 4. `explain_slot`
 5. `compare_builds`
-6. `chat_followup`
+6. `game_status`
+7. `chat_followup`
 
 ## 2.2 离线功能
 
@@ -669,6 +670,7 @@ v1 改成只暴露 5 个更直接的工具。
 | `recommend_slot` | 3 | 需要对比候选 item |
 | `explain_slot` | 3 | 往往要比较当前项与替代项 |
 | `compare_builds` | 3 | 可能需要查多个差异位 |
+| `game_status` | 1 | 默认直接用注入的详细参数 appendix，不主动开工具 |
 | `chat_followup` | 4 | 问题最开放 |
 
 ## 5.6 Slug Resolver 子流程
@@ -908,6 +910,7 @@ ai/prompts/
 ├── recommend_slot.md
 ├── explain_slot.md
 ├── compare_builds.md
+├── game_status.md
 └── chat_followup.md
 ```
 
@@ -1123,10 +1126,12 @@ game_localization/
 5. `localized_name_rules.md`
 6. run-specific prompt
 7. context block
-8. baseline block
-9. calibration block
-10. reference cache block
-11. session memory block
+8. detailed parameter appendix（仅 `game_status`）
+9. operation block
+10. baseline block
+11. calibration block
+12. reference cache block
+13. session memory block
 
 ## 8. 各 run type 的结构化输出
 
@@ -1259,6 +1264,44 @@ game_localization/
 }
 ```
 
+## 8.7 `game_status`
+
+```json
+{
+  "summary": "当前击杀节奏更取决于双方中期关键装完成后的爆发窗口。",
+  "assumed_match_duration_minutes": 30,
+  "own_kill_frequency_vs_enemies": [
+    {
+      "enemy_champion_slug": "lol-zed",
+      "estimated_minutes_per_kill": 5.2,
+      "reason": "阿狸当前爆发成型较快，但仍要尊重劫的位移和先手窗口。"
+    }
+  ],
+  "own_tower_push_percent_per_minute": 3.8,
+  "own_tower_push_reason": "当前 build 有稳定清线和法强支撑，推塔速度中等偏上。",
+  "enemy_statuses": [
+    {
+      "champion_slug": "lol-zed",
+      "estimated_minutes_per_kill_on_user": 4.4,
+      "kill_reason": "劫的单点爆发和先手节奏更稳定，但仍受你当前位置与保命手段影响。",
+      "tower_push_percent_per_minute": 2.9,
+      "tower_push_reason": "劫对塔的持续输出一般，更多依赖兵线和单带窗口。"
+    }
+  ]
+}
+```
+
+补充说明：
+
+- 后端会额外追加一个 deterministic `parameter_appendix`
+- 其中包含当前涉及英雄、装备、符文的详细参数快照，直接来自 catalog 数据，不依赖模型复述
+- `own_tower_push_percent_per_minute` 不再表示整局统一推塔能力，而是“我方当前目标塔”的每分钟推进百分比
+- `enemy_statuses[*].tower_push_percent_per_minute` 表示“对应敌方英雄当前目标塔”的每分钟推进百分比
+- `payload` 可选传入：
+  - `own_current_tower_target`
+  - `enemy_current_tower_targets`
+- 若未传目标塔，后端默认按 `outer_tower` 处理
+
 ## 9. 每个在线功能的具体 Workflow
 
 ## 9.1 `evaluate_build`
@@ -1349,7 +1392,27 @@ game_localization/
    - `batch_get_entities`
 5. 输出自然语言回答和 follow-up suggestions
 
-## 9.7 所有在线功能的最终返回语言
+## 9.7 `game_status`
+
+流程：
+
+1. 服务层组装 context bundle
+2. 服务层把当前涉及的英雄 / 装备 / 符文参数整理成详细 appendix
+3. 进入 `OnlineRunGraph`
+4. 默认不主动开工具，直接基于注入的 appendix 做估计
+5. 输出：
+   - 用户英雄对每个敌方英雄的击杀频率
+   - 每个敌方英雄对用户英雄的击杀频率
+   - 用户英雄对“当前目标塔”的推塔速度
+   - 每个敌方英雄对“各自当前目标塔”的推塔速度
+6. 程序校验：
+   - `ARAM -> 15` 分钟
+   - 非 `ARAM -> 30` 分钟
+   - 敌方英雄集合必须与输入完全一致
+   - 频率与推塔速度数值范围合法
+7. 后端把 deterministic `parameter_appendix` 追加到最终返回结果
+
+## 9.8 所有在线功能的最终返回语言
 
 统一规则：
 
@@ -1466,6 +1529,7 @@ For this batch:
 - `recommend_slot` -> `primary_reasoning_model`
 - `explain_slot` -> `primary_reasoning_model`
 - `compare_builds` -> `primary_reasoning_model`
+- `game_status` -> `primary_reasoning_model`
 - `chat_followup` -> `fast_reasoning_model` 或 `primary_reasoning_model`
 - `baseline_precompute` -> `primary_reasoning_model`
 - `version_calibration` -> `calibration_model`
@@ -1486,6 +1550,7 @@ streaming 用于需要前端同步展示推理进度、tool call 和正文预览
 - `evaluate_build`
 - `recommend_slot`
 - `compare_builds`
+- `game_status`
 
 Graph 内部发出这些事件：
 
@@ -1528,17 +1593,18 @@ AI 子系统建议按这个顺序开发：
 11. `evaluate_build`
 12. `explain_slot`
 13. `compare_builds`
-14. `chat_followup`
-15. `repair_result`
-16. `baseline_precompute`
-17. `version_calibration`
-18. `benchmark_run`
+14. `game_status`
+15. `chat_followup`
+16. `repair_result`
+17. `baseline_precompute`
+18. `version_calibration`
+19. `benchmark_run`
 
 ## 14. 一句话结论
 
 PentaBuilder 的 AI 设计应该直接实现成这套结构：
 
-- 在线 6 个 run type 共用一个 `LangGraph OnlineRunGraph`
+- 在线 7 个 run type 共用一个 `LangGraph OnlineRunGraph`
 - baseline 和 calibration 由服务层先注入
 - 模型只调用 5 个只读工具补充少量候选事实
 - prompt 固定由 `shared blocks + run-specific block` 组成

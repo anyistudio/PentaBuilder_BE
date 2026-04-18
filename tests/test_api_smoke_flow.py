@@ -103,12 +103,64 @@ def test_end_to_end_smoke_flow(configured_client: TestClient) -> None:
                 "terminology_style": "official",
             },
             "session_id": session_id,
-            "payload": {},
+            "payload": {
+                "own_current_tower_target": "inner_tower",
+                "enemy_current_tower_targets": [
+                    {
+                        "champion_slug": "lol-zed",
+                        "tower_target": "outer_tower",
+                    }
+                ],
+            },
         },
     )
     assert evaluate_response.status_code == 200
     evaluate_data = evaluate_response.json()["data"]
     assert evaluate_data["result"]["score"] >= 60
+
+    game_status_response = configured_client.post(
+        "/api/v1/ai/runs",
+        headers=headers,
+        json={
+            "run_type": "game_status",
+            "context": {
+                **context,
+                "enemy_team": [
+                    {
+                        "champion_slug": "lol-zed",
+                        "build": [
+                            "lol-eclipse",
+                            "lol-ionian-boots-of-lucidity",
+                            None,
+                            None,
+                            None,
+                            None,
+                        ],
+                        "runes": {
+                            "primary": ["lol-electrocute"],
+                            "secondary": ["lol-transcendence"],
+                        },
+                    }
+                ],
+                "own_runes": {
+                    "primary": ["lol-electrocute"],
+                    "secondary": ["lol-manaflow-band"],
+                },
+            },
+            "response_preferences": {
+                "language": "zh-CN",
+                "terminology_style": "official",
+            },
+            "session_id": session_id,
+            "payload": {},
+        },
+    )
+    assert game_status_response.status_code == 200
+    game_status_data = game_status_response.json()["data"]
+    assert game_status_data["result"]["assumed_match_duration_minutes"] == 30
+    assert game_status_data["result"]["own_kill_frequency_vs_enemies"][0]["enemy_champion_slug"] == "lol-zed"
+    assert game_status_data["result"]["enemy_statuses"][0]["champion_slug"] == "lol-zed"
+    assert game_status_data["result"]["parameter_appendix"]["enemy_team"][0]["build"][0]["item_slug"] == "lol-eclipse"
 
     session_list_response = configured_client.get("/api/v1/sessions", headers=headers)
     assert session_list_response.status_code == 200

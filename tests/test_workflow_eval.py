@@ -14,7 +14,7 @@ from app.evals.workflow_eval import (
 def test_build_eval_cases_produces_five_examples_per_feature():
     cases = build_eval_cases("full-20260411")
 
-    assert len(cases) == 30
+    assert len(cases) == len(RunType) * 5
 
     counts = Counter(case.feature for case in cases)
     for run_type in RunType:

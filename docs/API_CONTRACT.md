@@ -119,6 +119,7 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
 "recommend_full_build"
 "explain_slot"
 "compare_builds"
+"game_status"
 "chat_followup"
 ```
 
@@ -693,6 +694,7 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
   - `evaluate_build`
   - `recommend_slot`
   - `compare_builds`
+  - `game_status`
   不建议开启 SSE 正文流
 - `stream=false` 时可直接返回完整结果
 - 前端必须根据 `context.game` 明确展示当前工作区是 `LoL PC` 还是 `Wild Rift`
@@ -740,6 +742,37 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
   }
 }
 ```
+
+#### `game_status`
+
+- `payload` 可为空
+- 可选：
+  - `payload.own_current_tower_target`
+    - `"outer_tower" | "inner_tower" | "nexus"`
+    - 不传时默认 `"outer_tower"`
+  - `payload.enemy_current_tower_targets`
+    - 数组，按敌方英雄逐个声明当前目标塔
+    - 每项结构：
+
+```json
+{
+  "champion_slug": "lol-zed",
+  "tower_target": "outer_tower"
+}
+```
+
+- 返回结果会包含：
+  - `assumed_match_duration_minutes`
+  - `own_kill_frequency_vs_enemies`
+  - `own_tower_push_percent_per_minute`
+  - `enemy_statuses`
+- 若 `environment.tags` 包含 `aram`，`assumed_match_duration_minutes` 必须为 `15`
+- 否则 `assumed_match_duration_minutes` 必须为 `30`
+- 后端会额外追加一个 deterministic `parameter_appendix`
+  - 包含当前涉及英雄、装备、符文的详细参数快照
+  - 该 appendix 直接来自 catalog 数据，不依赖模型回填
+- `own_tower_push_percent_per_minute` 表示“我方当前目标塔”每分钟推进多少百分比
+- `enemy_statuses[*].tower_push_percent_per_minute` 表示“该敌方英雄当前目标塔”每分钟推进多少百分比
 
 #### `chat_followup`
 

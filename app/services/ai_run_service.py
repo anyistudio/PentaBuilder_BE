@@ -663,6 +663,43 @@ class AIRunService:
                         code="invalid_payload",
                         status_code=400,
                     ) from exc
+        if run_type == RunType.GAME_STATUS:
+            own_current_tower_target = operation_context.get("own_current_tower_target", "outer_tower")
+            if own_current_tower_target not in {"outer_tower", "inner_tower", "nexus"}:
+                raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
+            operation_context["own_current_tower_target"] = own_current_tower_target
+
+            enemy_current_tower_targets = operation_context.get("enemy_current_tower_targets", [])
+            if enemy_current_tower_targets in (None, {}):
+                enemy_current_tower_targets = []
+            if not isinstance(enemy_current_tower_targets, list):
+                raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
+
+            normalized_enemy_targets: list[dict[str, str]] = []
+            seen_enemy_slugs: set[str] = set()
+            enemy_slugs = {enemy.champion_slug for enemy in context.enemy_team}
+            for item in enemy_current_tower_targets:
+                if not isinstance(item, dict):
+                    raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
+                champion_slug = item.get("champion_slug")
+                tower_target = item.get("tower_target")
+                if not isinstance(champion_slug, str) or not isinstance(tower_target, str):
+                    raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
+                champion_slug = validate_slug_for_game(context.game, champion_slug)
+                if champion_slug not in enemy_slugs:
+                    raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
+                if tower_target not in {"outer_tower", "inner_tower", "nexus"}:
+                    raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
+                if champion_slug in seen_enemy_slugs:
+                    raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
+                seen_enemy_slugs.add(champion_slug)
+                normalized_enemy_targets.append(
+                    {
+                        "champion_slug": champion_slug,
+                        "tower_target": tower_target,
+                    }
+                )
+            operation_context["enemy_current_tower_targets"] = normalized_enemy_targets
 
     def _resolve_bound_session(
         self,

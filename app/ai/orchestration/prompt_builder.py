@@ -4,6 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from app.ai.orchestration.entity_appendix import build_involved_entity_parameter_appendix
 from app.catalog.registry import CatalogEntity, CatalogSnapshot
 from app.domain.enums import Game, Language, RunType
 from app.domain.match_context import (
@@ -42,6 +43,7 @@ def build_prompt_package(
     validation_errors: list[str] | None = None,
     candidate_result: dict[str, Any] | None = None,
 ) -> PromptPackage:
+    enemy_auto_replan = _is_enemy_auto_replan(operation_context)
     stream_channel = _stream_channel_for_run_type(run_type)
     prompt_files = [
         "shared/system_base.md",
@@ -85,6 +87,12 @@ def build_prompt_package(
             context=context,
             response_preferences=response_preferences,
             snapshot=snapshot,
+            operation_context=operation_context,
+        ),
+        _game_status_parameter_block(
+            run_type=run_type,
+            context=context,
+            snapshot=snapshot,
         ),
         _operation_block(
             run_type=run_type,
@@ -99,10 +107,23 @@ def build_prompt_package(
             context=context,
             response_preferences=response_preferences,
             snapshot=snapshot,
+            operation_context=operation_context,
         ),
-        _optional_text_block("Calibration Summary", calibration_summary),
-        _optional_text_block("Reference Cache Summary", reference_summary),
-        _optional_text_block("Session Memory Summary", session_memory_summary),
+        (
+            ""
+            if enemy_auto_replan
+            else _optional_text_block("Calibration Summary", calibration_summary)
+        ),
+        (
+            ""
+            if enemy_auto_replan
+            else _optional_text_block("Reference Cache Summary", reference_summary)
+        ),
+        (
+            ""
+            if enemy_auto_replan
+            else _optional_text_block("Session Memory Summary", session_memory_summary)
+        ),
         _tool_facts_block(tool_facts=tool_facts),
         _available_tools_block(
             context=context,
@@ -247,8 +268,10 @@ def _context_bundle_block(
     context: MatchContext,
     response_preferences: ResponsePreferences,
     snapshot: CatalogSnapshot,
+    operation_context: dict[str, Any],
 ) -> str:
     catalog = snapshot.catalogs[context.game]
+    purchased_only = _is_enemy_auto_replan(operation_context)
     sections = [
         "## Injected Context Bundle",
         "### Own Champion",
@@ -269,18 +292,29 @@ def _context_bundle_block(
                     runes=enemy.runes.model_dump(mode="json"),
                     response_preferences=response_preferences,
                     snapshot=snapshot,
+                    purchased_only=purchased_only,
                 )
             )
 
     sections.append("### Current Build")
-    sections.extend(
-        _format_build_slots(
-            build=context.own_build,
-            context=context,
-            response_preferences=response_preferences,
-            snapshot=snapshot,
+    if purchased_only:
+        sections.extend(
+            _format_purchased_build_slots(
+                build=context.own_build,
+                context=context,
+                response_preferences=response_preferences,
+                snapshot=snapshot,
+            )
         )
-    )
+    else:
+        sections.extend(
+            _format_build_slots(
+                build=context.own_build,
+                context=context,
+                response_preferences=response_preferences,
+                snapshot=snapshot,
+            )
+        )
     sections.append("### Current Runes")
     sections.extend(
         _format_rune_lines(
@@ -303,6 +337,16 @@ def _operation_block(
     reply_to_run_summary: str | None,
 ) -> str:
     sections = ["## Task-Specific Context"]
+    if _is_enemy_auto_replan(operation_context):
+        sections.extend(
+            [
+                "- Planner mode: enemy auto-replan during an ongoing simulated match.",
+                "- Perspective rule: `own_champion_slug` is the enemy hero being planned, and `enemy_team` is the opposing user side.",
+                "- Use only the explicitly listed purchased items as locked constraints.",
+                "- Do not infer, preserve, or continue any future plan unless an item is explicitly listed as already purchased.",
+                "- No baseline build reference should be assumed for this auto-replan task.",
+            ]
+        )
     if run_type == RunType.RECOMMEND_FULL_BUILD:
         if context.game == Game.WILD_RIFT:
             sections.extend(
@@ -383,6 +427,38 @@ def _operation_block(
         if reply_to_run_summary:
             sections.append("### Reply-To Run Summary")
             sections.append(reply_to_run_summary)
+    if run_type == RunType.GAME_STATUS:
+        own_tower_target = _tower_target_label(
+            str(operation_context.get("own_current_tower_target", "outer_tower"))
+        )
+        enemy_tower_targets = _game_status_enemy_tower_targets(
+            context=context,
+            operation_context=operation_context,
+        )
+        sections.extend(
+            [
+                (
+                    "- Assumed match duration: "
+                    f"{_assumed_match_duration_minutes(context)} minutes"
+                ),
+                f"- Own current tower target: {own_tower_target}",
+                (
+                    "- Enemy current tower targets: "
+                    + (
+                        ", ".join(enemy_tower_targets)
+                        if enemy_tower_targets
+                        else "default to first tower for every enemy"
+                    )
+                ),
+                (
+                    "- Estimation contract: output the user's kill cadence versus each enemy, "
+                    "each enemy's kill cadence versus the user, each enemy's tower push rate, "
+                    "and the user's tower push rate against each subject's current tower target. "
+                    "Keep the reasons anchored in currently owned items first, then explain how "
+                    "those items interact with kit and matchup."
+                ),
+            ]
+        )
     return "\n".join(sections)
 
 
@@ -392,7 +468,10 @@ def _baseline_block(
     context: MatchContext,
     response_preferences: ResponsePreferences,
     snapshot: CatalogSnapshot,
+    operation_context: dict[str, Any],
 ) -> str:
+    if _is_enemy_auto_replan(operation_context):
+        return ""
     if not baseline:
         return ""
     sections = ["## Baseline Build Reference"]
@@ -427,6 +506,51 @@ def _optional_text_block(title: str, content: str | None) -> str:
     if not content:
         return ""
     return f"## {title}\n{content}"
+
+
+def _game_status_parameter_block(
+    *,
+    run_type: RunType,
+    context: MatchContext,
+    snapshot: CatalogSnapshot,
+) -> str:
+    if run_type != RunType.GAME_STATUS:
+        return ""
+    appendix = build_involved_entity_parameter_appendix(context=context, snapshot=snapshot)
+    return "\n".join(
+        [
+            "## Detailed Parameter Appendix",
+            (
+                "Use this appendix as grounded structured data for the estimates. "
+                "These parameters come directly from the current catalog snapshot."
+            ),
+            json.dumps(appendix, ensure_ascii=False, indent=2),
+        ]
+    )
+
+
+def _tower_target_label(value: str) -> str:
+    if value == "inner_tower":
+        return "second tower"
+    if value == "nexus":
+        return "nexus"
+    return "first tower"
+
+
+def _game_status_enemy_tower_targets(
+    *,
+    context: MatchContext,
+    operation_context: dict[str, Any],
+) -> list[str]:
+    targets_by_slug = {
+        str(item.get("champion_slug")): _tower_target_label(str(item.get("tower_target", "outer_tower")))
+        for item in operation_context.get("enemy_current_tower_targets", [])
+        if isinstance(item, dict)
+    }
+    lines: list[str] = []
+    for enemy in context.enemy_team:
+        lines.append(f"{enemy.champion_slug} -> {targets_by_slug.get(enemy.champion_slug, 'first tower')}")
+    return lines
 
 
 def _tool_facts_block(tool_facts: dict[str, list[dict[str, Any]]] | None) -> str:
@@ -501,14 +625,26 @@ def _localization_bundle_block(
     snapshot: CatalogSnapshot,
     tool_facts: dict[str, list[dict[str, Any]]] | None,
 ) -> str:
+    enemy_auto_replan = _is_enemy_auto_replan(operation_context)
     relevant_slugs = {
         context.own_champion_slug,
         *(enemy.champion_slug for enemy in context.enemy_team),
         *(slot for slot in context.own_build if slot),
+        *(
+            slot
+            for enemy in context.enemy_team
+            for slot in enemy.build
+            if slot
+        ),
         *(context.own_runes.primary or []),
         *(context.own_runes.secondary or []),
+        *(
+            rune_slug
+            for enemy in context.enemy_team
+            for rune_slug in [*(enemy.runes.primary or []), *(enemy.runes.secondary or [])]
+        ),
     }
-    if baseline:
+    if baseline and not enemy_auto_replan:
         relevant_slugs.update(
             slug
             for slug in (
@@ -521,11 +657,12 @@ def _localization_bundle_block(
         rune_selection = baseline.get("recommended_runes") or {}
         relevant_slugs.update(rune_selection.get("primary") or [])
         relevant_slugs.update(rune_selection.get("secondary") or [])
-    comparison_context = operation_context.get("comparison_context", {})
-    relevant_slugs.update(slug for slug in comparison_context.get("own_build") or [] if slug)
-    comparison_runes = _normalize_rune_selection(comparison_context.get("own_runes"))
-    relevant_slugs.update(comparison_runes.get("primary") or [])
-    relevant_slugs.update(comparison_runes.get("secondary") or [])
+    if not enemy_auto_replan:
+        comparison_context = operation_context.get("comparison_context", {})
+        relevant_slugs.update(slug for slug in comparison_context.get("own_build") or [] if slug)
+        comparison_runes = _normalize_rune_selection(comparison_context.get("own_runes"))
+        relevant_slugs.update(comparison_runes.get("primary") or [])
+        relevant_slugs.update(comparison_runes.get("secondary") or [])
     relevant_slugs.update(_slugs_from_tool_facts(tool_facts))
 
     lines = ["## Localization Bundle"]
@@ -785,6 +922,10 @@ def _normalize_rune_selection(value: Any) -> dict[str, Any]:
     return {"primary": [], "secondary": []}
 
 
+def _is_enemy_auto_replan(operation_context: dict[str, Any]) -> bool:
+    return str(operation_context.get("planner_role") or "").strip() == "enemy_auto"
+
+
 def _format_enemy_context(
     *,
     index: int,
@@ -793,23 +934,38 @@ def _format_enemy_context(
     runes: dict[str, Any],
     response_preferences: ResponsePreferences,
     snapshot: CatalogSnapshot,
+    purchased_only: bool = False,
 ) -> str:
     header = f"{index}. {_entity_label(entity, response_preferences)}"
+    build_lines = (
+        _format_purchased_build_slots(
+            build=build,
+            context=MatchContext(
+                game=entity.game,
+                data_version=snapshot.data_version,
+                own_champion_slug=entity.slug,
+            ),
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+        )
+        if purchased_only
+        else _format_build_slots(
+            build=build,
+            context=MatchContext(
+                game=entity.game,
+                data_version=snapshot.data_version,
+                own_champion_slug=entity.slug,
+            ),
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+        )
+    )
     body = [
         f"   - Summary: {_champion_summary_line(entity)}",
-        "   - Known build slots:",
+        f"   - {'Purchased items' if purchased_only else 'Known build slots'}:",
         *[
             f"     - {line.removeprefix('- ')}"
-            for line in _format_build_slots(
-                build=build,
-                context=MatchContext(
-                    game=entity.game,
-                    data_version=snapshot.data_version,
-                    own_champion_slug=entity.slug,
-                ),
-                response_preferences=response_preferences,
-                snapshot=snapshot,
-            )
+            for line in build_lines
         ],
         "   - Known runes:",
         *[
@@ -880,6 +1036,31 @@ def _format_build_slots(
     for slot_index, item_slug in enumerate(slots[:build_slot_count], start=1):
         lines.append(
             f"- Slot {slot_index}: "
+            + _format_item_reference(
+                item_slug,
+                context,
+                response_preferences,
+                snapshot,
+            )
+        )
+    return lines
+
+
+def _format_purchased_build_slots(
+    *,
+    build: list[str | None],
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+) -> list[str]:
+    purchased = [item_slug for item_slug in build if item_slug]
+    if not purchased:
+        return ["- No purchased items known yet."]
+
+    lines: list[str] = []
+    for purchased_index, item_slug in enumerate(purchased, start=1):
+        lines.append(
+            f"- Purchased item {purchased_index}: "
             + _format_item_reference(
                 item_slug,
                 context,
@@ -1003,6 +1184,10 @@ def _champion_summary_line(entity: CatalogEntity) -> str:
 
 def _game_label(game_value: str) -> str:
     return "LoL PC" if game_value == "lol" else "Wild Rift"
+
+
+def _assumed_match_duration_minutes(context: MatchContext) -> int:
+    return 15 if "aram" in context.environment.tags else 30
 
 
 def _trim_text(value: str, limit: int) -> str:

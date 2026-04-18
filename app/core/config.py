@@ -59,11 +59,11 @@ class Settings(BaseSettings):
     openai_project_id: str | None = None
     all_models: str = ""
     primary_reasoning_provider: str = "google"
-    primary_reasoning_model: str = "gemini-3.1-pro-preview"
+    primary_reasoning_model: str = "gemini-3-flash-preview"
     fast_reasoning_provider: str = "google"
-    fast_reasoning_model: str = "gemini-3.1-pro-preview"
+    fast_reasoning_model: str = "gemini-3-flash-preview"
     calibration_provider: str = "google"
-    calibration_model: str = "gemini-3.1-pro-preview"
+    calibration_model: str = "gemini-3-flash-preview"
     debug_llm: bool = True
 
     @property

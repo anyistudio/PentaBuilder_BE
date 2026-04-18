@@ -20,6 +20,7 @@ TOOL_ROUND_LIMITS = {
     RunType.RECOMMEND_SLOT: 3,
     RunType.EXPLAIN_SLOT: 3,
     RunType.COMPARE_BUILDS: 3,
+    RunType.GAME_STATUS: 1,
     RunType.CHAT_FOLLOWUP: 4,
 }
 TOTAL_TOOL_CALL_LIMIT = 8
@@ -442,6 +443,8 @@ def _default_tool_need(
     if run_type == RunType.COMPARE_BUILDS:
         diff_count = _comparison_diff_count(context=context, operation_context=operation_context)
         return diff_count > 2, "many_build_differences" if diff_count > 2 else "few_differences"
+    if run_type == RunType.GAME_STATUS:
+        return False, "detailed_context_appendix_is_sufficient"
     if run_type == RunType.CHAT_FOLLOWUP:
         return True, "chat_followup_allows_tools"
     if run_type == RunType.EVALUATE_BUILD:

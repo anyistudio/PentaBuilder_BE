@@ -12,6 +12,7 @@ class RunType(str, Enum):
     RECOMMEND_SLOT = "recommend_slot"
     EXPLAIN_SLOT = "explain_slot"
     COMPARE_BUILDS = "compare_builds"
+    GAME_STATUS = "game_status"
     CHAT_FOLLOWUP = "chat_followup"
 
 
