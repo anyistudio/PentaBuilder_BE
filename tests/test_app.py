@@ -57,7 +57,7 @@ def test_append_llm_debug_log_uses_run_id_file(monkeypatch, tmp_path) -> None:
     log_dir = tmp_path / "log"
     monkeypatch.setattr(llm_debug, "LLM_DEBUG_LOG_DIR", log_dir)
     monkeypatch.setattr(llm_debug, "LEGACY_LLM_DEBUG_LOG_PATH", tmp_path / "debug_llm.log")
-    log_file_name = "20260418-153045-123456-4000.log"
+    log_file_name = "20260418-103045-123456-4000.log"
 
     with llm_debug.llm_debug_scope(
         workflow_name="online_run",
@@ -80,4 +80,4 @@ def test_build_run_log_file_name_uses_start_timestamp_and_run_suffix() -> None:
         started_at="2026-04-18T15:30:45.123456+00:00",
     )
 
-    assert log_file_name == "20260418-153045-123456-4000.log"
+    assert log_file_name == "20260418-103045-123456-4000.log"

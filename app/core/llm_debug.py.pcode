@@ -99,7 +99,7 @@ def _resolve_log_path(record):
 
 def build_run_log_file_name(*, run_id, started_at):
     Build the human-readable per-run filename from:
-    - the run start timestamp in UTC, formatted for filesystem safety
+    - the run start timestamp converted into America/Chicago time, formatted for filesystem safety
     - the last four characters of the sanitized run_id
 
     Return a final `<timestamp>-<suffix>.log` filename.

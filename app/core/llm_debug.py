@@ -5,12 +5,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
 from typing import Any, Iterator
+from zoneinfo import ZoneInfo
 
 from app.core.config import BASE_DIR
 from app.core.request_context import get_request_id
 
 LLM_DEBUG_LOG_DIR = BASE_DIR / "log"
 LEGACY_LLM_DEBUG_LOG_PATH = BASE_DIR / "debug_llm.log"
+LLM_DEBUG_LOG_TIMEZONE = ZoneInfo("America/Chicago")
 DETAIL_SECTION_KEYS = {
     "system_prompt",
     "prompt",
@@ -376,8 +378,7 @@ def build_run_log_file_name(*, run_id: str, started_at: datetime | str) -> str:
 
     if started_at_value.tzinfo is None:
         started_at_value = started_at_value.replace(tzinfo=timezone.utc)
-    else:
-        started_at_value = started_at_value.astimezone(timezone.utc)
+    started_at_value = started_at_value.astimezone(LLM_DEBUG_LOG_TIMEZONE)
 
     timestamp = started_at_value.strftime("%Y%m%d-%H%M%S-%f")
     run_suffix = _sanitize_log_stem(run_id)[-4:] or "misc"

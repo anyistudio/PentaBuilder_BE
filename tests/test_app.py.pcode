@@ -23,4 +23,4 @@ Function test_append_llm_debug_log_uses_run_id_file:
 
 Function test_build_run_log_file_name_uses_start_timestamp_and_run_suffix:
 - build a run log file name from a fixed UTC timestamp plus a known run_id
-- verify the final name uses the formatted start timestamp and the last four characters of the run_id
+- verify the final name converts that timestamp into America/Chicago local time before appending the run-id suffix
