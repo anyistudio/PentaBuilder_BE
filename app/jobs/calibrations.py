@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.ai.providers.factory import create_llm_client
 from app.catalog.registry import CatalogEntity, GameDataRegistry
 from app.core.config import get_settings
+from app.core.llm_debug import llm_debug_scope
 from app.core.errors import ApiError
 from app.db.models import ModelCalibration
 from app.domain.enums import Game
@@ -79,11 +80,16 @@ def generate_calibration_summary(
                 *(_format_entity_for_calibration(entity) for entity in batch),
             ]
         )
-        result = llm_client.generate_text(
-            prompt=prompt,
-            system_prompt=CALIBRATION_SYSTEM_PROMPT,
-            temperature=0.1,
-        )
+        with llm_debug_scope(
+            workflow_name="generate_calibration",
+            calibration_batch_index=batch_index,
+            entity_batch_size=len(batch),
+        ):
+            result = llm_client.generate_text(
+                prompt=prompt,
+                system_prompt=CALIBRATION_SYSTEM_PROMPT,
+                temperature=0.1,
+            )
         if result.text.strip():
             batch_notes.append(f"## Batch {batch_index}\n{result.text.strip()}")
 

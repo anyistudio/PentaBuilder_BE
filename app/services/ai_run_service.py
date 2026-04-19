@@ -18,6 +18,11 @@ from app.api.schemas.ai_run import AIRunSummarySchema
 from app.catalog.registry import CatalogSnapshot, GameDataRegistry
 from app.core.config import Settings
 from app.core.errors import ApiError
+from app.core.llm_debug import (
+    append_llm_debug_log,
+    build_run_log_file_name,
+    llm_debug_scope,
+)
 from app.db.models import AIRun, BaselineBuild, ModelCalibration, SessionRecord, User
 from app.domain.enums import RunStatus, RunType
 from app.domain.match_context import (
@@ -281,6 +286,33 @@ class AIRunService:
         session.add(run)
         session.commit()
         session.refresh(run)
+        llm_debug_log_file_name = self._build_llm_debug_log_file_name(run)
+        if self.settings.debug_llm:
+            append_llm_debug_log(
+                "ai_run_created",
+                workflow_name="online_run",
+                log_file_name=llm_debug_log_file_name,
+                run_type=run.run_type,
+                session_id=str(run.session_id) if run.session_id else None,
+                run_id=str(run.id),
+                cache_resolution=cache_resolution,
+                cached_entry_id=str(cache_entry.id) if cache_entry is not None else None,
+                stream=stream,
+                has_cached_result=cached_result is not None,
+            )
+            if cached_result is not None:
+                append_llm_debug_log(
+                    "ai_run_cache_hit",
+                    workflow_name="online_run",
+                    log_file_name=llm_debug_log_file_name,
+                    run_type=run.run_type,
+                    session_id=str(run.session_id) if run.session_id else None,
+                    run_id=str(run.id),
+                    cache_resolution=cache_resolution,
+                    cached_entry_id=str(cache_entry.id) if cache_entry is not None else None,
+                    stream=stream,
+                    result_payload=cached_result,
+                )
         if cached_result is not None and not stream:
             self._finalize_cached_run(
                 session,
@@ -314,44 +346,52 @@ class AIRunService:
             return run.structured_result
 
         try:
-            prepared = self._prepare_run(
-                session,
-                run=run,
-                context=context,
-                response_preferences=response_preferences,
-                operation_context=operation_context,
-                provider_name_override=provider_name_override,
-                model_name_override=model_name_override,
-            )
-            graph_input = dict(initial_graph_state or {})
-            if "context" not in graph_input:
-                graph_input["context"] = context.model_dump(mode="json")
-            if "operation_context" not in graph_input:
-                graph_input["operation_context"] = operation_context
-            if streamed_text is not None:
-                graph_input["streamed_text"] = streamed_text
-            graph_result = prepared.graph.invoke(graph_input)
-            result = graph_result["result"]
-            provider_usage = self._merge_usage_payloads(
-                primary=result.pop("_provider_usage", {}),
-                additional=additional_usage,
-                provider_name=prepared.provider_name,
-                model_name=prepared.model_name,
-            )
-            self._complete_run(
-                session,
-                run=run,
-                context=context,
-                response_preferences=response_preferences,
-                operation_context=operation_context,
-                result=result,
-                provider_usage=provider_usage,
-                tool_trace=graph_result.get("tool_trace") or [],
-                tool_facts=graph_result.get("tool_facts") or {},
-                prompt_artifact=graph_result.get("prompt"),
-                started_at=started_at,
-            )
-            return result
+            with llm_debug_scope(
+                workflow_name="online_run",
+                log_file_name=self._build_llm_debug_log_file_name(run),
+                run_type=run.run_type,
+                session_id=str(run.session_id) if run.session_id else None,
+                run_id=str(run.id),
+                execution_mode="sync",
+            ):
+                prepared = self._prepare_run(
+                    session,
+                    run=run,
+                    context=context,
+                    response_preferences=response_preferences,
+                    operation_context=operation_context,
+                    provider_name_override=provider_name_override,
+                    model_name_override=model_name_override,
+                )
+                graph_input = dict(initial_graph_state or {})
+                if "context" not in graph_input:
+                    graph_input["context"] = context.model_dump(mode="json")
+                if "operation_context" not in graph_input:
+                    graph_input["operation_context"] = operation_context
+                if streamed_text is not None:
+                    graph_input["streamed_text"] = streamed_text
+                graph_result = prepared.graph.invoke(graph_input)
+                result = graph_result["result"]
+                provider_usage = self._merge_usage_payloads(
+                    primary=result.pop("_provider_usage", {}),
+                    additional=additional_usage,
+                    provider_name=prepared.provider_name,
+                    model_name=prepared.model_name,
+                )
+                self._complete_run(
+                    session,
+                    run=run,
+                    context=context,
+                    response_preferences=response_preferences,
+                    operation_context=operation_context,
+                    result=result,
+                    provider_usage=provider_usage,
+                    tool_trace=graph_result.get("tool_trace") or [],
+                    tool_facts=graph_result.get("tool_facts") or {},
+                    prompt_artifact=graph_result.get("prompt"),
+                    started_at=started_at,
+                )
+                return result
         except Exception as exc:
             self._mark_run_failed(session, run=run, exc=exc)
             raise
@@ -396,164 +436,178 @@ class AIRunService:
                 )
                 return
 
-            prepared = self._prepare_run(
-                session,
-                run=run,
-                context=context,
-                response_preferences=response_preferences,
-                operation_context=operation_context,
-                provider_name_override=provider_name_override,
-                model_name_override=model_name_override,
-            )
-            self.event_stream_service.publish(
-                str(run.id),
-                "tool_event",
-                {
-                    "phase": "planning",
-                    "status": "started",
-                    "summary": (
-                        "Inspecting the current context and deciding whether "
-                        "extra grounded data is needed."
-                    ),
-                },
-            )
-            graph_state = prepared.graph.collect_tool_context(
-                {
-                    "context": context.model_dump(mode="json"),
-                    "operation_context": operation_context,
-                }
-            )
-            tool_trace = list(graph_state.get("tool_trace", []))
-            if not tool_trace:
-                tool_trace = [
+            with llm_debug_scope(
+                workflow_name="online_run",
+                log_file_name=self._build_llm_debug_log_file_name(run),
+                run_type=run.run_type,
+                session_id=str(run.session_id) if run.session_id else None,
+                run_id=str(run.id),
+                execution_mode="stream",
+                api_path="/api/v1/ai/runs",
+                api_endpoint="/api/v1/ai/runs",
+                http_method="POST",
+            ):
+                prepared = self._prepare_run(
+                    session,
+                    run=run,
+                    context=context,
+                    response_preferences=response_preferences,
+                    operation_context=operation_context,
+                    provider_name_override=provider_name_override,
+                    model_name_override=model_name_override,
+                )
+                self.event_stream_service.publish(
+                    str(run.id),
+                    "tool_event",
                     {
                         "phase": "planning",
-                        "status": "completed",
-                        "summary": "Injected context was sufficient, so no tool calls were needed.",
-                    }
-                ]
-            for tool_event in tool_trace:
-                self.event_stream_service.publish(
-                    str(run.id),
-                    "tool_event",
-                    tool_event,
+                        "status": "started",
+                        "summary": (
+                            "Inspecting the current context and deciding whether "
+                            "extra grounded data is needed."
+                        ),
+                    },
                 )
-            self.event_stream_service.publish(
-                str(run.id),
-                "tool_event",
-                {
-                    "phase": "drafting",
-                    "status": "started",
-                    "summary": "Tool context is ready. Streaming the user-visible draft now.",
-                },
-            )
-            response_schema = get_result_response_schema(
-                run_type=RunType(run.run_type),
-                context=context,
-            )
-            preview_prompt = prepared.graph.build_prompt_package(
-                operation_context=operation_context,
-                output_mode="stream_sections",
-                response_schema=response_schema,
-                tool_facts=graph_state.get("tool_facts"),
-            )
-            try:
-                stream_result = self._stream_sectioned_result(
-                    run_id=run.id,
-                    llm_client=prepared.llm_client,
-                    prompt_package=preview_prompt,
-                    response_preferences=response_preferences,
-                )
-                finalized_state = prepared.graph.finalize_existing_result(
+                graph_state = prepared.graph.collect_tool_context(
                     {
-                        **graph_state,
+                        "context": context.model_dump(mode="json"),
                         "operation_context": operation_context,
-                        "streamed_text": stream_result.display_text,
-                        "result": stream_result.structured_result,
-                        "model_result": stream_result.structured_result,
-                        "provider_usage_payloads": [
-                            *list(graph_state.get("provider_usage_payloads", [])),
-                            {
-                                "provider_name": prepared.provider_name,
-                                "model_name": prepared.model_name,
-                                "tokens_input": (
-                                    stream_result.usage.input_tokens
-                                    if stream_result.usage
-                                    else None
-                                ),
-                                "tokens_output": (
-                                    stream_result.usage.output_tokens
-                                    if stream_result.usage
-                                    else None
-                                ),
-                                "latency_ms": (
-                                    stream_result.usage.latency_ms
-                                    if stream_result.usage
-                                    else None
-                                ),
-                                "cost_usd": (
-                                    stream_result.usage.cost_usd
-                                    if stream_result.usage
-                                    else None
-                                ),
-                            },
-                        ],
                     }
                 )
-                result = finalized_state["result"]
-                provider_usage = result.pop("_provider_usage", {})
+                tool_trace = list(graph_state.get("tool_trace", []))
+                if not tool_trace:
+                    tool_trace = [
+                        {
+                            "phase": "planning",
+                            "status": "completed",
+                            "summary": (
+                                "Injected context was sufficient, "
+                                "so no tool calls were needed."
+                            ),
+                        }
+                    ]
+                for tool_event in tool_trace:
+                    self.event_stream_service.publish(
+                        str(run.id),
+                        "tool_event",
+                        tool_event,
+                    )
                 self.event_stream_service.publish(
                     str(run.id),
                     "tool_event",
                     {
                         "phase": "drafting",
-                        "status": "completed",
-                        "summary": (
-                            "Draft stream completed. Structured result extracted successfully."
-                        ),
+                        "status": "started",
+                        "summary": "Tool context is ready. Streaming the user-visible draft now.",
                     },
                 )
-                self._complete_run(
-                    session,
-                    run=run,
+                response_schema = get_result_response_schema(
+                    run_type=RunType(run.run_type),
                     context=context,
-                    response_preferences=response_preferences,
+                )
+                preview_prompt = prepared.graph.build_prompt_package(
                     operation_context=operation_context,
-                    result=result,
-                    provider_usage=provider_usage,
-                    tool_trace=finalized_state.get("tool_trace") or [],
-                    tool_facts=finalized_state.get("tool_facts") or {},
-                    prompt_artifact={
-                        "system_prompt": preview_prompt.system_prompt,
-                        "user_prompt": preview_prompt.user_prompt,
-                        "response_schema": response_schema,
-                        "output_mode": "stream_sections",
-                    },
-                    started_at=None,
+                    output_mode="stream_sections",
+                    response_schema=response_schema,
+                    tool_facts=graph_state.get("tool_facts"),
                 )
-            except Exception:
-                self.event_stream_service.publish(
-                    str(run.id),
-                    "tool_event",
-                    {
-                        "phase": "drafting",
-                        "status": "fallback",
-                        "summary": (
-                            "Sectioned streaming output could not be finalized cleanly. "
-                            "Falling back to structured generation."
-                        ),
-                    },
-                )
-                result = self.execute_run(
-                    session,
-                    run=run,
-                    context=context,
-                    response_preferences=response_preferences,
-                    operation_context=operation_context,
-                    provider_name_override=prepared.provider_name,
-                    model_name_override=prepared.model_name,
-                    initial_graph_state=graph_state,
-                )
+                try:
+                    stream_result = self._stream_sectioned_result(
+                        run_id=run.id,
+                        llm_client=prepared.llm_client,
+                        prompt_package=preview_prompt,
+                        response_preferences=response_preferences,
+                    )
+                    finalized_state = prepared.graph.finalize_existing_result(
+                        {
+                            **graph_state,
+                            "operation_context": operation_context,
+                            "streamed_text": stream_result.display_text,
+                            "result": stream_result.structured_result,
+                            "model_result": stream_result.structured_result,
+                            "provider_usage_payloads": [
+                                *list(graph_state.get("provider_usage_payloads", [])),
+                                {
+                                    "provider_name": prepared.provider_name,
+                                    "model_name": prepared.model_name,
+                                    "tokens_input": (
+                                        stream_result.usage.input_tokens
+                                        if stream_result.usage
+                                        else None
+                                    ),
+                                    "tokens_output": (
+                                        stream_result.usage.output_tokens
+                                        if stream_result.usage
+                                        else None
+                                    ),
+                                    "latency_ms": (
+                                        stream_result.usage.latency_ms
+                                        if stream_result.usage
+                                        else None
+                                    ),
+                                    "cost_usd": (
+                                        stream_result.usage.cost_usd
+                                        if stream_result.usage
+                                        else None
+                                    ),
+                                },
+                            ],
+                        }
+                    )
+                    result = finalized_state["result"]
+                    provider_usage = result.pop("_provider_usage", {})
+                    self.event_stream_service.publish(
+                        str(run.id),
+                        "tool_event",
+                        {
+                            "phase": "drafting",
+                            "status": "completed",
+                            "summary": (
+                                "Draft stream completed. Structured result extracted successfully."
+                            ),
+                        },
+                    )
+                    self._complete_run(
+                        session,
+                        run=run,
+                        context=context,
+                        response_preferences=response_preferences,
+                        operation_context=operation_context,
+                        result=result,
+                        provider_usage=provider_usage,
+                        tool_trace=finalized_state.get("tool_trace") or [],
+                        tool_facts=finalized_state.get("tool_facts") or {},
+                        prompt_artifact={
+                            "system_prompt": preview_prompt.system_prompt,
+                            "user_prompt": preview_prompt.user_prompt,
+                            "response_schema": response_schema,
+                            "output_mode": "stream_sections",
+                        },
+                        started_at=None,
+                    )
+                except Exception:
+                    self.event_stream_service.publish(
+                        str(run.id),
+                        "tool_event",
+                        {
+                            "phase": "drafting",
+                            "status": "fallback",
+                            "summary": (
+                                "Sectioned streaming output could not be finalized cleanly. "
+                                "Falling back to structured generation."
+                            ),
+                        },
+                    )
+                    result = self.execute_run(
+                        session,
+                        run=run,
+                        context=context,
+                        response_preferences=response_preferences,
+                        operation_context=operation_context,
+                        provider_name_override=prepared.provider_name,
+                        model_name_override=prepared.model_name,
+                        initial_graph_state=graph_state,
+                    )
             self.event_stream_service.publish(
                 str(run.id),
                 "run_completed",
@@ -664,7 +718,10 @@ class AIRunService:
                         status_code=400,
                     ) from exc
         if run_type == RunType.GAME_STATUS:
-            own_current_tower_target = operation_context.get("own_current_tower_target", "outer_tower")
+            own_current_tower_target = operation_context.get(
+                "own_current_tower_target",
+                "outer_tower",
+            )
             if own_current_tower_target not in {"outer_tower", "inner_tower", "nexus"}:
                 raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
             operation_context["own_current_tower_target"] = own_current_tower_target
@@ -974,25 +1031,26 @@ class AIRunService:
     ) -> SectionedStreamResult:
         parser = _SectionedStreamParser()
         final_usage: LLMUsage | None = None
-        for event in llm_client.stream_text(
-            prompt=prompt_package.user_prompt,
-            system_prompt=prompt_package.system_prompt,
-            temperature=0.35,
-        ):
-            if event.event_type == "text_delta" and event.delta:
-                visible_delta = parser.push(event.delta)
-                if visible_delta:
-                    self.event_stream_service.publish(
-                        str(run_id),
-                        "message_delta",
-                        {
-                            "channel": prompt_package.stream_channel or "summary",
-                            "language": response_preferences.language.value,
-                            "delta": visible_delta,
-                        },
-                    )
-            elif event.event_type == "completed":
-                final_usage = event.usage
+        with llm_debug_scope(graph_node="stream_sections"):
+            for event in llm_client.stream_text(
+                prompt=prompt_package.user_prompt,
+                system_prompt=prompt_package.system_prompt,
+                temperature=0.35,
+            ):
+                if event.event_type == "text_delta" and event.delta:
+                    visible_delta = parser.push(event.delta)
+                    if visible_delta:
+                        self.event_stream_service.publish(
+                            str(run_id),
+                            "message_delta",
+                            {
+                                "channel": prompt_package.stream_channel or "summary",
+                                "language": response_preferences.language.value,
+                                "delta": visible_delta,
+                            },
+                        )
+                elif event.event_type == "completed":
+                    final_usage = event.usage
 
         parser.finish()
         try:
@@ -1184,6 +1242,13 @@ class AIRunService:
             return merged
         if additional.input_tokens is not None:
             merged["tokens_input"] = (merged["tokens_input"] or 0) + additional.input_tokens
+
+    def _build_llm_debug_log_file_name(self, run: AIRun) -> str:
+        started_at = run.created_at or datetime.now(tz=timezone.utc)
+        return build_run_log_file_name(
+            run_id=str(run.id),
+            started_at=started_at,
+        )
         if additional.output_tokens is not None:
             merged["tokens_output"] = (merged["tokens_output"] or 0) + additional.output_tokens
         if additional.latency_ms is not None:

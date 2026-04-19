@@ -110,6 +110,74 @@ def test_resolve_catalog_slug_can_fallback_to_selector_model(
     assert usage_payloads[0]["model_name"] == "gemini-selector-test"
 
 
+def test_resolve_catalog_slug_uses_fuzzy_match_for_near_miss_item_id(configured_app) -> None:
+    snapshot = _load_snapshot(configured_app)
+    toolset = CatalogToolset(
+        catalog_service=configured_app.state.catalog_service,
+        selector_llm_client=None,
+    )
+
+    result, usage_payloads = toolset.resolve_catalog_slug(
+        snapshot,
+        game=Game.WILD_RIFT,
+        entity_type="item",
+        raw_name="wr-ludens-echo",
+        filters=None,
+    )
+
+    assert usage_payloads == []
+    assert result["resolution_status"] == "resolved"
+    assert result["resolved_slug"] == "wr-luden-s-echo"
+    assert result["resolved_id"] == "wr-luden-s-echo"
+    assert result["resolved_entity"]["id"] == "wr-luden-s-echo"
+    assert result["resolved_entity"]["fuzzy_score"] >= 90
+
+
+def test_search_catalog_returns_top_match_with_real_id_and_params(configured_app) -> None:
+    snapshot = _load_snapshot(configured_app)
+    toolset = CatalogToolset(
+        catalog_service=configured_app.state.catalog_service,
+        selector_llm_client=None,
+    )
+
+    session = configured_app.state.session_factory()
+    try:
+        result = toolset.search_catalog(
+            session,
+            game=Game.WILD_RIFT,
+            snapshot=snapshot,
+            entity_type="item",
+            query="ludens echo",
+            limit=5,
+        )
+    finally:
+        session.close()
+
+    assert result["match_count"] >= 1
+    assert result["top_match"]["id"] == "wr-luden-s-echo"
+    assert result["top_match"]["slug"] == "wr-luden-s-echo"
+    assert result["top_match"]["cost"]
+    assert result["top_match"]["stats"]
+
+
+def test_list_item_ids_returns_real_ids_for_magic_items(configured_app) -> None:
+    snapshot = _load_snapshot(configured_app)
+    toolset = CatalogToolset(
+        catalog_service=configured_app.state.catalog_service,
+        selector_llm_client=None,
+    )
+
+    result = toolset.list_item_ids(
+        snapshot,
+        game=Game.WILD_RIFT,
+        category="magic",
+    )
+
+    assert result["requested_categories"] == ["magic"]
+    assert result["item_count"] >= 1
+    assert any(item["id"] == "wr-luden-s-echo" for item in result["items"])
+
+
 def test_validate_run_result_reports_field_level_slug_errors(configured_app) -> None:
     snapshot = _load_snapshot(configured_app)
     context = MatchContext(

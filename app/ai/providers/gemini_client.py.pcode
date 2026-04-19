@@ -2,3 +2,4 @@ Class GeminiClient:
 - call the Google Generative Language REST endpoint
 - normalize the response into LLMResult and LLMUsage
 - keep provider-specific logic out of the service layer
+- when DEBUG_LLM is enabled, log readable prompt/output data without duplicating the same content again through raw request/response payload dumps

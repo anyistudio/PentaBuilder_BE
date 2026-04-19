@@ -19,6 +19,8 @@ dependencies = [
     "psycopg[binary]>=3.2.0,<4.0.0",
     "sqlalchemy>=2.0.36,<3.0.0",
     "uvicorn[standard]>=0.32.0,<1.0.0",
+    "fuzzywuzzy>=0.18.0,<1.0.0",
+    "python-levenshtein>=0.25.0,<1.0.0",
 ]
 
 [project.optional-dependencies]

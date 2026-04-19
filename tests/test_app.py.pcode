@@ -1,0 +1,26 @@
+Function test_healthz_returns_ok:
+- call `/healthz`
+- verify the route returns 200 plus an `X-Request-ID` header
+
+
+Function test_unhandled_exceptions_are_wrapped_as_json:
+- mount a temporary route that raises
+- verify the global exception handler converts it into the standard JSON error envelope
+
+
+Function test_clear_debug_llm_log_endpoint:
+- seed both the new `log/*.log` files and the legacy `debug_llm.log`
+- monkeypatch the debug-log paths to a temp directory
+- call the clear endpoint
+- verify the response reports bytes/files removed and all seeded logs are gone while the `log/` directory remains
+
+
+Function test_append_llm_debug_log_uses_run_id_file:
+- monkeypatch the debug log directory to a temp folder
+- emit one debug record inside an llm_debug scope that carries a precomputed per-run log filename
+- verify the output is written to that timestamp-plus-suffix filename and includes the expected event metadata
+
+
+Function test_build_run_log_file_name_uses_start_timestamp_and_run_suffix:
+- build a run log file name from a fixed UTC timestamp plus a known run_id
+- verify the final name uses the formatted start timestamp and the last four characters of the run_id

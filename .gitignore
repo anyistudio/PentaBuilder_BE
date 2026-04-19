@@ -7,3 +7,6 @@ __pycache__/
 *.pyc
 game_data/
 .local_object_storage/
+debug_llm.log
+log/*
+!log/.gitkeep

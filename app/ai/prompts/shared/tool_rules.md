@@ -1,13 +1,10 @@
 Tool rules:
 - Use injected facts first. Do not act as if you saw more data than what is provided.
-- Use tools only to resolve missing candidate facts, not to restate what is already injected.
+- Ask for tools only when a missing fact blocks a grounded answer.
 - Prefer narrow candidate comparison over broad exploration.
-- If additional candidate facts are already injected as reference items, use them before expanding the search mentally.
-- When you need multiple candidate facts of the same type, prefer one search plus one batch lookup instead of repeated single lookups.
-- Never invent a canonical slug format or switch games by mistake.
-- If you already know the exact canonical slug for the current game, you may use it directly.
-- If you know only a raw name, alias, nickname, lane, rune path, item subtype, or an uncertain slug, call `resolve_catalog_slug` first.
-- Use `list_catalog_candidates` only when you need a filtered candidate pool such as a lane-specific champion list, a rune-path slice, or a narrowed item subtype set.
-- Stop planning tools as soon as you have enough information to decide.
-- Do not repeat the same point with different wording just to fill space.
-- Keep the final recommendation focused on one best answer, with optional secondary alternatives only when the contract asks for them.
+- If the exact slug is uncertain, call `resolve_catalog_slug` first.
+- `search_catalog` may query multiple names or aliases together when that is the fastest way to surface likely candidates.
+- If item names are still unstable after fuzzy search, use `list_item_ids` to inspect the real IDs for a broad item category.
+- Prefer one search plus one batch lookup over repeated single-entity lookups.
+- Stop as soon as you have enough information to decide.
+- Never repeat an equivalent tool call.

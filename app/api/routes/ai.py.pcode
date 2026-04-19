@@ -3,6 +3,11 @@ Route create_ai_run:
 - return cached results immediately when strong cache applies
 - otherwise execute non-stream runs inline or queue stream runs in background
 
+Route clear_debug_llm_log:
+- allow local/debug tooling to clear the append-only LLM debug log file
+- reject the route when backend DEBUG_LLM logging is disabled
+- return whether the file existed plus how many bytes were removed
+
 Route get_ai_run:
 - fetch final run metadata/result with owner checks for user-bound runs
 

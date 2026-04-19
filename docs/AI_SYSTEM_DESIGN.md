@@ -1,5 +1,9 @@
 # PentaBuilder AI System Design
 
+> 实现对齐版工作流说明请先看 [AI_WORKFLOW_REFERENCE.md](./AI_WORKFLOW_REFERENCE.md)。
+>
+> 这份 `AI_SYSTEM_DESIGN.md` 更偏设计规格；如果你要了解当前代码里每个 workflow 实际怎么跑、哪些 run type 会调用工具、流式路径如何 fallback、离线 job 怎么复用在线 graph，请优先看上面的 reference 文档。
+
 ## 1. 目标
 
 这份文档只做一件事：把 `PentaBuilder_BE` 的 AI 功能设计成可以直接实现的规格。
@@ -474,6 +478,7 @@ v1 改成只暴露 5 个更直接的工具。
 用途：
 
 - 当模型不知道具体 slug 时，通过 `name / stats / description / blurb` 做模糊搜索
+- 内部会结合 lexical match + `fuzzywuzzy` 多种 fuzzy 分数做排序，并显式返回 Top 1 的真实 ID 和参数摘要
 
 输入：
 
@@ -491,9 +496,20 @@ v1 改成只暴露 5 个更直接的工具。
 
 ```json
 {
+  "game": "wild_rift",
   "entity_type": "item",
+  "query": "magic resistance health item",
+  "ranking_method": "fuzzywuzzy_blend",
+  "match_count": 2,
+  "top_match": {
+    "id": "wr-abyssal-mask",
+    "slug": "wr-abyssal-mask",
+    "name": "Abyssal Mask",
+    "cost": "3000"
+  },
   "matches": [
     {
+      "id": "wr-abyssal-mask",
       "slug": "wr-abyssal-mask",
       "name": "Abyssal Mask",
       "cost": "3000",
@@ -580,7 +596,41 @@ v1 改成只暴露 5 个更直接的工具。
 - 该工具必须至少带一个有效 filter
 - 返回的是 light candidate summaries，不是完整详情
 
-### Tool 7: `resolve_catalog_slug`
+### Tool 7: `list_item_ids`
+
+用途：
+
+- 当 item 名称仍然不稳定时，按 broad category 直接列出真实 item ID
+- 典型类别包括 `physical`、`magic`、`boots`、`enchant`
+
+输入：
+
+```json
+{
+  "game": "wild_rift",
+  "category": "magic"
+}
+```
+
+输出：
+
+```json
+{
+  "game": "wild_rift",
+  "entity_type": "item",
+  "requested_categories": ["magic"],
+  "item_count": 3,
+  "items": [
+    {
+      "id": "wr-luden-s-echo",
+      "slug": "wr-luden-s-echo",
+      "name": "卢登的回声"
+    }
+  ]
+}
+```
+
+### Tool 8: `resolve_catalog_slug`
 
 用途：
 
@@ -591,7 +641,7 @@ v1 改成只暴露 5 个更直接的工具。
 
 1. 先做 exact slug / exact name / alias match
 2. 若未命中，则按主 LLM 提供的 filter 生成 candidate pool
-3. 对 candidate pool 做 deterministic ranking
+3. 对 candidate pool 做 deterministic ranking + `fuzzywuzzy` 综合排序
 4. 若仍不够确定，则调用一个更便宜的 selector model，只允许它从候选集中选一个 slug
 5. 若仍无法确定，则返回 `ambiguous` 或 `not_found`
 
@@ -619,6 +669,7 @@ v1 改成只暴露 5 个更直接的工具。
     "category": "ap"
   },
   "resolution_status": "resolved",
+  "resolved_id": "wr-crown-of-the-shattered-queen",
   "resolved_slug": "wr-crown-of-the-shattered-queen",
   "resolved_name": "Crown of the Shattered Queen",
   "resolved_by": "selector_model",
@@ -1120,18 +1171,21 @@ game_localization/
 每次在线 run 最终 prompt 按这个顺序拼：
 
 1. `system_base.md`
-2. `tool_rules.md`
-3. `output_rules.md`
-4. `generation_language_rules.md`
-5. `localized_name_rules.md`
-6. run-specific prompt
-7. context block
-8. detailed parameter appendix（仅 `game_status`）
-9. operation block
-10. baseline block
-11. calibration block
-12. reference cache block
-13. session memory block
+2. `output_rules.md`
+3. `generation_language_rules.md`
+4. `localized_name_rules.md`
+5. `tool_rules.md`（仅 `output_mode="tool_plan"`）
+6. `tool_planning_rules.md`（仅 `output_mode="tool_plan"`）
+7. `repair_rules.md`（仅 `output_mode="repair_json"`）
+8. run-specific prompt
+9. match overview
+10. context block
+11. compact detailed parameter appendix（仅 `game_status` prompt 注入；最终返回里的 `parameter_appendix` 仍是完整 deterministic snapshot）
+12. operation block
+13. baseline block
+14. calibration block
+15. reference cache block
+16. session memory block
 
 ## 8. 各 run type 的结构化输出
 
@@ -1330,6 +1384,7 @@ game_localization/
 4. 若 injected context + baseline 还不够，先进入 tool planning
 5. 若还没有确认的 canonical slug，优先调用：
    - `resolve_catalog_slug`
+   - 实在不稳时也可先用 `list_item_ids`
    - 必要时由它内部触发 `list_catalog_candidates`
 6. slug 确认后，再调用：
    - `search_catalog`
@@ -1583,12 +1638,13 @@ AI 子系统建议按这个顺序开发：
 4. `get_rune`
 5. `batch_get_entities`
 6. `search_catalog`
-7. shared prompt builder
-8. `OnlineRunGraph` 最小版本：
+7. `list_item_ids`
+8. shared prompt builder
+9. `OnlineRunGraph` 最小版本：
    - `prepare_context`
    - `generate_result`
    - `validate_result`
-9. `recommend_full_build`
+10. `recommend_full_build`
 10. `recommend_slot`
 11. `evaluate_build`
 12. `explain_slot`

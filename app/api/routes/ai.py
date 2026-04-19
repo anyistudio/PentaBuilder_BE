@@ -6,8 +6,15 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_ai_run_service, get_current_user, get_db_session
-from app.api.schemas.ai_run import AIRunCreateRequest, AIRunPayload, AIRunStreamingPayload
+from app.api.schemas.ai_run import (
+    AIRunCreateRequest,
+    AIRunPayload,
+    AIRunStreamingPayload,
+    LLMLogClearPayload,
+)
 from app.api.schemas.common import ApiResponse
+from app.core.errors import ApiError
+from app.core.llm_debug import clear_llm_debug_log
 from app.db.models import User
 from app.services.ai_run_service import AIRunService
 
@@ -106,4 +113,21 @@ def stream_ai_run_events(
     return StreamingResponse(
         ai_run_service.event_stream_service.stream(str(run_id)),
         media_type="text/event-stream",
+    )
+
+
+@router.post("/debug/llm-log/clear")
+def clear_debug_llm_log(request: Request) -> ApiResponse[LLMLogClearPayload]:
+    settings = request.app.state.settings
+    if not settings.debug_llm:
+        raise ApiError(
+            "LLM debug logging is disabled for this environment.",
+            status_code=404,
+            code="llm_debug_disabled",
+        )
+
+    payload = LLMLogClearPayload.model_validate(clear_llm_debug_log())
+    return ApiResponse[LLMLogClearPayload](
+        request_id=request.state.request_id,
+        data=payload,
     )

@@ -1,0 +1,113 @@
+def get_llm_debug_context():
+    Return a shallow copy of the current contextvar payload so nested scopes cannot mutate shared state by accident.
+
+
+def llm_debug_scope(**updates):
+    Merge the caller's debug fields into the current scope, expose the merged context during the block, then restore the previous context on exit.
+
+
+def append_llm_debug_log(event, **payload):
+    Build one debug record from:
+    - current UTC timestamp
+    - event name
+    - active llm_debug_scope context
+    - current request_id
+    - normalized payload fields
+
+    Serialize that record into a human-readable plain-text entry instead of JSON.
+
+    Resolve the destination file under `log/` by:
+    - using an explicit log filename when the caller already pinned this run to a specific file
+    - otherwise falling back to `request-<request_id>.log`
+    - finally using `misc.log` only for truly unscoped cases
+
+    Append the entry to that file, inserting a blank gap between entries so each per-run log stays easy to skim manually.
+
+
+def clear_llm_debug_log():
+    Acquire the shared log-file lock, delete every `*.log` file under `log/`, also clean the legacy `debug_llm.log` file during migration, ensure the log directory still exists, and return a summary including total bytes removed plus how many files were cleared.
+
+
+def usage_to_payload(usage):
+    Convert usage dataclasses, dictionaries, or provider usage objects into a small normalized mapping for logging.
+
+
+def _normalize_debug_value(value):
+    Recursively normalize dataclasses, dicts, and sequences into log-safe Python primitives.
+
+
+def _format_debug_record(record):
+    Render one log entry as:
+    - a separator
+    - event name and timestamp
+    - a metadata block
+    - ordered detail sections like prompt, output, usage, error, request_payload, response_payload
+    - a closing separator
+
+
+def _format_metadata_lines(record):
+    Pull the most important routing fields out of the record first so the top of the log shows:
+    - request info
+    - API path/method
+    - workflow/run metadata
+    - graph node / tool info
+    - provider/model/API mode
+
+    Also promote any short leftover inline values into metadata so small provider identifiers stay near the top instead of falling into a generic extra block.
+
+
+def _render_block(value, *, indent):
+    Dispatch to the right renderer for dicts, lists, strings, or scalar values.
+
+
+def _render_mapping(value, *, indent):
+    Render nested dictionaries line by line using indentation.
+
+    Keep short scalar values inline and expand larger nested values into child blocks.
+
+
+def _render_sequence(value, *, indent):
+    Render lists and tuples as ordered `item[index]` blocks so nested payloads remain readable without JSON braces.
+
+
+def _render_text(value, *, indent):
+    Preserve the full text value.
+
+    Keep short single-line strings inline.
+    For multiline or long strings, switch to an indented block style so prompts and outputs are easy to read without truncation.
+
+
+def _is_inline_value(value):
+    Decide whether a value is short and simple enough to stay on one line.
+
+
+def _is_simple_scalar(value):
+    Return whether the value is a basic non-string scalar used for inline metadata.
+
+
+def _format_inline_scalar(value):
+    Convert null and booleans into readable text and stringify other scalar values.
+
+
+def _labelize(key):
+    Turn `snake_case` keys into a display label for the metadata section.
+
+
+def _resolve_log_path(record):
+    Choose the physical debug log file for one record, preferring an explicitly supplied per-run filename so every event for that run lands in the same file.
+
+
+def build_run_log_file_name(*, run_id, started_at):
+    Build the human-readable per-run filename from:
+    - the run start timestamp in UTC, formatted for filesystem safety
+    - the last four characters of the sanitized run_id
+
+    Return a final `<timestamp>-<suffix>.log` filename.
+
+
+def _sanitize_log_stem(value):
+    Keep log filenames filesystem-safe while preserving UUID readability.
+
+
+def _sanitize_log_file_name(value):
+    Keep caller-supplied log filenames filesystem-safe and ensure they end with `.log`.

@@ -7,3 +7,7 @@ Class AIRunCreateRequest:
 
 Class AIRunPayload:
 - wrap AIRunSummarySchema plus optional structured result
+
+Class LLMLogClearPayload:
+- summarize debug-log cleanup results for the local tooling endpoint
+- report whether any logs existed, total bytes removed, how many files were deleted, and which log directory was targeted

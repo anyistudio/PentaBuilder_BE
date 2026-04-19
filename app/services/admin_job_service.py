@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.catalog.registry import GameDataRegistry
+from app.core.llm_debug import llm_debug_scope
 from app.core.errors import ApiError
 from app.db.models import AdminJobRun
 from app.domain.enums import Game
@@ -69,7 +70,14 @@ class AdminJobService:
             session.add(job)
             session.commit()
 
-            summary = self._run_job(session, job=job)
+            with llm_debug_scope(
+                workflow_name="admin_job",
+                job_type=job.job_type,
+                api_path=self._job_api_path(job.job_type),
+                api_endpoint=self._job_api_path(job.job_type),
+                http_method="POST",
+            ):
+                summary = self._run_job(session, job=job)
             artifact_object_key = None
             if summary:
                 artifact_object_key = f"admin-jobs/{job.id}/summary.json"
@@ -178,3 +186,16 @@ class AdminJobService:
             )
             return summary
         raise ApiError("Unsupported admin job.", status_code=400, code="invalid_input")
+
+    def _job_api_path(self, job_type: str) -> str:
+        if job_type == "precompute_baselines":
+            return "/api/v1/admin/jobs/precompute-baselines"
+        if job_type == "generate_calibration":
+            return "/api/v1/admin/jobs/generate-calibrations"
+        if job_type == "run_benchmarks":
+            return "/api/v1/admin/jobs/run-benchmarks"
+        if job_type == "activate_version":
+            return "/api/v1/admin/data-versions/activate"
+        if job_type == "clear_cache":
+            return "/api/v1/admin/cache/clear"
+        return "/api/v1/admin/jobs"

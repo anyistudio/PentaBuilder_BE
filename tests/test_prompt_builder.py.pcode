@@ -1,0 +1,19 @@
+def _load_snapshot(configured_app):
+    Open a backend session, read the active data version, load the matching catalog snapshot, then close the session.
+
+
+def test_game_status_generation_prompt_skips_tool_rules_and_uses_compact_appendix(configured_app):
+    Build a `game_status` prompt with a simple Wild Rift context.
+    Assert the generation system prompt does not include tool-planning sections.
+    Assert the user prompt keeps the appendix but strips repeated champion/item localization fields and verbose ability-hook text.
+
+
+def test_recommend_full_build_prompt_keeps_wild_rift_contract_in_task_context_once(configured_app):
+    Build a `recommend_full_build` tool-planning prompt for Wild Rift.
+    Verify the 7-step and boots-before-enchant contract lives in the task context block once instead of being repeated in the system task instructions.
+    Also confirm the available-tools block now exposes the category-based `list_item_ids` helper.
+
+
+def test_prioritized_workflow_schemas_are_compact(configured_app):
+    Generate the response schemas for `recommend_full_build`, `game_status`, and the tool-plan contract.
+    Check that the most important descriptions were shortened to the new compact wording for these prioritized workflows.

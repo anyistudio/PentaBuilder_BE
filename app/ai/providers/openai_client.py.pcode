@@ -4,6 +4,7 @@ Class OpenAIClient:
 - emit SSE-compatible text deltas for streaming preview text
 - normalize usage metadata into the shared LLMUsage shape
 - reuse the same debug logging style as Gemini so model IO stays inspectable in local development
+- keep debug logging readable by logging the normalized prompt/output once and only attaching small provider response metadata instead of duplicating raw payload bodies
 
 Method generate_text:
 - build the chat completion payload from system + user prompts

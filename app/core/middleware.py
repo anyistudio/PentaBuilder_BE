@@ -6,6 +6,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+from app.core.llm_debug import llm_debug_scope
 from app.core.request_context import reset_request_id, set_request_id
 
 LOGGER = logging.getLogger(__name__)
@@ -28,7 +29,12 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         )
 
         try:
-            response = await call_next(request)
+            with llm_debug_scope(
+                http_method=request.method,
+                api_path=request.url.path,
+                api_endpoint=request.url.path,
+            ):
+                response = await call_next(request)
         finally:
             duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
             metrics_service = getattr(request.app.state, "metrics_service", None)

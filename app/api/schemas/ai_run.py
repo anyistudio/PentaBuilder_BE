@@ -47,3 +47,13 @@ class AIRunStreamingPayload(BaseModel):
 
     run: AIRunSummarySchema
     stream_url: str
+
+
+class LLMLogClearPayload(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    cleared: bool
+    existed: bool
+    bytes_removed: int
+    files_removed: int = 0
+    log_path: str

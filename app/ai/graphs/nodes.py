@@ -11,6 +11,7 @@ from app.ai.providers.base import BaseLLMClient
 from app.ai.tools.catalog_tools import CatalogToolset
 from app.catalog.registry import CatalogSnapshot
 from app.core.errors import ApiError
+from app.core.llm_debug import llm_debug_scope
 from app.domain.enums import RunType
 from app.domain.match_context import MatchContext, ResponsePreferences, validate_slug_for_game
 
@@ -147,6 +148,7 @@ def tool_select_node(
             response_schema=get_tool_plan_response_schema(),
             temperature=0.05,
             error_message="Model returned an invalid tool plan.",
+            graph_node="tool_select",
         )
         tool_plan = validate_tool_plan(raw_result)
         planned_calls = list(tool_plan.tool_calls)
@@ -235,14 +237,15 @@ def tool_execute_node(
         provider_usage_payloads = list(state.get("provider_usage_payloads", []))
         executed_calls = 0
         for tool_call in pending_tool_calls:
-            result, trace_entry, usage_payloads = _execute_tool_call(
-                session=session,
-                context=context,
-                response_preferences=response_preferences,
-                snapshot=snapshot,
-                toolset=toolset,
-                tool_call=tool_call,
-            )
+            with llm_debug_scope(graph_node="tool_execute", tool_name=tool_call["tool_name"]):
+                result, trace_entry, usage_payloads = _execute_tool_call(
+                    session=session,
+                    context=context,
+                    response_preferences=response_preferences,
+                    snapshot=snapshot,
+                    toolset=toolset,
+                    tool_call=tool_call,
+                )
             tool_trace.append(trace_entry)
             tool_facts.setdefault(tool_call["tool_name"], []).append(result)
             seen_tool_call_keys.append(tool_call["call_key"])
@@ -307,6 +310,7 @@ def generate_result_node(
             response_schema=response_schema,
             temperature=_temperature_for_run_type(run_type),
             error_message="Model returned invalid JSON.",
+            graph_node="generate_result",
         )
         provider_usage_payloads = list(state.get("provider_usage_payloads", []))
         provider_usage_payloads.append(usage_payload)
@@ -411,6 +415,7 @@ def repair_result_node(
             response_schema=response_schema,
             temperature=0.05,
             error_message="Model returned invalid repair JSON.",
+            graph_node="repair_result",
         )
         provider_usage_payloads = list(state.get("provider_usage_payloads", []))
         provider_usage_payloads.append(usage_payload)
@@ -479,14 +484,16 @@ def _call_json_model(
     response_schema: dict[str, Any],
     temperature: float,
     error_message: str,
+    graph_node: str,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    llm_result = llm_client.generate_text(
-        prompt=prompt,
-        system_prompt=system_prompt,
-        response_mime_type="application/json",
-        response_schema=response_schema,
-        temperature=temperature,
-    )
+    with llm_debug_scope(graph_node=graph_node):
+        llm_result = llm_client.generate_text(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            response_mime_type="application/json",
+            response_schema=response_schema,
+            temperature=temperature,
+        )
     try:
         raw_result = json.loads(llm_result.text)
     except json.JSONDecodeError as exc:
@@ -598,9 +605,9 @@ def _sanitize_tool_call(
         }
 
     if tool_name == "list_catalog_candidates":
-        game = arguments.get("game")
+        game = arguments.get("game") or context.game.value
         entity_type = arguments.get("entity_type")
-        filters = _sanitize_candidate_filters(arguments.get("filters"))
+        filters = _extract_candidate_filters(arguments)
         if game != context.game.value or entity_type not in {"champion", "item", "rune"}:
             return None
         if not filters:
@@ -614,8 +621,25 @@ def _sanitize_tool_call(
             },
         }
 
+    if tool_name == "list_item_ids":
+        game = arguments.get("game") or context.game.value
+        raw_category = arguments.get("category")
+        if raw_category is None:
+            raw_category = arguments.get("categories")
+        if raw_category is None:
+            raw_category = arguments.get("kind")
+        if game != context.game.value:
+            return None
+        return {
+            "tool_name": tool_name,
+            "arguments": {
+                "game": game,
+                "category": _clean_tool_text_or_list(raw_category),
+            },
+        }
+
     if tool_name == "resolve_catalog_slug":
-        game = arguments.get("game")
+        game = arguments.get("game") or context.game.value
         entity_type = arguments.get("entity_type")
         raw_name = arguments.get("raw_name")
         if game != context.game.value or entity_type not in {"champion", "item", "rune"}:
@@ -631,7 +655,7 @@ def _sanitize_tool_call(
                 "game": game,
                 "entity_type": entity_type,
                 "raw_name": cleaned_name,
-                "filters": _sanitize_candidate_filters(arguments.get("filters")),
+                "filters": _extract_candidate_filters(arguments),
             },
         }
 
@@ -795,6 +819,40 @@ def _execute_tool_call(
                 if isinstance(candidate, dict) and candidate.get("slug")
             ][:20],
         }, []
+    if tool_name == "list_item_ids":
+        result = toolset.list_item_ids(
+            snapshot,
+            game=context.game,
+            category=arguments.get("category"),
+        )
+        summary = _listed_item_ids_summary(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            requested_categories=list(result.get("requested_categories") or []),
+            item_slugs=[
+                item.get("slug")
+                for item in result.get("items") or []
+                if isinstance(item, dict) and isinstance(item.get("slug"), str)
+            ],
+        )
+        return result, {
+            "phase": "execution",
+            "tool": tool_name,
+            "status": "completed",
+            "summary": summary,
+            "arguments": {
+                "game": arguments["game"],
+                "category": arguments.get("category"),
+            },
+            "entity_type": "item",
+            "item_count": result.get("item_count", 0),
+            "item_slugs": [
+                item.get("slug")
+                for item in result.get("items") or []
+                if isinstance(item, dict) and item.get("slug")
+            ],
+        }, []
     if tool_name == "resolve_catalog_slug":
         result, usage_payloads = toolset.resolve_catalog_slug(
             snapshot,
@@ -909,6 +967,26 @@ def _entity_exists_for_type(
     return slug in catalog.runes_by_slug
 
 
+def _extract_candidate_filters(arguments: dict[str, Any]) -> dict[str, Any]:
+    nested_filters = _sanitize_candidate_filters(arguments.get("filters"))
+    top_level_filters = _sanitize_candidate_filters(
+        {
+            key: value
+            for key, value in arguments.items()
+            if key not in {"game", "entity_type", "raw_name", "filters"}
+        }
+    )
+    merged = dict(nested_filters)
+    for key, value in top_level_filters.items():
+        existing = merged.get(key)
+        if existing is None:
+            merged[key] = value
+            continue
+        if isinstance(existing, list) and isinstance(value, list):
+            merged[key] = [*existing, *[item for item in value if item not in existing]][:8]
+    return merged
+
+
 def _sanitize_candidate_filters(raw_filters: Any) -> dict[str, Any]:
     if not isinstance(raw_filters, dict):
         return {}
@@ -922,6 +1000,8 @@ def _sanitize_candidate_filters(raw_filters: Any) -> dict[str, Any]:
         "subtype",
         "path",
         "slot",
+        "tag",
+        "tags",
         "keyword",
         "keywords",
     }
@@ -930,10 +1010,11 @@ def _sanitize_candidate_filters(raw_filters: Any) -> dict[str, Any]:
         key = str(raw_key).strip().lower()
         if key not in allowed_keys:
             continue
+        canonical_key = "keywords" if key in {"tag", "tags"} else key
         if isinstance(raw_value, str):
             cleaned = " ".join(raw_value.split())[:60]
             if cleaned:
-                sanitized[key] = cleaned
+                sanitized[canonical_key] = cleaned
             continue
         if isinstance(raw_value, list):
             cleaned_items = [
@@ -942,8 +1023,22 @@ def _sanitize_candidate_filters(raw_filters: Any) -> dict[str, Any]:
                 if isinstance(item, str) and item.strip()
             ]
             if cleaned_items:
-                sanitized[key] = cleaned_items
+                sanitized[canonical_key] = cleaned_items
     return sanitized
+
+
+def _clean_tool_text_or_list(value: Any) -> str | list[str] | None:
+    if isinstance(value, str):
+        cleaned = " ".join(value.split())[:60]
+        return cleaned or None
+    if isinstance(value, list):
+        cleaned_items = [
+            " ".join(str(item).split())[:60]
+            for item in value[:8]
+            if isinstance(item, str) and item.strip()
+        ]
+        return cleaned_items or None
+    return None
 
 
 def _tool_call_key(tool_name: str, arguments: dict[str, Any]) -> str:
@@ -1143,6 +1238,39 @@ def _search_catalog_summary(
         f"Searched the {_entity_type_label(entity_type, zh=False)} catalog for “{query}” "
         "but found no close matches."
     )
+
+
+def _listed_item_ids_summary(
+    *,
+    context: MatchContext,
+    response_preferences: ResponsePreferences,
+    snapshot: CatalogSnapshot,
+    requested_categories: list[str],
+    item_slugs: list[str],
+) -> str:
+    names = [
+        _preferred_entity_name(
+            context=context,
+            response_preferences=response_preferences,
+            snapshot=snapshot,
+            slug=slug,
+        )
+        for slug in item_slugs[:6]
+    ]
+    category_text = ", ".join(requested_categories) if requested_categories else "all"
+    if _is_zh_output(response_preferences):
+        if names:
+            return (
+                f"列出装备类别“{category_text}”的真实 ID，包含："
+                f"{_format_entity_name_list(names, entity_type='item', zh=True)}。"
+            )
+        return f"装备类别“{category_text}”下暂时没有匹配的装备 ID。"
+    if names:
+        return (
+            f"Listed real item IDs for category “{category_text}”: "
+            f"{_format_entity_name_list(names, entity_type='item', zh=False)}."
+        )
+    return f"No item IDs matched category “{category_text}”."
 
 
 def _preferred_entity_name(

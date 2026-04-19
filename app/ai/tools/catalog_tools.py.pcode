@@ -2,5 +2,7 @@ Class CatalogToolset:
 - expose bounded read-only catalog helpers for champions, items, runes, batch lookups, and search
 - route all slug lookups through the in-memory catalog snapshot
 - return documented ToolView payloads instead of raw catalog payloads
+- rank fuzzy name matches with a blended `fuzzywuzzy` score so near-miss IDs like `wr-ludens-echo` still land on the real catalog slug
+- return explicit `id` fields, top-match detail, and category-based item-ID listings so the main model can see the real catalog identifiers directly
 - keep batch/search helpers capped and stable so model-visible tool usage stays bounded
 - keep tool behavior deterministic and side-effect free

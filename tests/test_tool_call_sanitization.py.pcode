@@ -1,0 +1,20 @@
+def _load_snapshot(configured_app):
+    Open a backend session, resolve the active data version, load the matching catalog snapshot, then close the session.
+
+
+def test_list_catalog_candidates_sanitizer_fills_game_and_maps_tags_to_keywords(configured_app):
+    Build a Wild Rift context.
+    Pass a model-style `list_catalog_candidates` call that omits `game` and uses top-level `tags`.
+    Verify backend sanitization fills in the current game and converts `tags` into supported `keywords`.
+
+
+def test_resolve_catalog_slug_sanitizer_accepts_nested_tags_without_explicit_game(configured_app):
+    Build a Wild Rift context.
+    Pass a `resolve_catalog_slug` call with a raw rune name, nested `filters.tags`, and no explicit `game`.
+    Verify backend sanitization keeps the raw name, injects the current game, and normalizes `tags` into `keywords`.
+
+
+def test_list_item_ids_sanitizer_accepts_kind_alias_without_explicit_game(configured_app):
+    Build a Wild Rift context.
+    Pass a `list_item_ids` call that uses `kind` instead of `category` and omits `game`.
+    Verify backend sanitization injects the current game and rewrites the alias into the canonical `category` argument.

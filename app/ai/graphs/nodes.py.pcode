@@ -10,9 +10,11 @@ Function tool_select_node:
 - build a tool-planning prompt from injected context plus current tool facts
 - ask the model for the next bounded JSON tool plan
 - sanitize, dedupe, and capacity-limit tool calls before execution
+- tolerate common model slips such as omitted `game`, top-level filter fields, `tags` aliases, and `kind/category` aliases for `list_item_ids`
 
 Function tool_execute_node:
 - execute read-only catalog tools against the in-memory snapshot
+- include the new category-based `list_item_ids` helper alongside search/candidate/slug-resolution tools
 - append stable tool_trace entries and grouped tool_facts back into graph state
 
 Function generate_result_node:

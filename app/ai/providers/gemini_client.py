@@ -11,6 +11,7 @@ import httpx
 
 from app.ai.providers.base import BaseLLMClient, LLMResult, LLMStreamEvent, LLMUsage
 from app.core.config import get_settings
+from app.core.llm_debug import append_llm_debug_log, usage_to_payload
 from app.core.errors import IntegrationError
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,18 @@ class GeminiClient(BaseLLMClient):
                 system_prompt=system_prompt,
                 response_mime_type=response_mime_type,
             )
+            append_llm_debug_log(
+                "llm_request",
+                provider_name=self.provider_name,
+                model_name=self.model_name,
+                llm_api_mode="generateContent",
+                llm_api_url=url,
+                prompt=prompt,
+                system_prompt=system_prompt,
+                response_mime_type=response_mime_type,
+                response_schema=response_schema,
+                temperature=temperature,
+            )
 
         response = self._post_with_retries(url=url, payload=payload, debug=debug)
         response_payload = response.json()
@@ -88,6 +101,16 @@ class GeminiClient(BaseLLMClient):
 
         if debug:
             self._debug_response(text=text, usage=usage)
+            append_llm_debug_log(
+                "llm_response",
+                provider_name=self.provider_name,
+                model_name=self.model_name,
+                llm_api_mode="generateContent",
+                llm_api_url=url,
+                output_text=text,
+                usage=usage_to_payload(usage),
+                **self._response_debug_fields(response_payload),
+            )
 
         return LLMResult(
             text=text,
@@ -125,8 +148,21 @@ class GeminiClient(BaseLLMClient):
                 system_prompt=system_prompt,
                 response_mime_type=response_mime_type,
             )
+            append_llm_debug_log(
+                "llm_request",
+                provider_name=self.provider_name,
+                model_name=self.model_name,
+                llm_api_mode="streamGenerateContent",
+                llm_api_url=url,
+                prompt=prompt,
+                system_prompt=system_prompt,
+                response_mime_type=response_mime_type,
+                response_schema=response_schema,
+                temperature=temperature,
+            )
 
         usage = LLMUsage(latency_ms=0)
+        collected_text: list[str] = []
         try:
             with self._client.stream(
                 "POST",
@@ -135,6 +171,20 @@ class GeminiClient(BaseLLMClient):
                 json=payload,
             ) as response:
                 if response.status_code in RETRYABLE_STATUS_CODES:
+                    if debug:
+                        append_llm_debug_log(
+                            "llm_error",
+                            provider_name=self.provider_name,
+                            model_name=self.model_name,
+                            llm_api_mode="streamGenerateContent",
+                            llm_api_url=url,
+                            error={
+                                "type": "HTTPStatusError",
+                                "message": f"upstream status {response.status_code}",
+                                "status_code": response.status_code,
+                                "response_text": self._response_text(response),
+                            },
+                        )
                     raise self._build_response_error(response, exhausted=False)
                 try:
                     response.raise_for_status()
@@ -143,6 +193,19 @@ class GeminiClient(BaseLLMClient):
                         print(
                             f"[DEBUG_LLM] HTTP ERROR: {response.status_code} "
                             f"{self._response_excerpt(response)}"
+                        )
+                        append_llm_debug_log(
+                            "llm_error",
+                            provider_name=self.provider_name,
+                            model_name=self.model_name,
+                            llm_api_mode="streamGenerateContent",
+                            llm_api_url=url,
+                            error={
+                                "type": "HTTPStatusError",
+                                "message": f"upstream status {response.status_code}",
+                                "status_code": response.status_code,
+                                "response_text": self._response_text(response),
+                            },
                         )
                     raise self._build_response_error(response, exhausted=False) from exc
                 for line in response.iter_lines():
@@ -159,11 +222,34 @@ class GeminiClient(BaseLLMClient):
                     delta = self._extract_text(event_payload)
                     usage = self._extract_usage(event_payload, started_at=started_at)
                     if delta:
+                        collected_text.append(delta)
                         yield LLMStreamEvent(event_type="text_delta", delta=delta)
         except httpx.RequestError as exc:
+            if debug:
+                append_llm_debug_log(
+                    "llm_error",
+                    provider_name=self.provider_name,
+                    model_name=self.model_name,
+                    llm_api_mode="streamGenerateContent",
+                    llm_api_url=url,
+                    error={
+                        "type": type(exc).__name__,
+                        "message": str(exc),
+                    },
+                )
             raise self._build_request_error(exc, exhausted=False) from exc
 
         usage.latency_ms = round((time.perf_counter() - started_at) * 1000)
+        if debug:
+            append_llm_debug_log(
+                "llm_stream_completed",
+                provider_name=self.provider_name,
+                model_name=self.model_name,
+                llm_api_mode="streamGenerateContent",
+                llm_api_url=url,
+                output_text="".join(collected_text),
+                usage=usage_to_payload(usage),
+            )
         yield LLMStreamEvent(
             event_type="completed",
             usage=usage,
@@ -236,6 +322,18 @@ class GeminiClient(BaseLLMClient):
                             "[DEBUG_LLM] REQUEST ERROR: "
                             f"{type(exc).__name__} {exc}"
                         )
+                        append_llm_debug_log(
+                            "llm_error",
+                            provider_name=self.provider_name,
+                            model_name=self.model_name,
+                            llm_api_mode="generateContent",
+                            llm_api_url=url,
+                            error={
+                                "type": type(exc).__name__,
+                                "message": str(exc),
+                                "attempt": attempt + 1,
+                            },
+                        )
                     raise self._build_request_error(exc, exhausted=True) from exc
                 delay = self._retry_delay(attempt=attempt)
                 logger.warning(
@@ -261,6 +359,20 @@ class GeminiClient(BaseLLMClient):
                             "[DEBUG_LLM] RETRYABLE HTTP ERROR EXHAUSTED: "
                             f"{response.status_code} {self._response_excerpt(response)}"
                         )
+                        append_llm_debug_log(
+                            "llm_error",
+                            provider_name=self.provider_name,
+                            model_name=self.model_name,
+                            llm_api_mode="generateContent",
+                            llm_api_url=url,
+                            error={
+                                "type": "HTTPStatusError",
+                                "message": f"upstream status {response.status_code}",
+                                "status_code": response.status_code,
+                                "attempt": attempt + 1,
+                                "response_text": self._response_text(response),
+                            },
+                        )
                     raise self._build_response_error(response, exhausted=True)
                 delay = self._retry_delay(attempt=attempt, response=response)
                 logger.warning(
@@ -285,6 +397,19 @@ class GeminiClient(BaseLLMClient):
                     print(
                         f"[DEBUG_LLM] HTTP ERROR: {exc.response.status_code} "
                         f"{self._response_excerpt(exc.response)}"
+                    )
+                    append_llm_debug_log(
+                        "llm_error",
+                        provider_name=self.provider_name,
+                        model_name=self.model_name,
+                        llm_api_mode="generateContent",
+                        llm_api_url=url,
+                        error={
+                            "type": "HTTPStatusError",
+                            "message": f"upstream status {exc.response.status_code}",
+                            "status_code": exc.response.status_code,
+                            "response_text": self._response_text(exc.response),
+                        },
                     )
                 raise self._build_response_error(exc.response, exhausted=False) from exc
             return response
@@ -372,11 +497,13 @@ class GeminiClient(BaseLLMClient):
         )
 
     def _response_excerpt(self, response: httpx.Response) -> str:
+        return self._response_text(response)[:500]
+
+    def _response_text(self, response: httpx.Response) -> str:
         try:
-            text = response.text
+            return response.text
         except Exception:
             return ""
-        return text[:500]
 
     def _extract_text(self, payload: dict[str, Any]) -> str:
         candidates = payload.get("candidates", [])
@@ -392,6 +519,21 @@ class GeminiClient(BaseLLMClient):
             output_tokens=usage_payload.get("candidatesTokenCount"),
             latency_ms=round((time.perf_counter() - started_at) * 1000),
         )
+
+    def _response_debug_fields(self, payload: dict[str, Any]) -> dict[str, Any]:
+        candidates = payload.get("candidates", [])
+        usage_payload = payload.get("usageMetadata", {})
+        first_candidate = candidates[0] if isinstance(candidates, list) and candidates else {}
+        if not isinstance(first_candidate, dict):
+            first_candidate = {}
+        return {
+            "provider_response_id": payload.get("responseId"),
+            "provider_model_version": payload.get("modelVersion"),
+            "provider_finish_reason": first_candidate.get("finishReason"),
+            "provider_candidate_count": len(candidates) if isinstance(candidates, list) else None,
+            "provider_total_token_count": usage_payload.get("totalTokenCount"),
+            "provider_thoughts_token_count": usage_payload.get("thoughtsTokenCount"),
+        }
 
     def _debug_request(
         self,

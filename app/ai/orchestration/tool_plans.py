@@ -11,6 +11,7 @@ ToolName = Literal[
     "batch_get_entities",
     "search_catalog",
     "list_catalog_candidates",
+    "list_item_ids",
     "resolve_catalog_slug",
 ]
 
@@ -36,15 +37,11 @@ def get_tool_plan_response_schema() -> dict[str, Any]:
         "properties": {
             "reasoning_summary": {
                 "type": "string",
-                "description": (
-                    "A short user-visible progress summary explaining what facts are still needed "
-                    "and why the next tool calls were selected. "
-                    "Do not reveal hidden chain-of-thought."
-                ),
+                "description": "Short user-visible note about the missing facts and next action.",
             },
             "tool_calls": {
                 "type": "array",
-                "description": "The next minimal set of tool calls needed for this round.",
+                "description": "The next minimal tool calls for this round.",
                 "maxItems": 2,
                 "items": {
                     "type": "object",
@@ -58,12 +55,13 @@ def get_tool_plan_response_schema() -> dict[str, Any]:
                                 "batch_get_entities",
                                 "search_catalog",
                                 "list_catalog_candidates",
+                                "list_item_ids",
                                 "resolve_catalog_slug",
                             ],
                         },
                         "arguments": {
                             "type": "object",
-                            "description": "Tool arguments for the selected tool.",
+                            "description": "Arguments for the selected tool.",
                             "additionalProperties": True,
                         },
                     },
@@ -73,9 +71,7 @@ def get_tool_plan_response_schema() -> dict[str, Any]:
             },
             "done": {
                 "type": "boolean",
-                "description": (
-                    "Set to true when the current injected context and tool facts are enough."
-                ),
+                "description": "True when the current context and tool facts are already enough.",
             },
         },
         "required": ["reasoning_summary", "tool_calls", "done"],

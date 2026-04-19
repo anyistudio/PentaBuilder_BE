@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable, Literal
 
+from fuzzywuzzy import fuzz
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy.orm import Session
 
@@ -9,6 +10,7 @@ from app.ai.providers.base import BaseLLMClient, LLMResult
 from app.api.schemas.catalog import CatalogEntitySummary, CatalogEntityType
 from app.catalog.registry import CatalogEntity, CatalogSnapshot
 from app.core.errors import ApiError
+from app.core.llm_debug import llm_debug_scope
 from app.domain.enums import Game, Language, TerminologyStyle
 from app.domain.match_context import canonicalize_catalog_slug, normalize_lookup_text
 from app.services.catalog_service import CatalogService
@@ -17,6 +19,7 @@ MAX_BATCH_SLUGS = 12
 MAX_SEARCH_LIMIT = 8
 MAX_SELECTOR_CANDIDATES = 80
 MAX_PROMPT_CANDIDATES = 20
+MAX_FUZZY_CANDIDATE_PREVIEW = 12
 
 FILTER_KEY_ALIASES = {
     "position": "position",
@@ -39,11 +42,15 @@ FILTER_TOKEN_EXPANSIONS = {
     "adc": ("adc", "dragon lane", "marksman", "射手"),
     "support": ("support", "辅助"),
     "ap": ("ability power", "magic"),
+    "magic": ("magic", "ability power", "ap", "法术", "法强", "魔法"),
     "ad": ("attack damage", "physical"),
+    "physical": ("physical", "attack damage", "ad", "物理"),
     "ah": ("ability haste",),
     "mr": ("magic resistance",),
     "armor": ("armor",),
-    "boots": ("boots", "shoes", "靴"),
+    "boots": ("boots", "shoes", "shoe", "靴", "鞋", "鞋子"),
+    "shoe": ("boots", "shoes", "shoe", "靴", "鞋", "鞋子"),
+    "shoes": ("boots", "shoes", "shoe", "靴", "鞋", "鞋子"),
     "enchant": ("enchant", "附魔"),
     "mage": ("mage", "ability power", "magic"),
     "tank": ("tank", "health", "armor", "magic resistance"),
@@ -79,6 +86,16 @@ class SlugSelectorDecision(BaseModel):
     resolution_status: Literal["selected", "ambiguous", "not_found"]
     selected_slug: str | None = None
     reasoning_summary: str = Field(default="")
+
+
+@dataclass(frozen=True)
+class RankedCatalogEntity:
+    entity: CatalogEntity
+    score: int
+    lexical_score: int
+    fuzzy_score: int
+    fuzzy_breakdown: dict[str, int]
+    matched_term: str
 
 
 @dataclass
@@ -134,35 +151,40 @@ class CatalogToolset:
         query: str,
         limit: int = 5,
     ) -> dict[str, Any]:
+        del session
         resolved_type = CatalogEntityType(entity_type)
         bounded_limit = max(1, min(limit, MAX_SEARCH_LIMIT))
-        _, results = self.catalog_service.lookup(
-            session,
-            game=game,
-            query=query,
-            entity_type=resolved_type,
-            data_version=snapshot.data_version,
-            language=Language.ZH_CN,
-            terminology_style=TerminologyStyle.OFFICIAL,
-            limit=bounded_limit,
-        )
-        matches: list[dict[str, Any]] = []
-        for result in results:
-            entity = self._lookup_entity(
+        ranked_matches = self._rank_entities(
+            raw_name=query,
+            entities=self._all_entities(
                 snapshot=snapshot,
-                slug=result.slug,
+                game=game,
                 entity_type=resolved_type,
+            ),
+        )
+        matches = [
+            self._search_match_view(
+                entity=ranking.entity,
+                snapshot=snapshot,
+                matched_fields=self._matched_fields(entity=ranking.entity, query=query),
+                ranking=ranking,
             )
-            if entity is None:
-                continue
-            matches.append(
-                self._search_match_view(
-                    entity=entity,
-                    snapshot=snapshot,
-                    matched_fields=self._matched_fields(entity=entity, query=query),
-                )
-            )
-        return {"entity_type": resolved_type.value, "matches": matches}
+            for ranking in ranked_matches[:bounded_limit]
+        ]
+        top_match = (
+            self._detailed_ranked_entity_view(ranking=ranked_matches[0])
+            if ranked_matches
+            else None
+        )
+        return {
+            "game": game.value,
+            "entity_type": resolved_type.value,
+            "query": query,
+            "ranking_method": "fuzzywuzzy_blend",
+            "match_count": len(ranked_matches),
+            "top_match": top_match,
+            "matches": matches,
+        }
 
     def list_catalog_candidates(
         self,
@@ -188,6 +210,38 @@ class CatalogToolset:
             "candidates": [
                 self._candidate_summary_view(entity=entity, snapshot=snapshot)
                 for entity in candidates
+            ],
+        }
+
+    def list_item_ids(
+        self,
+        snapshot: CatalogSnapshot,
+        *,
+        game: Game,
+        category: str | list[str] | None,
+    ) -> dict[str, Any]:
+        normalized_categories = self._normalize_item_categories(category)
+        filters = (
+            {"category": normalized_categories[0]}
+            if len(normalized_categories) == 1
+            else {"category": normalized_categories}
+            if normalized_categories
+            else {}
+        )
+        items = self._filtered_entities(
+            snapshot=snapshot,
+            game=game,
+            entity_type=CatalogEntityType.ITEM,
+            filters=filters,
+        )
+        return {
+            "game": game.value,
+            "entity_type": CatalogEntityType.ITEM.value,
+            "requested_categories": normalized_categories or ["all"],
+            "item_count": len(items),
+            "items": [
+                self._candidate_summary_view(entity=entity, snapshot=snapshot)
+                for entity in items
             ],
         }
 
@@ -234,6 +288,7 @@ class CatalogToolset:
                     resolved_by="exact_match",
                     confidence="high",
                     candidates=[exact_match],
+                    selected_ranking=None,
                     selector_summary=None,
                 ),
                 [],
@@ -242,6 +297,10 @@ class CatalogToolset:
         ranked_candidates = self._rank_entities(raw_name=cleaned_name, entities=candidate_scope)
         auto_selected = self._select_top_ranked_candidate(ranked_candidates)
         if auto_selected is not None:
+            candidate_preview: list[RankedCatalogEntity | CatalogEntity] = [
+                auto_selected,
+                *ranked_candidates[1:4],
+            ]
             return (
                 self._resolved_slug_payload(
                     snapshot=snapshot,
@@ -249,13 +308,11 @@ class CatalogToolset:
                     entity_type=resolved_type,
                     raw_name=cleaned_name,
                     filters=normalized_filters,
-                    entity=auto_selected,
+                    entity=auto_selected.entity,
                     resolved_by="deterministic_rank",
                     confidence="medium",
-                    candidates=[
-                        auto_selected,
-                        *(entity for _, entity in ranked_candidates[1:4]),
-                    ],
+                    candidates=candidate_preview,
+                    selected_ranking=auto_selected,
                     selector_summary=None,
                 ),
                 [],
@@ -303,6 +360,14 @@ class CatalogToolset:
                             resolved_by="selector_model",
                             confidence="medium",
                             candidates=selector_pool,
+                            selected_ranking=next(
+                                (
+                                    ranking
+                                    for ranking in ranked_candidates
+                                    if ranking.entity.slug == selected_entity.slug
+                                ),
+                                None,
+                            ),
                             selector_summary=selector_summary,
                         ),
                         selector_usage,
@@ -316,7 +381,7 @@ class CatalogToolset:
             status = "ambiguous" if selector_pool else "not_found"
 
         candidate_preview = selector_pool or [
-            entity for _, entity in ranked_candidates[:MAX_PROMPT_CANDIDATES]
+            ranking for ranking in ranked_candidates[:MAX_PROMPT_CANDIDATES]
         ]
         return (
             {
@@ -326,15 +391,17 @@ class CatalogToolset:
                 "applied_filters": normalized_filters,
                 "resolution_status": status,
                 "resolved_slug": None,
+                "resolved_id": None,
                 "resolved_name": None,
+                "resolved_entity": None,
                 "resolved_by": None,
                 "confidence": "low",
                 "selector_summary": selector_summary,
                 "candidate_count": len(candidate_preview),
-                "candidates": [
-                    self._candidate_summary_view(entity=entity, snapshot=snapshot)
-                    for entity in candidate_preview
-                ],
+                "candidates": self._candidate_payloads(
+                    snapshot=snapshot,
+                    candidates=candidate_preview,
+                ),
             },
             selector_usage,
         )
@@ -355,6 +422,7 @@ class CatalogToolset:
         infobox = raw_payload.get("infobox", {})
         summary = self._entity_summary(entity, data_version="")
         return {
+            "id": entity.slug,
             "slug": entity.slug,
             "name": entity.english_name,
             "aliases": summary.aliases[:4],
@@ -387,6 +455,7 @@ class CatalogToolset:
         attributes = raw_payload.get("attributes") or {}
         summary = self._entity_summary(entity, data_version="")
         return {
+            "id": entity.slug,
             "slug": entity.slug,
             "name": entity.english_name,
             "aliases": summary.aliases[:4],
@@ -404,6 +473,7 @@ class CatalogToolset:
         attributes = raw_payload.get("attributes") or {}
         summary = self._entity_summary(entity, data_version="")
         return {
+            "id": entity.slug,
             "slug": entity.slug,
             "name": entity.english_name,
             "aliases": summary.aliases[:4],
@@ -418,10 +488,12 @@ class CatalogToolset:
         entity: CatalogEntity,
         snapshot: CatalogSnapshot,
         matched_fields: list[str],
+        ranking: RankedCatalogEntity | None = None,
     ) -> dict[str, Any]:
         summary = self._entity_summary(entity, data_version=snapshot.data_version)
         if entity.entity_type == CatalogEntityType.CHAMPION.value:
-            return {
+            payload = {
+                "id": entity.slug,
                 "slug": entity.slug,
                 "name": entity.english_name,
                 "aliases": summary.aliases[:4],
@@ -429,8 +501,10 @@ class CatalogToolset:
                 "position_tags": summary.position_tags,
                 "matched_fields": matched_fields,
             }
+            return self._attach_ranking(payload=payload, ranking=ranking)
         if entity.entity_type == CatalogEntityType.ITEM.value:
-            return {
+            payload = {
+                "id": entity.slug,
                 "slug": entity.slug,
                 "name": entity.english_name,
                 "aliases": summary.aliases[:4],
@@ -438,9 +512,11 @@ class CatalogToolset:
                 "stats": summary.stats,
                 "matched_fields": matched_fields,
             }
+            return self._attach_ranking(payload=payload, ranking=ranking)
         raw_payload = entity.raw_payload if isinstance(entity.raw_payload, dict) else {}
         attributes = raw_payload.get("attributes") or {}
-        return {
+        payload = {
+            "id": entity.slug,
             "slug": entity.slug,
             "name": entity.english_name,
             "aliases": summary.aliases[:4],
@@ -448,16 +524,18 @@ class CatalogToolset:
             "slot": raw_payload.get("slot") or attributes.get("Slot"),
             "matched_fields": matched_fields,
         }
+        return self._attach_ranking(payload=payload, ranking=ranking)
 
     def _candidate_summary_view(
         self,
         *,
         entity: CatalogEntity,
         snapshot: CatalogSnapshot,
-        match_score: int | None = None,
+        ranking: RankedCatalogEntity | None = None,
     ) -> dict[str, Any]:
         summary = self._entity_summary(entity, data_version=snapshot.data_version)
         payload: dict[str, Any] = {
+            "id": entity.slug,
             "slug": entity.slug,
             "name": summary.name,
             "aliases": summary.aliases[:4],
@@ -477,9 +555,7 @@ class CatalogToolset:
             attributes = raw_payload.get("attributes") or {}
             payload["path"] = raw_payload.get("path") or attributes.get("Path")
             payload["slot"] = raw_payload.get("slot") or attributes.get("Slot")
-        if match_score is not None and match_score > 0:
-            payload["match_score"] = match_score
-        return payload
+        return self._attach_ranking(payload=payload, ranking=ranking)
 
     def _lookup_entity(
         self,
@@ -761,44 +837,72 @@ class CatalogToolset:
         *,
         raw_name: str,
         entities: list[CatalogEntity],
-    ) -> list[tuple[int, CatalogEntity]]:
-        ranked = [
-            (self.catalog_service.score_entity_match(query=raw_name, entity=entity), entity)
-            for entity in entities
-        ]
+    ) -> list[RankedCatalogEntity]:
+        ranked: list[RankedCatalogEntity] = []
+        for entity in entities:
+            lexical_score = self.catalog_service.score_entity_match(query=raw_name, entity=entity)
+            fuzzy_score, fuzzy_breakdown, matched_term = self._best_fuzzy_match(
+                raw_name=raw_name,
+                entity=entity,
+            )
+            combined_score = max(lexical_score, 0) + fuzzy_score
+            ranked.append(
+                RankedCatalogEntity(
+                    entity=entity,
+                    score=combined_score,
+                    lexical_score=lexical_score,
+                    fuzzy_score=fuzzy_score,
+                    fuzzy_breakdown=fuzzy_breakdown,
+                    matched_term=matched_term,
+                )
+            )
         ordered = sorted(
             ranked,
-            key=lambda item: (-item[0], item[1].english_name.lower(), item[1].slug),
+            key=lambda item: (
+                -item.score,
+                -item.lexical_score,
+                -item.fuzzy_score,
+                item.entity.english_name.lower(),
+                item.entity.slug,
+            ),
         )
         if normalize_lookup_text(raw_name):
-            return [item for item in ordered if item[0] > 0]
+            return [
+                item
+                for item in ordered
+                if item.lexical_score > 0 or item.fuzzy_score >= 55
+            ]
         return ordered
 
     def _select_top_ranked_candidate(
         self,
-        ranked_candidates: list[tuple[int, CatalogEntity]],
-    ) -> CatalogEntity | None:
+        ranked_candidates: list[RankedCatalogEntity],
+    ) -> RankedCatalogEntity | None:
         if not ranked_candidates:
             return None
-        top_score, top_entity = ranked_candidates[0]
-        next_score = ranked_candidates[1][0] if len(ranked_candidates) > 1 else -1
-        if top_score >= 260 and top_score > next_score:
-            return top_entity
-        if top_score >= 180 and top_score >= next_score + 60:
-            return top_entity
-        if len(ranked_candidates) == 1 and top_score >= 120:
-            return top_entity
+        top_candidate = ranked_candidates[0]
+        next_candidate = ranked_candidates[1] if len(ranked_candidates) > 1 else None
+        next_score = next_candidate.score if next_candidate is not None else -1
+        next_fuzzy_score = next_candidate.fuzzy_score if next_candidate is not None else -1
+        if top_candidate.lexical_score >= 260 and top_candidate.score > next_score:
+            return top_candidate
+        if top_candidate.fuzzy_score >= 95 and top_candidate.fuzzy_score >= next_fuzzy_score + 10:
+            return top_candidate
+        if top_candidate.score >= 220 and top_candidate.score >= next_score + 40:
+            return top_candidate
+        if len(ranked_candidates) == 1 and top_candidate.fuzzy_score >= 90:
+            return top_candidate
         return None
 
     def _selector_candidate_pool(
         self,
         *,
         filtered_entities: list[CatalogEntity],
-        ranked_candidates: list[tuple[int, CatalogEntity]],
+        ranked_candidates: list[RankedCatalogEntity],
     ) -> list[CatalogEntity]:
         if filtered_entities:
             return filtered_entities[:MAX_SELECTOR_CANDIDATES]
-        return [entity for _, entity in ranked_candidates[:MAX_SELECTOR_CANDIDATES]]
+        return [ranking.entity for ranking in ranked_candidates[:MAX_SELECTOR_CANDIDATES]]
 
     def _resolved_slug_payload(
         self,
@@ -811,10 +915,15 @@ class CatalogToolset:
         entity: CatalogEntity,
         resolved_by: str,
         confidence: str,
-        candidates: list[CatalogEntity],
+        candidates: list[RankedCatalogEntity | CatalogEntity],
+        selected_ranking: RankedCatalogEntity | None,
         selector_summary: str | None,
     ) -> dict[str, Any]:
-        summary = self._candidate_summary_view(entity=entity, snapshot=snapshot)
+        summary = self._candidate_summary_view(
+            entity=entity,
+            snapshot=snapshot,
+            ranking=selected_ranking,
+        )
         return {
             "game": game.value,
             "entity_type": entity_type.value,
@@ -822,16 +931,178 @@ class CatalogToolset:
             "applied_filters": filters,
             "resolution_status": "resolved",
             "resolved_slug": entity.slug,
+            "resolved_id": entity.slug,
             "resolved_name": summary.get("name"),
+            "resolved_entity": self._detailed_ranked_entity_view(
+                ranking=selected_ranking,
+                entity=entity,
+            ),
             "resolved_by": resolved_by,
             "confidence": confidence,
             "selector_summary": selector_summary,
             "candidate_count": len(candidates),
-            "candidates": [
-                self._candidate_summary_view(entity=item, snapshot=snapshot)
-                for item in candidates[:MAX_PROMPT_CANDIDATES]
-            ],
+            "candidates": self._candidate_payloads(
+                snapshot=snapshot,
+                candidates=candidates[:MAX_PROMPT_CANDIDATES],
+            ),
         }
+
+    def _attach_ranking(
+        self,
+        *,
+        payload: dict[str, Any],
+        ranking: RankedCatalogEntity | None,
+    ) -> dict[str, Any]:
+        if ranking is None:
+            return payload
+        payload["match_score"] = ranking.score
+        payload["lexical_score"] = ranking.lexical_score
+        payload["fuzzy_score"] = ranking.fuzzy_score
+        payload["matched_term"] = ranking.matched_term
+        payload["fuzzy_breakdown"] = dict(ranking.fuzzy_breakdown)
+        return payload
+
+    def _candidate_payloads(
+        self,
+        *,
+        snapshot: CatalogSnapshot,
+        candidates: list[RankedCatalogEntity | CatalogEntity],
+    ) -> list[dict[str, Any]]:
+        payloads: list[dict[str, Any]] = []
+        for candidate in candidates:
+            if isinstance(candidate, RankedCatalogEntity):
+                payloads.append(
+                    self._candidate_summary_view(
+                        entity=candidate.entity,
+                        snapshot=snapshot,
+                        ranking=candidate,
+                    )
+                )
+                continue
+            payloads.append(self._candidate_summary_view(entity=candidate, snapshot=snapshot))
+        return payloads
+
+    def _detailed_ranked_entity_view(
+        self,
+        *,
+        ranking: RankedCatalogEntity | None,
+        entity: CatalogEntity | None = None,
+    ) -> dict[str, Any] | None:
+        ranked_entity = ranking.entity if ranking is not None else entity
+        if ranked_entity is None:
+            return None
+        payload = self._entity_tool_view(ranked_entity)
+        if payload is None:
+            return None
+        return self._attach_ranking(payload=payload, ranking=ranking)
+
+    def _best_fuzzy_match(
+        self,
+        *,
+        raw_name: str,
+        entity: CatalogEntity,
+    ) -> tuple[int, dict[str, int], str]:
+        query_variants = {
+            self._collapsed_lookup_text(raw_name),
+            normalize_lookup_text(raw_name),
+        }
+        query_variants = {variant for variant in query_variants if variant}
+        best_score = 0
+        best_breakdown = {
+            "ratio": 0,
+            "partial_ratio": 0,
+            "token_sort_ratio": 0,
+            "token_set_ratio": 0,
+            "wratio": 0,
+        }
+        best_term = ""
+        for term in entity.search_terms:
+            candidate_variants = {
+                self._collapsed_lookup_text(term),
+                normalize_lookup_text(term),
+            }
+            candidate_variants = {variant for variant in candidate_variants if variant}
+            term_best_breakdown = {
+                "ratio": 0,
+                "partial_ratio": 0,
+                "token_sort_ratio": 0,
+                "token_set_ratio": 0,
+                "wratio": 0,
+            }
+            for query_variant in query_variants:
+                for candidate_variant in candidate_variants:
+                    term_best_breakdown["ratio"] = max(
+                        term_best_breakdown["ratio"],
+                        fuzz.ratio(query_variant, candidate_variant),
+                    )
+                    term_best_breakdown["partial_ratio"] = max(
+                        term_best_breakdown["partial_ratio"],
+                        fuzz.partial_ratio(query_variant, candidate_variant),
+                    )
+                    term_best_breakdown["token_sort_ratio"] = max(
+                        term_best_breakdown["token_sort_ratio"],
+                        fuzz.token_sort_ratio(query_variant, candidate_variant),
+                    )
+                    term_best_breakdown["token_set_ratio"] = max(
+                        term_best_breakdown["token_set_ratio"],
+                        fuzz.token_set_ratio(query_variant, candidate_variant),
+                    )
+                    term_best_breakdown["wratio"] = max(
+                        term_best_breakdown["wratio"],
+                        fuzz.WRatio(query_variant, candidate_variant),
+                    )
+            composite_score = round(
+                term_best_breakdown["wratio"] * 0.30
+                + term_best_breakdown["token_set_ratio"] * 0.25
+                + term_best_breakdown["token_sort_ratio"] * 0.20
+                + term_best_breakdown["partial_ratio"] * 0.15
+                + term_best_breakdown["ratio"] * 0.10
+            )
+            if composite_score > best_score:
+                best_score = composite_score
+                best_breakdown = term_best_breakdown
+                best_term = term
+        return best_score, best_breakdown, best_term
+
+    def _collapsed_lookup_text(self, value: str) -> str:
+        return " ".join(value.strip().lower().split())
+
+    def _normalize_item_categories(self, category: str | list[str] | None) -> list[str]:
+        if category is None:
+            return []
+        raw_values = [category] if isinstance(category, str) else list(category)
+        normalized_categories: list[str] = []
+        alias_map = {
+            "magic": "magic",
+            "ap": "magic",
+            "法术": "magic",
+            "法强": "magic",
+            "魔法": "magic",
+            "physical": "physical",
+            "ad": "physical",
+            "物理": "physical",
+            "boots": "boots",
+            "boot": "boots",
+            "shoe": "boots",
+            "shoes": "boots",
+            "鞋": "boots",
+            "鞋子": "boots",
+            "enchant": "enchant",
+            "附魔": "enchant",
+            "tank": "tank",
+            "mage": "mage",
+            "support": "support_item",
+        }
+        for raw_value in raw_values[:8]:
+            if not isinstance(raw_value, str):
+                continue
+            cleaned = normalize_lookup_text(raw_value)
+            if not cleaned:
+                continue
+            normalized_value = alias_map.get(cleaned, cleaned)
+            if normalized_value not in normalized_categories:
+                normalized_categories.append(normalized_value)
+        return normalized_categories
 
     def _select_candidate_with_llm(
         self,
@@ -882,25 +1153,30 @@ class CatalogToolset:
                     "attrs=" + ", ".join(str(value) for value in candidate["main_attributes"][:3])
                 )
             prompt_lines.append("- " + " | ".join(parts))
-        llm_result = self.selector_llm_client.generate_text(
-            prompt="\n".join(prompt_lines),
-            system_prompt=SLUG_SELECTOR_SYSTEM_PROMPT,
-            response_mime_type="application/json",
-            response_schema={
-                "type": "object",
-                "properties": {
-                    "resolution_status": {
-                        "type": "string",
-                        "enum": ["selected", "ambiguous", "not_found"],
+        with llm_debug_scope(
+            graph_node="tool_execute",
+            tool_name="resolve_catalog_slug",
+            tool_stage="selector_llm",
+        ):
+            llm_result = self.selector_llm_client.generate_text(
+                prompt="\n".join(prompt_lines),
+                system_prompt=SLUG_SELECTOR_SYSTEM_PROMPT,
+                response_mime_type="application/json",
+                response_schema={
+                    "type": "object",
+                    "properties": {
+                        "resolution_status": {
+                            "type": "string",
+                            "enum": ["selected", "ambiguous", "not_found"],
+                        },
+                        "selected_slug": {"type": ["string", "null"]},
+                        "reasoning_summary": {"type": "string"},
                     },
-                    "selected_slug": {"type": ["string", "null"]},
-                    "reasoning_summary": {"type": "string"},
+                    "required": ["resolution_status", "selected_slug", "reasoning_summary"],
+                    "additionalProperties": False,
                 },
-                "required": ["resolution_status", "selected_slug", "reasoning_summary"],
-                "additionalProperties": False,
-            },
-            temperature=0.0,
-        )
+                temperature=0.0,
+            )
         decision = self._parse_selector_decision(llm_result)
         if (
             decision.selected_slug is not None

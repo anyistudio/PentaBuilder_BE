@@ -212,11 +212,8 @@ def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> d
         }
     if run_type == RunType.RECOMMEND_FULL_BUILD:
         build_description = (
-            "The single best ordered item purchase path using canonical item slugs. "
-            "For League of Legends PC, return exactly 6 item steps. "
-            "For Wild Rift, return exactly 7 steps consisting of 5 normal items, "
-            "1 boots item, and 1 separate enchant item. In Wild Rift, the boots "
-            "step must come before the enchant step."
+            "Ordered purchase path using canonical item slugs. Follow the current "
+            "game's step count and boots/enchant contract from the prompt."
         )
         return {
             "type": "object",
@@ -231,11 +228,11 @@ def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> d
                 ),
                 "summary": {
                     "type": "string",
-                    "description": "Short overall explanation for the full build choice.",
+                    "description": "Short build-direction summary.",
                 },
                 "slot_notes": {
                     "type": "array",
-                    "description": "Optional short notes for specific slots.",
+                    "description": "Optional short notes for high-value steps.",
                     "items": {
                         "type": "object",
                         "properties": {
@@ -243,11 +240,11 @@ def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> d
                                 "type": "integer",
                                 "minimum": 0,
                                 "maximum": build_slot_count - 1,
-                                "description": "The affected build-order step index.",
+                                "description": "0-based build-order step index.",
                             },
                             "text": {
                                 "type": "string",
-                                "description": "Short note for that slot.",
+                                "description": "Short timing or sequencing note.",
                             },
                         },
                         "required": ["slot_index", "text"],
@@ -437,42 +434,34 @@ def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> d
             "properties": {
                 "summary": {
                     "type": "string",
-                    "description": "Short overview of kill cadence and tower pressure.",
+                    "description": "Short overview of current kill and tower pressure.",
                 },
                 "assumed_match_duration_minutes": {
                     "type": "integer",
                     "enum": [15, 30],
-                    "description": (
-                        "Must be 15 for ARAM contexts, otherwise 30 for normal/ranked contexts."
-                    ),
+                    "description": "15 for ARAM, otherwise 30.",
                 },
                 "own_kill_frequency_vs_enemies": {
                     "type": "array",
-                    "description": (
-                        "For the user's champion, estimate how often they kill each enemy "
-                        "champion, expressed as minutes per kill."
-                    ),
+                    "description": "User kill cadence versus each enemy.",
                     "items": {
                         "type": "object",
                         "properties": {
                             "enemy_champion_slug": {
                                 "type": "string",
-                                "description": "One enemy champion slug from the current context.",
+                                "description": "Enemy champion slug from the current context.",
                             },
                             "estimated_minutes_per_kill": {
                                 "type": "number",
                                 "exclusiveMinimum": 0,
                                 "description": (
-                                    "Estimated minutes per kill. Keep it within the assumed match "
-                                    "duration, using larger numbers when kill pressure is low."
+                                    "Minutes per kill within the assumed "
+                                    "match duration."
                                 ),
                             },
                             "reason": {
                                 "type": "string",
-                                "description": (
-                                    "Short reason grounded first in current items/item spikes, "
-                                    "then champion kit, runes, and mode."
-                                ),
+                                "description": "Short reason grounded in current items first.",
                             },
                         },
                         "required": [
@@ -488,61 +477,48 @@ def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> d
                     "minimum": 0,
                     "maximum": 100,
                     "description": (
-                        "Estimated percent of the user's current target objective "
-                        "(first tower, second tower, or nexus) pushed per minute under the "
-                        "current build and rune setup."
+                        "Percent of the user's current target objective "
+                        "pushed per minute."
                     ),
                 },
                 "own_tower_push_reason": {
                     "type": "string",
-                    "description": (
-                        "Short reason for the user's tower pressure estimate, grounded in "
-                        "current items, waveclear pattern, and structure damage profile."
-                    ),
+                    "description": "Short reason for the user's tower pressure estimate.",
                 },
                 "enemy_statuses": {
                     "type": "array",
-                    "description": (
-                        "For each enemy champion, estimate kill cadence against the user and tower "
-                        "pressure."
-                    ),
+                    "description": "Enemy kill cadence versus the user and enemy tower pressure.",
                     "items": {
                         "type": "object",
                         "properties": {
                             "champion_slug": {
                                 "type": "string",
-                                "description": "One enemy champion slug from the current context.",
+                                "description": "Enemy champion slug from the current context.",
                             },
                             "estimated_minutes_per_kill_on_user": {
                                 "type": "number",
                                 "exclusiveMinimum": 0,
                                 "description": (
-                                    "Estimated minutes per kill against the user's champion. "
-                                    "Keep it within the assumed match duration."
+                                    "Minutes per kill on the user within the "
+                                    "assumed match duration."
                                 ),
                             },
                             "kill_reason": {
                                 "type": "string",
-                                "description": (
-                                    "Short reason for this kill cadence estimate, grounded first "
-                                    "in current items/item spikes and then in champion threat pattern."
-                                ),
+                                "description": "Short reason for this kill cadence estimate.",
                             },
                             "tower_push_percent_per_minute": {
                                 "type": "number",
                                 "minimum": 0,
                                 "maximum": 100,
                                 "description": (
-                                    "Estimated percent of this enemy champion's current target "
-                                    "objective (first tower, second tower, or nexus) pushed per minute."
+                                    "Percent of that enemy's current target "
+                                    "objective pushed per minute."
                                 ),
                             },
                             "tower_push_reason": {
                                 "type": "string",
-                                "description": (
-                                    "Short reason for this tower pressure estimate, grounded first "
-                                    "in current items and then in waveclear/structure DPS pattern."
-                                ),
+                                "description": "Short reason for this tower pressure estimate.",
                             },
                         },
                         "required": [

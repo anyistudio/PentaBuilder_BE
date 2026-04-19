@@ -1,0 +1,63 @@
+def build_involved_entity_parameter_appendix(*, context, snapshot):
+    Build the structured appendix for the champions, items, and runes involved in the current match context.
+
+    Include:
+    - own side champion
+    - own side purchased items only
+    - own side selected runes only
+    - each enemy champion
+    - each enemy's purchased items only
+    - each enemy's selected runes only
+
+    Run the final payload through `_compact_payload` so empty lists, empty dicts, null fields, and blank strings are removed before the appendix is injected into prompts or returned in results.
+
+
+def _build_parameter_slots(*, build, catalog):
+    Walk the build slots in order.
+
+    Skip empty slots completely.
+
+    For non-empty slots:
+    - keep the original `slot_index`
+    - keep `item_slug`
+    - attach the compact item payload when the catalog item exists
+    - mark the slot as `missing=true` when the slug is present but the catalog entry cannot be found
+
+
+def _rune_parameter_selection(*, rune_selection, catalog):
+    Build primary/secondary rune payload lists, then drop empty rune groups.
+
+
+def _rune_parameter_list(*, rune_slugs, catalog):
+    Convert rune slugs into structured rune payloads, preserving a `missing` marker when a slug cannot be resolved.
+
+
+def _champion_parameter_payload(entity):
+    Build the detailed champion appendix payload.
+
+    Keep:
+    - champion identity and localization fields
+    - infobox data
+    - abilities with detailed numeric and mechanical fields
+
+    Remove the short `blurb` field because the higher-level prompt already includes ability hooks, so the appendix should focus on the more detailed structured fields instead of repeating the short summary text.
+
+    Compact the final payload to remove null and empty fields.
+
+
+def _item_parameter_payload(entity):
+    Build the item appendix payload, then compact away empty fields.
+
+
+def _rune_parameter_payload(entity):
+    Build the rune appendix payload, then compact away empty fields.
+
+
+def _compact_payload(value):
+    Recursively remove:
+    - `None`
+    - blank strings
+    - empty dicts
+    - empty lists
+
+    Keep meaningful scalar values and return the compacted nested structure.

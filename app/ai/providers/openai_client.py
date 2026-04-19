@@ -8,6 +8,7 @@ import httpx
 
 from app.ai.providers.base import BaseLLMClient, LLMResult, LLMStreamEvent, LLMUsage
 from app.core.config import get_settings
+from app.core.llm_debug import append_llm_debug_log, usage_to_payload
 
 
 @lru_cache(maxsize=1)
@@ -71,13 +72,40 @@ class OpenAIClient(BaseLLMClient):
                 system_prompt=system_prompt,
                 response_mime_type=response_mime_type,
             )
+            append_llm_debug_log(
+                "llm_request",
+                provider_name=self.provider_name,
+                model_name=self.model_name,
+                llm_api_mode="responses.create",
+                llm_api_url=url,
+                prompt=prompt,
+                system_prompt=system_prompt,
+                response_mime_type=response_mime_type,
+                response_schema=response_schema,
+                temperature=temperature,
+            )
 
-        response = self._client.post(
-            url,
-            headers=self._headers(),
-            json=payload,
-        )
-        self._raise_for_status(response)
+        try:
+            response = self._client.post(
+                url,
+                headers=self._headers(),
+                json=payload,
+            )
+        except httpx.RequestError as exc:
+            if settings.debug_llm:
+                append_llm_debug_log(
+                    "llm_error",
+                    provider_name=self.provider_name,
+                    model_name=self.model_name,
+                    llm_api_mode="responses.create",
+                    llm_api_url=url,
+                    error={
+                        "type": type(exc).__name__,
+                        "message": str(exc),
+                    },
+                )
+            raise
+        self._raise_for_status(response, llm_api_mode="responses.create")
         response_payload = response.json()
         text = self._extract_text(response_payload).strip()
         usage = self._extract_usage(response_payload, started_at=started_at) or LLMUsage(
@@ -86,6 +114,16 @@ class OpenAIClient(BaseLLMClient):
 
         if settings.debug_llm:
             self._debug_response(text=text, usage=usage)
+            append_llm_debug_log(
+                "llm_response",
+                provider_name=self.provider_name,
+                model_name=self.model_name,
+                llm_api_mode="responses.create",
+                llm_api_url=url,
+                output_text=text,
+                usage=usage_to_payload(usage),
+                **self._response_debug_fields(response_payload),
+            )
 
         return LLMResult(
             text=text,
@@ -124,31 +162,70 @@ class OpenAIClient(BaseLLMClient):
                 system_prompt=system_prompt,
                 response_mime_type=response_mime_type,
             )
+            append_llm_debug_log(
+                "llm_request",
+                provider_name=self.provider_name,
+                model_name=self.model_name,
+                llm_api_mode="responses.stream",
+                llm_api_url=url,
+                prompt=prompt,
+                system_prompt=system_prompt,
+                response_mime_type=response_mime_type,
+                response_schema=response_schema,
+                temperature=temperature,
+            )
 
-        with self._client.stream(
-            "POST",
-            url,
-            headers=self._headers(stream=True),
-            json=payload,
-        ) as response:
-            self._raise_for_status(response)
-            for line in response.iter_lines():
-                if not line:
-                    continue
-                if isinstance(line, bytes):
-                    line = line.decode("utf-8")
-                if not line.startswith("data: "):
-                    continue
-                raw_data = line.removeprefix("data: ").strip()
-                if not raw_data or raw_data == "[DONE]":
-                    continue
-                event_payload = json.loads(raw_data)
-                delta = self._extract_stream_delta(event_payload)
-                usage = self._extract_usage(event_payload, started_at=started_at) or usage
-                if delta:
-                    yield LLMStreamEvent(event_type="text_delta", delta=delta)
+        collected_text: list[str] = []
+        try:
+            with self._client.stream(
+                "POST",
+                url,
+                headers=self._headers(stream=True),
+                json=payload,
+            ) as response:
+                self._raise_for_status(response, llm_api_mode="responses.stream")
+                for line in response.iter_lines():
+                    if not line:
+                        continue
+                    if isinstance(line, bytes):
+                        line = line.decode("utf-8")
+                    if not line.startswith("data: "):
+                        continue
+                    raw_data = line.removeprefix("data: ").strip()
+                    if not raw_data or raw_data == "[DONE]":
+                        continue
+                    event_payload = json.loads(raw_data)
+                    delta = self._extract_stream_delta(event_payload)
+                    usage = self._extract_usage(event_payload, started_at=started_at) or usage
+                    if delta:
+                        collected_text.append(delta)
+                        yield LLMStreamEvent(event_type="text_delta", delta=delta)
+        except httpx.RequestError as exc:
+            if settings.debug_llm:
+                append_llm_debug_log(
+                    "llm_error",
+                    provider_name=self.provider_name,
+                    model_name=self.model_name,
+                    llm_api_mode="responses.stream",
+                    llm_api_url=url,
+                    error={
+                        "type": type(exc).__name__,
+                        "message": str(exc),
+                    },
+                )
+            raise
 
         usage.latency_ms = round((time.perf_counter() - started_at) * 1000)
+        if settings.debug_llm:
+            append_llm_debug_log(
+                "llm_stream_completed",
+                provider_name=self.provider_name,
+                model_name=self.model_name,
+                llm_api_mode="responses.stream",
+                llm_api_url=url,
+                output_text="".join(collected_text),
+                usage=usage_to_payload(usage),
+            )
         yield LLMStreamEvent(
             event_type="completed",
             usage=usage,
@@ -269,13 +346,26 @@ class OpenAIClient(BaseLLMClient):
             return prompt
         return "JSON response required.\n\n" + prompt
 
-    def _raise_for_status(self, response: httpx.Response) -> None:
+    def _raise_for_status(self, response: httpx.Response, *, llm_api_mode: str) -> None:
         try:
             response.raise_for_status()
         except httpx.HTTPStatusError:
             settings = get_settings()
             if settings.debug_llm:
                 print(f"[DEBUG_LLM] HTTP ERROR: {response.status_code} {response.text[:2000]}")
+                append_llm_debug_log(
+                    "llm_error",
+                    provider_name=self.provider_name,
+                    model_name=self.model_name,
+                    llm_api_mode=llm_api_mode,
+                    llm_api_url=str(response.request.url),
+                    error={
+                        "type": "HTTPStatusError",
+                        "message": f"upstream status {response.status_code}",
+                        "status_code": response.status_code,
+                        "response_text": response.text,
+                    },
+                )
             raise
 
     def _responses_url(self) -> str:
@@ -332,6 +422,15 @@ class OpenAIClient(BaseLLMClient):
             output_tokens=usage_payload.get("output_tokens"),
             latency_ms=round((time.perf_counter() - started_at) * 1000),
         )
+
+    def _response_debug_fields(self, payload: dict[str, Any]) -> dict[str, Any]:
+        output_items = payload.get("output")
+        return {
+            "provider_response_id": payload.get("id"),
+            "provider_model_version": payload.get("model"),
+            "provider_finish_reason": payload.get("status"),
+            "provider_output_item_count": len(output_items) if isinstance(output_items, list) else None,
+        }
 
     def _debug_request(
         self,
