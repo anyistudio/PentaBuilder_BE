@@ -1242,13 +1242,6 @@ class AIRunService:
             return merged
         if additional.input_tokens is not None:
             merged["tokens_input"] = (merged["tokens_input"] or 0) + additional.input_tokens
-
-    def _build_llm_debug_log_file_name(self, run: AIRun) -> str:
-        started_at = run.created_at or datetime.now(tz=timezone.utc)
-        return build_run_log_file_name(
-            run_id=str(run.id),
-            started_at=started_at,
-        )
         if additional.output_tokens is not None:
             merged["tokens_output"] = (merged["tokens_output"] or 0) + additional.output_tokens
         if additional.latency_ms is not None:
@@ -1256,6 +1249,13 @@ class AIRunService:
         if additional.cost_usd is not None:
             merged["cost_usd"] = (merged["cost_usd"] or 0) + additional.cost_usd
         return merged
+
+    def _build_llm_debug_log_file_name(self, run: AIRun) -> str:
+        started_at = run.created_at or datetime.now(tz=timezone.utc)
+        return build_run_log_file_name(
+            run_id=str(run.id),
+            started_at=started_at,
+        )
 
     def _chunk_text(self, text: str, size: int = 24) -> list[str]:
         if not text:
