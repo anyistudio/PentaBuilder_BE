@@ -1,0 +1,15 @@
+Script purpose:
+- run a focused local benchmark for `recommend_full_build` only
+- read the model matrix from the backend `.env`
+- execute 5 curated cases against every configured model
+- write result artifacts and keep a user-editable token-price template on disk
+
+Main flow:
+- parse optional CLI overrides for data_version, output directory, price-file path, provider filters, model filters, and DEBUG_LLM behavior
+- bootstrap the normal backend app wiring through the shared local eval app factory
+- resolve the active data version unless the user overrides it
+- load model refs from `.env` via the dedicated recommend_full_build benchmark helper
+- optionally filter the loaded model refs down to one or more providers and/or specific model identifiers, including `.env`-style `provider:model`
+- run the benchmark with the interactive progress bar enabled
+- print one-line failure reasons to the terminal during the run
+- run the benchmark and print the saved artifact paths

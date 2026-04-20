@@ -7,6 +7,13 @@ Class Settings:
 - keep secrets as SecretStr
 - provide is_local helper for reload behavior
 - expose all_models_list so local evaluation can read one comma-separated model matrix from .env
+- treat `PRIMARY_REASONING_MODEL`, `FAST_REASONING_MODEL`, and `CALIBRATION_MODEL` as combined `provider:model_name` refs
+- allow `SLUG_SELECTOR_MODEL` to be either a bare model name or one combined `provider:model_name` reference while still falling back to the fast-reasoning model ref
+
+Function _split_model_ref:
+- split one optional combined model reference into provider and model name
+- accept `provider:model_name` when present or else reuse the configured fallback provider with the raw model name
+- fall back entirely when the setting is blank
 
 Function get_settings:
 - cache one Settings instance per process

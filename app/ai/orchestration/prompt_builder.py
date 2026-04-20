@@ -196,8 +196,17 @@ def _output_mode_block(
     if output_mode == "tool_plan":
         return (
             "Tool planning mode:\n"
-            "- Return one JSON object only.\n"
-            "- Do not output markdown fences or extra text.\n"
+            "- Return exactly one top-level JSON object.\n"
+            "- Do not output markdown fences, commentary, or any extra text "
+            "before or after the JSON.\n"
+            "- Do not concatenate multiple JSON objects.\n"
+            "- Use the schema field names exactly: `reasoning_summary`, `tool_calls`, `done`, "
+            "and inside each tool call use `tool_name` and `arguments`.\n"
+            "- Never use alias keys such as `tool` or `args`.\n"
+            "- In tool-planning mode, never emit final-answer fields such as "
+            "`recommended_build_order`, `recommended_runes`, or `build_direction`.\n"
+            "- If the current context is already enough, set `done=true` and "
+            "return `tool_calls=[]`.\n"
             "- Keep `reasoning_summary` short and user-visible. "
             "Do not reveal hidden chain-of-thought."
         )

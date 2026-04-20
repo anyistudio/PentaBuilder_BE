@@ -1,8 +1,29 @@
+Function best_catalog_entity_fuzzy_match:
+- expose the existing fuzzy catalog ranking as a reusable top-1 helper for other backend layers
+- return the highest-ranked candidate or `None` when no reasonable fuzzy candidate survives filtering
+
+
+Function rank_catalog_entities:
+- build the shared ranked candidate list using optional lexical scoring plus the blended `fuzzywuzzy` score
+- keep the same ordering and score thresholds used by tool-side search and slug resolution
+
+
+Function _best_fuzzy_match:
+- compare one raw query against one catalog entity across multiple normalized search terms
+- blend ratio, partial, token-sort, token-set, and WRatio into one composite fuzzy score
+
+
+Function _collapsed_lookup_text:
+- normalize whitespace and case for the fuzzy matching helper
+
+
 Class CatalogToolset:
 - expose bounded read-only catalog helpers for champions, items, runes, batch lookups, and search
 - route all slug lookups through the in-memory catalog snapshot
 - return documented ToolView payloads instead of raw catalog payloads
 - rank fuzzy name matches with a blended `fuzzywuzzy` score so near-miss IDs like `wr-ludens-echo` still land on the real catalog slug
+- build selector candidate pools by combining exactish overlap hits with fuzzy top-20 matches before asking the small selector model to choose one ID
 - return explicit `id` fields, top-match detail, and category-based item-ID listings so the main model can see the real catalog identifiers directly
+- treat multi-category `list_item_ids` requests as a union of category buckets rather than an impossible intersection
 - keep batch/search helpers capped and stable so model-visible tool usage stays bounded
 - keep tool behavior deterministic and side-effect free

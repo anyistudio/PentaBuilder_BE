@@ -2,4 +2,5 @@ Module tool_plans.py:
 - define the bounded model-visible tool names
 - include the category-based `list_item_ids` helper in the allowed tool set
 - validate tool selection JSON from the model against a strict two-call-per-round contract
+- accept common OpenAI-style aliases like `tool` and `args` when normalizing tool plans
 - expose the JSON schema used for tool planning responses, using compact field descriptions to reduce prompt overhead

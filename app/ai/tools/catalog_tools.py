@@ -17,7 +17,7 @@ from app.services.catalog_service import CatalogService
 
 MAX_BATCH_SLUGS = 12
 MAX_SEARCH_LIMIT = 8
-MAX_SELECTOR_CANDIDATES = 80
+MAX_SELECTOR_CANDIDATES = 20
 MAX_PROMPT_CANDIDATES = 20
 MAX_FUZZY_CANDIDATE_PREVIEW = 12
 
@@ -98,10 +98,203 @@ class RankedCatalogEntity:
     matched_term: str
 
 
+def best_catalog_entity_fuzzy_match(
+    *,
+    raw_name: str,
+    entities: list[CatalogEntity],
+) -> RankedCatalogEntity | None:
+    ranked = rank_catalog_entities(
+        raw_name=raw_name,
+        entities=entities,
+        lexical_scorer=None,
+    )
+    return ranked[0] if ranked else None
+
+
+def rank_catalog_entities(
+    *,
+    raw_name: str,
+    entities: list[CatalogEntity],
+    lexical_scorer: Callable[[CatalogEntity], int] | None,
+) -> list[RankedCatalogEntity]:
+    ranked: list[RankedCatalogEntity] = []
+    for entity in entities:
+        lexical_score = lexical_scorer(entity) if lexical_scorer is not None else 0
+        fuzzy_score, fuzzy_breakdown, matched_term = _best_fuzzy_match(
+            raw_name=raw_name,
+            entity=entity,
+        )
+        combined_score = max(lexical_score, 0) + fuzzy_score
+        ranked.append(
+            RankedCatalogEntity(
+                entity=entity,
+                score=combined_score,
+                lexical_score=lexical_score,
+                fuzzy_score=fuzzy_score,
+                fuzzy_breakdown=fuzzy_breakdown,
+                matched_term=matched_term,
+            )
+        )
+    ordered = sorted(
+        ranked,
+        key=lambda item: (
+            -item.score,
+            -item.lexical_score,
+            -item.fuzzy_score,
+            item.entity.english_name.lower(),
+            item.entity.slug,
+        ),
+    )
+    if normalize_lookup_text(raw_name):
+        return [
+            item
+            for item in ordered
+            if item.lexical_score > 0 or item.fuzzy_score >= 55
+        ]
+    return ordered
+
+
+def _best_fuzzy_match(
+    *,
+    raw_name: str,
+    entity: CatalogEntity,
+) -> tuple[int, dict[str, int], str]:
+    query_variants = {
+        _collapsed_lookup_text(raw_name),
+        normalize_lookup_text(raw_name),
+    }
+    query_variants = {variant for variant in query_variants if variant}
+    best_score = 0
+    best_breakdown = {
+        "ratio": 0,
+        "partial_ratio": 0,
+        "token_sort_ratio": 0,
+        "token_set_ratio": 0,
+        "wratio": 0,
+    }
+    best_term = ""
+    for term in entity.search_terms:
+        candidate_variants = {
+            _collapsed_lookup_text(term),
+            normalize_lookup_text(term),
+        }
+        candidate_variants = {variant for variant in candidate_variants if variant}
+        term_best_breakdown = {
+            "ratio": 0,
+            "partial_ratio": 0,
+            "token_sort_ratio": 0,
+            "token_set_ratio": 0,
+            "wratio": 0,
+        }
+        for query_variant in query_variants:
+            for candidate_variant in candidate_variants:
+                term_best_breakdown["ratio"] = max(
+                    term_best_breakdown["ratio"],
+                    fuzz.ratio(query_variant, candidate_variant),
+                )
+                term_best_breakdown["partial_ratio"] = max(
+                    term_best_breakdown["partial_ratio"],
+                    fuzz.partial_ratio(query_variant, candidate_variant),
+                )
+                term_best_breakdown["token_sort_ratio"] = max(
+                    term_best_breakdown["token_sort_ratio"],
+                    fuzz.token_sort_ratio(query_variant, candidate_variant),
+                )
+                term_best_breakdown["token_set_ratio"] = max(
+                    term_best_breakdown["token_set_ratio"],
+                    fuzz.token_set_ratio(query_variant, candidate_variant),
+                )
+                term_best_breakdown["wratio"] = max(
+                    term_best_breakdown["wratio"],
+                    fuzz.WRatio(query_variant, candidate_variant),
+                )
+        composite_score = round(
+            term_best_breakdown["wratio"] * 0.30
+            + term_best_breakdown["token_set_ratio"] * 0.25
+            + term_best_breakdown["token_sort_ratio"] * 0.20
+            + term_best_breakdown["partial_ratio"] * 0.15
+            + term_best_breakdown["ratio"] * 0.10
+        )
+        if composite_score > best_score:
+            best_score = composite_score
+            best_breakdown = term_best_breakdown
+            best_term = term
+    return best_score, best_breakdown, best_term
+
+
+def _collapsed_lookup_text(value: str) -> str:
+    return " ".join(value.strip().lower().split())
+
+
 @dataclass
 class CatalogToolset:
     catalog_service: CatalogService
     selector_llm_client: BaseLLMClient | None = None
+
+    def resolve_catalog_slug_with_selector(
+        self,
+        snapshot: CatalogSnapshot,
+        *,
+        game: Game,
+        entity_type: str,
+        raw_name: str,
+        filters: dict[str, Any] | None,
+    ) -> tuple[str | None, list[dict[str, Any]]]:
+        resolved_type = CatalogEntityType(entity_type)
+        cleaned_name = " ".join(str(raw_name).split())[:120]
+        normalized_filters = self._normalize_filters(filters)
+        filtered_entities = self._filtered_entities(
+            snapshot=snapshot,
+            game=game,
+            entity_type=resolved_type,
+            filters=normalized_filters,
+        )
+        candidate_scope = filtered_entities or self._all_entities(
+            snapshot=snapshot,
+            game=game,
+            entity_type=resolved_type,
+        )
+
+        exact_match = self._resolve_exact_match(
+            snapshot=snapshot,
+            game=game,
+            entity_type=resolved_type,
+            raw_name=cleaned_name,
+            candidate_scope=candidate_scope,
+        )
+        if exact_match is not None:
+            return exact_match.slug, []
+
+        ranked_candidates = self._rank_entities(raw_name=cleaned_name, entities=candidate_scope)
+        selector_pool = self._selector_candidate_pool(
+            raw_name=cleaned_name,
+            filtered_entities=filtered_entities,
+            ranked_candidates=ranked_candidates,
+        )
+        if self.selector_llm_client is not None and selector_pool:
+            selector_decision, usage_payload = self._select_candidate_with_llm(
+                snapshot=snapshot,
+                game=game,
+                entity_type=resolved_type,
+                raw_name=cleaned_name,
+                filters=normalized_filters,
+                candidates=selector_pool,
+            )
+            if (
+                selector_decision.resolution_status == "selected"
+                and isinstance(selector_decision.selected_slug, str)
+            ):
+                return selector_decision.selected_slug, (
+                    [usage_payload] if usage_payload is not None else []
+                )
+            return None, ([usage_payload] if usage_payload is not None else [])
+
+        fallback = self._select_top_ranked_candidate(ranked_candidates)
+        if fallback is not None:
+            return fallback.entity.slug, []
+        if ranked_candidates:
+            return ranked_candidates[0].entity.slug, []
+        return None, []
 
     def get_champion(self, snapshot: CatalogSnapshot, slug: str) -> dict[str, Any]:
         entity = snapshot.catalogs[self._game_from_slug(slug)].champions_by_slug.get(slug)
@@ -221,19 +414,35 @@ class CatalogToolset:
         category: str | list[str] | None,
     ) -> dict[str, Any]:
         normalized_categories = self._normalize_item_categories(category)
-        filters = (
-            {"category": normalized_categories[0]}
-            if len(normalized_categories) == 1
-            else {"category": normalized_categories}
-            if normalized_categories
-            else {}
-        )
-        items = self._filtered_entities(
-            snapshot=snapshot,
-            game=game,
-            entity_type=CatalogEntityType.ITEM,
-            filters=filters,
-        )
+        if not normalized_categories:
+            items = self._filtered_entities(
+                snapshot=snapshot,
+                game=game,
+                entity_type=CatalogEntityType.ITEM,
+                filters={},
+            )
+        elif len(normalized_categories) == 1:
+            items = self._filtered_entities(
+                snapshot=snapshot,
+                game=game,
+                entity_type=CatalogEntityType.ITEM,
+                filters={"category": normalized_categories[0]},
+            )
+        else:
+            deduped_items: dict[str, CatalogEntity] = {}
+            for normalized_category in normalized_categories:
+                category_items = self._filtered_entities(
+                    snapshot=snapshot,
+                    game=game,
+                    entity_type=CatalogEntityType.ITEM,
+                    filters={"category": normalized_category},
+                )
+                for entity in category_items:
+                    deduped_items.setdefault(entity.slug, entity)
+            items = sorted(
+                deduped_items.values(),
+                key=lambda entity: (entity.english_name.lower(), entity.slug),
+            )
         return {
             "game": game.value,
             "entity_type": CatalogEntityType.ITEM.value,
@@ -319,6 +528,7 @@ class CatalogToolset:
             )
 
         selector_pool = self._selector_candidate_pool(
+            raw_name=cleaned_name,
             filtered_entities=filtered_entities,
             ranked_candidates=ranked_candidates,
         )
@@ -838,41 +1048,14 @@ class CatalogToolset:
         raw_name: str,
         entities: list[CatalogEntity],
     ) -> list[RankedCatalogEntity]:
-        ranked: list[RankedCatalogEntity] = []
-        for entity in entities:
-            lexical_score = self.catalog_service.score_entity_match(query=raw_name, entity=entity)
-            fuzzy_score, fuzzy_breakdown, matched_term = self._best_fuzzy_match(
-                raw_name=raw_name,
+        return rank_catalog_entities(
+            raw_name=raw_name,
+            entities=entities,
+            lexical_scorer=lambda entity: self.catalog_service.score_entity_match(
+                query=raw_name,
                 entity=entity,
-            )
-            combined_score = max(lexical_score, 0) + fuzzy_score
-            ranked.append(
-                RankedCatalogEntity(
-                    entity=entity,
-                    score=combined_score,
-                    lexical_score=lexical_score,
-                    fuzzy_score=fuzzy_score,
-                    fuzzy_breakdown=fuzzy_breakdown,
-                    matched_term=matched_term,
-                )
-            )
-        ordered = sorted(
-            ranked,
-            key=lambda item: (
-                -item.score,
-                -item.lexical_score,
-                -item.fuzzy_score,
-                item.entity.english_name.lower(),
-                item.entity.slug,
             ),
         )
-        if normalize_lookup_text(raw_name):
-            return [
-                item
-                for item in ordered
-                if item.lexical_score > 0 or item.fuzzy_score >= 55
-            ]
-        return ordered
 
     def _select_top_ranked_candidate(
         self,
@@ -897,12 +1080,44 @@ class CatalogToolset:
     def _selector_candidate_pool(
         self,
         *,
+        raw_name: str,
         filtered_entities: list[CatalogEntity],
         ranked_candidates: list[RankedCatalogEntity],
     ) -> list[CatalogEntity]:
-        if filtered_entities:
-            return filtered_entities[:MAX_SELECTOR_CANDIDATES]
-        return [ranking.entity for ranking in ranked_candidates[:MAX_SELECTOR_CANDIDATES]]
+        seen: set[str] = set()
+        candidates: list[CatalogEntity] = []
+        candidate_scope = filtered_entities or [ranking.entity for ranking in ranked_candidates]
+        normalized_raw = normalize_lookup_text(raw_name)
+
+        def add(entity: CatalogEntity) -> None:
+            if entity.slug in seen or len(candidates) >= MAX_SELECTOR_CANDIDATES:
+                return
+            seen.add(entity.slug)
+            candidates.append(entity)
+
+        if normalized_raw:
+            for entity in candidate_scope:
+                normalized_terms = self._normalized_name_terms(entity)
+                if normalized_raw in normalized_terms:
+                    add(entity)
+            for entity in candidate_scope:
+                if any(self._terms_overlap(normalized_raw, term) for term in entity.search_terms):
+                    add(entity)
+        for ranking in ranked_candidates[:MAX_SELECTOR_CANDIDATES]:
+            add(ranking.entity)
+        for entity in candidate_scope[:MAX_SELECTOR_CANDIDATES]:
+            add(entity)
+        return candidates
+
+    def _terms_overlap(self, raw_name: str, term: str) -> bool:
+        normalized_term = normalize_lookup_text(term)
+        if not raw_name or not normalized_term:
+            return False
+        if raw_name in normalized_term or normalized_term in raw_name:
+            return True
+        raw_tokens = set(raw_name.split())
+        term_tokens = set(normalized_term.split())
+        return bool(raw_tokens and term_tokens and raw_tokens.intersection(term_tokens))
 
     def _resolved_slug_payload(
         self,
@@ -995,77 +1210,6 @@ class CatalogToolset:
         if payload is None:
             return None
         return self._attach_ranking(payload=payload, ranking=ranking)
-
-    def _best_fuzzy_match(
-        self,
-        *,
-        raw_name: str,
-        entity: CatalogEntity,
-    ) -> tuple[int, dict[str, int], str]:
-        query_variants = {
-            self._collapsed_lookup_text(raw_name),
-            normalize_lookup_text(raw_name),
-        }
-        query_variants = {variant for variant in query_variants if variant}
-        best_score = 0
-        best_breakdown = {
-            "ratio": 0,
-            "partial_ratio": 0,
-            "token_sort_ratio": 0,
-            "token_set_ratio": 0,
-            "wratio": 0,
-        }
-        best_term = ""
-        for term in entity.search_terms:
-            candidate_variants = {
-                self._collapsed_lookup_text(term),
-                normalize_lookup_text(term),
-            }
-            candidate_variants = {variant for variant in candidate_variants if variant}
-            term_best_breakdown = {
-                "ratio": 0,
-                "partial_ratio": 0,
-                "token_sort_ratio": 0,
-                "token_set_ratio": 0,
-                "wratio": 0,
-            }
-            for query_variant in query_variants:
-                for candidate_variant in candidate_variants:
-                    term_best_breakdown["ratio"] = max(
-                        term_best_breakdown["ratio"],
-                        fuzz.ratio(query_variant, candidate_variant),
-                    )
-                    term_best_breakdown["partial_ratio"] = max(
-                        term_best_breakdown["partial_ratio"],
-                        fuzz.partial_ratio(query_variant, candidate_variant),
-                    )
-                    term_best_breakdown["token_sort_ratio"] = max(
-                        term_best_breakdown["token_sort_ratio"],
-                        fuzz.token_sort_ratio(query_variant, candidate_variant),
-                    )
-                    term_best_breakdown["token_set_ratio"] = max(
-                        term_best_breakdown["token_set_ratio"],
-                        fuzz.token_set_ratio(query_variant, candidate_variant),
-                    )
-                    term_best_breakdown["wratio"] = max(
-                        term_best_breakdown["wratio"],
-                        fuzz.WRatio(query_variant, candidate_variant),
-                    )
-            composite_score = round(
-                term_best_breakdown["wratio"] * 0.30
-                + term_best_breakdown["token_set_ratio"] * 0.25
-                + term_best_breakdown["token_sort_ratio"] * 0.20
-                + term_best_breakdown["partial_ratio"] * 0.15
-                + term_best_breakdown["ratio"] * 0.10
-            )
-            if composite_score > best_score:
-                best_score = composite_score
-                best_breakdown = term_best_breakdown
-                best_term = term
-        return best_score, best_breakdown, best_term
-
-    def _collapsed_lookup_text(self, value: str) -> str:
-        return " ".join(value.strip().lower().split())
 
     def _normalize_item_categories(self, category: str | list[str] | None) -> list[str]:
         if category is None:

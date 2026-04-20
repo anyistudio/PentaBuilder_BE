@@ -28,14 +28,24 @@ def test_list_item_ids_returns_real_ids_for_magic_items(configured_app):
     Verify the response returns real item IDs and that common AP items appear in the listing.
 
 
+def test_list_item_ids_returns_union_for_multiple_categories(configured_app):
+    Ask `list_item_ids` for several Wild Rift categories at once.
+    Verify the helper returns the union of those category buckets instead of an empty intersection.
+
+
 def test_validate_run_result_reports_field_level_slug_errors(configured_app):
-    Validate a `recommend_full_build` payload that includes an invalid item slug.
-    Verify the raised `ApiError` reports the exact failing field path and unknown-slug message.
+    Validate a `recommend_full_build` payload that includes an item slug from the wrong game.
+    Verify the raised `ApiError` reports the exact failing field path and wrong-game message.
 
 
 def test_validate_run_result_accepts_seven_step_build_order_with_boots_and_enchant(configured_app):
     Validate a correct Wild Rift seven-step build order with a separate enchant step.
     Verify the normalized result preserves the build order and translates slot notes into explanation targets.
+
+
+def test_validate_run_result_accepts_treads_as_wild_rift_boots(configured_app):
+    Validate a Wild Rift build order whose boots step is `wr-mercury-s-treads`.
+    Verify the contract layer still recognizes it as the required boots step.
 
 
 def test_validate_run_result_rejects_wild_rift_build_order_without_seven_steps(configured_app):
@@ -46,3 +56,10 @@ def test_validate_run_result_rejects_wild_rift_build_order_without_seven_steps(c
 def test_validate_run_result_rejects_lol_recommend_full_build_with_enchant_step(configured_app):
     Validate a LoL build order that incorrectly includes a separate enchant step.
     Verify the contract layer rejects the enchant slot for PC League.
+Function test_validate_run_result_reports_field_level_slug_errors:
+- verify a wrong-game item slug such as `lol-zhonyas-hourglass` still fails validation with a field-level error
+
+
+Function test_validate_run_result_autofixes_near_miss_item_slug_with_selector_model:
+- verify `recommend_full_build` validation auto-corrects a close item slug like `wr-ludens-echo`
+- confirm the selector-model path records usage payloads while rewriting the build order to the real canonical item slug

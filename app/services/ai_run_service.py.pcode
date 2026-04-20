@@ -4,7 +4,7 @@ Class AIRunService:
 - append debug log entries when an AI run is created, including cache resolution and explicit cache-hit records even when no provider LLM call is needed
 - derive one deterministic LLM debug filename from the run start timestamp plus the last four characters of run_id, then carry that file name together with session_id/run_id through every LLM debug scope so the full trace stays in one log file
 - short-circuit strong cache hits while still updating transcripts, leaderboard, and metrics
-- execute the LangGraph pipeline with model selection, injected baseline/reference/calibration/session context, and optional precomputed tool state
+- execute the LangGraph pipeline with model selection derived from combined `provider:model_name` config refs, injected baseline/reference/calibration/session context, optional precomputed tool state, and a dedicated slug-selector model when configured
 - write ai_runs metadata and artifacts including prompt payloads plus tool traces/facts
 - update cache, leaderboard, transcripts, metrics, and structured logs after completion
 - expose background streaming execution that first collects tool context, then streams real preview text, then finalizes structured JSON

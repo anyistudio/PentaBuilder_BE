@@ -1,0 +1,149 @@
+Function build_recommend_full_build_benchmark_cases:
+- define exactly 5 `recommend_full_build` benchmark scenarios
+- keep hero selections distinct across cases
+- intentionally vary owned item counts from 0 through 4 so the benchmark covers early, mid, and late build-completion states
+
+
+Function load_model_refs_from_env_file:
+- read `.env` directly for `ALL_MODEL` first and `ALL_MODELS` second
+- fall back to already-loaded settings only when the file parse does not provide a model matrix
+- reuse the shared eval model parser so provider/model validation stays consistent
+
+
+Function filter_model_refs:
+- optionally narrow the loaded model list to one or more provider names and/or model identifiers
+- accept repeated CLI-style values or comma-separated provider/model lists
+- match provider names, bare model names, full `provider/model` labels, and `.env`-style `provider:model` strings case-insensitively
+- raise a clear error when filtering removes every model
+
+
+Function sync_model_price_table:
+- treat the configured JSON file as a persistent model-price registry rather than a per-run overwrite
+- keep the default registry under `scripts/recommend_full_build_model_prices.json` so it lives with benchmark tooling rather than generated reports
+- preserve every previously saved model entry so filtered benchmark runs cannot delete older prices
+- refresh provider/model identity fields for the models included in the current run while keeping their saved prices and notes
+- add blank entries for brand-new models so the user can fill them later
+
+
+Function build_selected_model_price_table:
+- derive a benchmark-local price snapshot from the persistent registry
+- keep only the models selected for the current run while preserving their saved prices and notes
+- reuse the registry timestamp when available so per-run artifacts can point back to the synced registry state
+
+
+Function build_default_output_dir:
+- create a timestamped output directory path under `evaluation_reports/` for one recommend_full_build benchmark run
+
+
+Function run_recommend_full_build_benchmark:
+- build the 5 benchmark cases
+- sync the persistent model-price registry on disk
+- derive a current-run-only price snapshot from that registry
+- run every case against every requested model with provider/model overrides
+- show a `tqdm` progress bar during manual benchmark runs while allowing tests to disable it
+- optionally print one-line failure summaries to the terminal as soon as a case fails
+- collect per-run outputs, timing, token usage, and cost metadata
+- write JSON, Markdown, case snapshot, and current-run model-price snapshot artifacts
+
+
+Function render_recommend_full_build_benchmark_markdown:
+- render a compact manual-review-friendly report covering model-level summary stats plus per-case generated content and explanation text
+- when a case fails, include a concise failure summary plus error code, status, parsed issue list, and raw error details in the Markdown report
+
+
+Function _run_one_case:
+- execute one non-stream `recommend_full_build` run with cache disabled
+- measure total wall-clock elapsed time around the full backend pipeline
+- capture run-level latency, token counters, provider-reported cost, estimated cost from the user-editable price table, generated build content, and explanation text
+- return a failure record with the error string plus structured failure metadata when execution raises
+
+
+Function _summarize_results:
+- aggregate benchmark rows by model and compute average elapsed time, average tokens, and total cost fields
+
+
+Function _write_benchmark_artifacts:
+- persist the benchmark report as JSON and Markdown
+- persist the resolved case list and the price-table snapshot alongside the report
+
+
+Function _extract_generated_content:
+- pull the build order, rune recommendation, and slot notes out of the raw recommend_full_build result for easier comparison
+
+
+Function _estimate_cost_from_price_table:
+- compute USD cost from input/output tokens only when both token counts and both per-million prices are available
+
+
+Function _build_failure_error_payload:
+- normalize an exception plus any persisted run error fields into one benchmark-friendly failure payload
+- preserve a concise failure summary, error code, HTTP status, parsed detail payload, and human-readable issue lines when available
+
+
+Function _read_model_matrix_from_env_file:
+- parse a simple `.env` file line by line
+- support both `ALL_MODEL` and `ALL_MODELS`
+- return the comma-split provider:model entries
+
+
+Function _normalize_filter_values:
+- flatten repeated CLI filter arguments and comma-separated values into one normalized lowercase set
+
+
+Function _model_filter_candidates:
+- generate the accepted identifier variants for one model ref
+- include bare model name, `provider/model`, and `.env`-style `provider:model`
+
+
+Function _extract_error_issue_messages:
+- convert structured validation issues from an error details payload into readable `path: message` lines
+
+
+Function _json_safe_error_details:
+- keep error details JSON-serializable for report.json and report.md output
+
+
+Function _build_model_price_table_payload:
+- standardize the JSON payload shape used by both the persistent registry file and per-run model-price snapshots
+- sort model labels for stable diffs and easier manual editing
+- stamp the payload with either the provided sync time or the current UTC time
+
+
+Function _read_json_file:
+- load a JSON object from disk and safely return an empty dict on missing/invalid content
+
+
+Function _strip_wrapping_quotes:
+- remove one matching pair of outer single or double quotes from an env value
+
+
+Function _owned_item_count:
+- count how many build slots are already populated in the benchmark case context
+
+
+Function _avg:
+- compute a rounded mean across numeric values only
+
+
+Function _sum:
+- compute a rounded numeric sum across numeric values only
+
+
+Function _display_number:
+- render optional numeric report fields in Markdown tables
+
+
+Function _display_currency:
+- render optional USD values with fixed precision for Markdown tables
+
+
+Function _context:
+- build a valid `MatchContext` from simplified benchmark inputs
+
+
+Function _slots:
+- enforce the correct slot count for LoL vs Wild Rift benchmark cases
+
+
+Function _runes:
+- package the primary/secondary rune lists into the expected payload shape

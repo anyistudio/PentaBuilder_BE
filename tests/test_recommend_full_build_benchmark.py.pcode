@@ -1,0 +1,51 @@
+Function test_build_recommend_full_build_benchmark_cases_has_five_distinct_item_counts:
+- build the focused recommend_full_build benchmark cases
+- verify there are exactly 5 cases, all target the same workflow, all use different heroes, and owned item counts progress from 0 to 4
+
+
+Function test_load_model_refs_from_env_file_supports_all_model_key:
+- create a temporary `.env` that uses the singular `ALL_MODEL` key
+- verify the loader still parses the provider/model matrix correctly
+
+
+Function test_sync_model_price_table_creates_blank_entries:
+- generate a temp price-template JSON for two models
+- verify the file exists and both input/output price fields start blank for manual fill-in
+
+
+Function test_sync_model_price_table_preserves_existing_models_when_running_subset:
+- seed a temp price file with two previously saved model entries
+- sync the price table for only one selected model
+- verify the unselected model entry is still present with its saved prices intact
+
+
+Function test_build_selected_model_price_table_returns_only_requested_models:
+- build a synthetic persistent registry payload containing both historical and current models
+- derive the per-run snapshot for one selected model
+- verify the snapshot keeps only that model while preserving its saved pricing fields
+
+
+Function test_filter_model_refs_by_provider_supports_case_and_csv:
+- pass a small mixed-provider model list through the provider filter helper
+- verify case-insensitive and comma-separated provider names both work
+
+
+Function test_filter_model_refs_by_model_supports_name_label_and_env_style:
+- pass a small mixed-model list through the model filter helper
+- verify bare model names, full `provider/model` labels, and `.env`-style `provider:model` strings are all accepted
+
+
+Function test_build_failure_error_payload_includes_detailed_issues:
+- construct an `ApiError` with structured validation issues
+- verify the benchmark failure payload preserves a concise failure summary, code, status, and readable issue messages
+
+
+Function test_render_markdown_includes_detailed_failure_reason:
+- render a synthetic failed benchmark report row
+- verify the Markdown includes the concise failure summary, error code, status code, issue breakdown, and raw error details
+
+
+Function test_run_recommend_full_build_benchmark_writes_artifacts:
+- run the focused benchmark against the configured fake LLM app for one model
+- disable the interactive progress bar so the test output stays quiet
+- verify the benchmark emits 5 result rows and writes the expected JSON/Markdown/case artifacts

@@ -1,0 +1,30 @@
+Module models.py:
+- define the lightweight eval data classes used by offline benchmark and workflow-eval scripts
+- parse model references from either explicit CLI args or backend settings defaults
+
+Class EvalModelRef:
+- hold one provider/model pair for an evaluation target
+- expose a readable `provider/model` label for reports
+
+Class EvalSeedRun:
+- describe one optional preliminary run whose output becomes reply context for a later eval run
+
+Class EvalCase:
+- package one eval case with its feature, context, payload, response preferences, and optional seed run
+
+Function parse_model_refs:
+- return explicit model refs when CLI args are provided
+- otherwise fall back to the settings-derived default model list
+
+Function default_model_refs:
+- build the default eval matrix from `PRIMARY_REASONING_MODEL` and `FAST_REASONING_MODEL`
+- split those combined `provider:model_name` refs through `Settings` helper properties
+- add a small OpenAI fallback pair when an OpenAI key is configured
+- deduplicate the final ordered list
+
+Function _parse_model_ref_strings:
+- parse explicit `provider:model_name` CLI strings into `EvalModelRef` entries
+- reject malformed inputs early
+
+Function _deduplicate:
+- preserve first-seen order while removing duplicate provider/model pairs

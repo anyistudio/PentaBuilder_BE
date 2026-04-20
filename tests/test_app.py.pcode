@@ -24,3 +24,20 @@ Function test_append_llm_debug_log_uses_run_id_file:
 Function test_build_run_log_file_name_uses_start_timestamp_and_run_suffix:
 - build a run log file name from a fixed UTC timestamp plus a known run_id
 - verify the final name converts that timestamp into America/Chicago local time before appending the run-id suffix
+
+
+Function test_slug_selector_model_accepts_provider_prefixed_model_ref:
+- instantiate `Settings` without reading the repo `.env`
+- provide `FAST_REASONING_MODEL` and `SLUG_SELECTOR_MODEL` in the combined `provider:model_name` format
+- verify the settings object resolves the selector provider/model pair from that single env var
+
+
+Function test_primary_and_fast_reasoning_model_refs_split_provider_and_model:
+- instantiate `Settings` with combined `PRIMARY_REASONING_MODEL` and `FAST_REASONING_MODEL` values
+- verify the resolved provider/model helper properties split those model refs correctly
+
+
+Function test_prepare_run_keeps_selector_model_on_env_config:
+- monkeypatch `create_llm_client` with a recorder
+- create one `recommend_full_build` run and call `_prepare_run()` with an explicit benchmark-style model override
+- verify the first client uses the override while the second selector client still uses the env-configured `SLUG_SELECTOR_MODEL`

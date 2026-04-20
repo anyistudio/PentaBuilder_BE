@@ -96,6 +96,7 @@ def test_recommend_full_build_prompt_keeps_wild_rift_contract_in_task_context_on
     assert prompt.system_prompt.count("Return exactly 7 steps.") == 0
     assert prompt.user_prompt.count("Build order contract: return exactly 7 steps.") == 1
     assert prompt.user_prompt.count("The boots step must appear before the enchant step.") == 1
+    assert "Keep `recommended_runes` empty for now" in prompt.system_prompt
     assert "`list_item_ids`" in prompt.user_prompt
 
 
@@ -129,6 +130,14 @@ def test_prioritized_workflow_schemas_are_compact(configured_app) -> None:
             "from the prompt."
         )
     )
+    assert (
+        recommend_schema["properties"]["recommended_runes"]["description"]
+        == (
+            "Temporary placeholder. Leave both arrays empty for this workflow: "
+            "`primary=[]`, `secondary=[]`."
+        )
+    )
+    assert "recommended_runes" in recommend_schema["required"]
     assert (
         game_status_schema["properties"]["assumed_match_duration_minutes"]["description"]
         == "15 for ARAM, otherwise 30."

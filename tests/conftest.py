@@ -208,7 +208,7 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
     if run_type == "recommend_full_build":
         return {
             "recommended_build_order": filled_build,
-            "recommended_runes": runes_template,
+            "recommended_runes": {"primary": [], "secondary": []},
             "summary": "这套 build 兼顾了当前对局的爆发、成型节奏和容错。",
             "slot_notes": [
                 {"slot_index": 0, "text": "第一件先做核心起手装。"},
@@ -255,12 +255,18 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
                     "estimated_minutes_per_kill": min(
                         float(assumed_duration), round(4.0 + index * 1.2, 1)
                     ),
-                    "reason": "当前已成型的核心输出装让爆发窗口更稳定，但仍要看对方位移和反打能力。",
+                    "reason": (
+                        "当前已成型的核心输出装让爆发窗口更稳定，"
+                        "但仍要看对方位移和反打能力。"
+                    ),
                 }
                 for index, slug in enumerate(enemy_slugs)
             ],
             "own_tower_push_percent_per_minute": 3.8,
-            "own_tower_push_reason": "当前已购装备提供稳定清线和普攻/技能混合伤害，推塔速度属于中等偏上。",
+            "own_tower_push_reason": (
+                "当前已购装备提供稳定清线和普攻/技能混合伤害，"
+                "推塔速度属于中等偏上。"
+            ),
             "enemy_statuses": [
                 {
                     "champion_slug": slug,
@@ -269,7 +275,10 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
                     ),
                     "kill_reason": "敌方当前已购装备让一轮爆发和先手控制后的集火窗口更危险。",
                     "tower_push_percent_per_minute": round(2.4 + index * 0.6, 1),
-                    "tower_push_reason": "敌方推塔速度取决于当前成装后的清线能力、持续输出和结构伤害节奏。",
+                    "tower_push_reason": (
+                        "敌方推塔速度取决于当前成装后的清线能力、"
+                        "持续输出和结构伤害节奏。"
+                    ),
                 }
                 for index, slug in enumerate(enemy_slugs)
             ],

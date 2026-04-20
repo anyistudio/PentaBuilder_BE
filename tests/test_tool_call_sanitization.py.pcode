@@ -18,3 +18,14 @@ def test_list_item_ids_sanitizer_accepts_kind_alias_without_explicit_game(config
     Build a Wild Rift context.
     Pass a `list_item_ids` call that uses `kind` instead of `category` and omits `game`.
     Verify backend sanitization injects the current game and rewrites the alias into the canonical `category` argument.
+
+
+def test_validate_tool_plan_accepts_tool_and_args_aliases():
+    Pass a tool plan payload that uses `tool` and `args` instead of `tool_name` and `arguments`.
+    Verify validation normalizes those aliases into the canonical tool-plan structure.
+
+
+def test_call_tool_plan_model_uses_first_valid_candidate_from_concatenated_json():
+    Stub an LLM client that returns two top-level JSON objects concatenated together.
+    Make the first object a valid aliased tool plan and the second object an unrelated final answer.
+    Verify tool-plan parsing recovers the first valid candidate instead of failing the whole run.

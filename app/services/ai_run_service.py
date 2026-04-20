@@ -827,8 +827,8 @@ class AIRunService:
             )
         selector_llm_client = create_llm_client(
             settings=self.settings,
-            provider_name=self.settings.fast_reasoning_provider,
-            model_name=self.settings.fast_reasoning_model,
+            provider_name=self.settings.resolved_slug_selector_provider,
+            model_name=self.settings.resolved_slug_selector_model,
         )
         graph = OnlineRunGraph(
             run_type=RunType(run.run_type),
@@ -869,12 +869,18 @@ class AIRunService:
     ) -> tuple[str, str]:
         if provider_name_override or model_name_override:
             return (
-                provider_name_override or self.settings.primary_reasoning_provider,
-                model_name_override or self.settings.primary_reasoning_model,
+                provider_name_override or self.settings.resolved_primary_reasoning_provider,
+                model_name_override or self.settings.resolved_primary_reasoning_model,
             )
         if run_type == RunType.CHAT_FOLLOWUP:
-            return self.settings.fast_reasoning_provider, self.settings.fast_reasoning_model
-        return self.settings.primary_reasoning_provider, self.settings.primary_reasoning_model
+            return (
+                self.settings.resolved_fast_reasoning_provider,
+                self.settings.resolved_fast_reasoning_model,
+            )
+        return (
+            self.settings.resolved_primary_reasoning_provider,
+            self.settings.resolved_primary_reasoning_model,
+        )
 
     def _load_baseline(self, session: Session, *, context: MatchContext) -> dict[str, Any] | None:
         stmt = sa.select(BaselineBuild).where(

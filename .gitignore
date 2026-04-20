@@ -10,3 +10,4 @@ game_data/
 debug_llm.log
 log/*
 !log/.gitkeep
+evaluation_reports/*

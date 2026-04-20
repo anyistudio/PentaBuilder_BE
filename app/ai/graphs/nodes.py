@@ -6,7 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.ai.orchestration.prompt_builder import build_prompt_package
 from app.ai.orchestration.result_contracts import get_result_response_schema, validate_run_result
-from app.ai.orchestration.tool_plans import get_tool_plan_response_schema, validate_tool_plan
+from app.ai.orchestration.tool_plans import (
+    ToolSelectionResult,
+    get_tool_plan_response_schema,
+    validate_tool_plan,
+)
 from app.ai.providers.base import BaseLLMClient
 from app.ai.tools.catalog_tools import CatalogToolset
 from app.catalog.registry import CatalogSnapshot
@@ -141,7 +145,7 @@ def tool_select_node(
             tool_facts=state.get("tool_facts"),
             output_mode="tool_plan",
         )
-        raw_result, usage_payload = _call_json_model(
+        tool_plan, usage_payload = _call_tool_plan_model(
             llm_client=llm_client,
             prompt=prompt_package.user_prompt,
             system_prompt=prompt_package.system_prompt,
@@ -150,7 +154,6 @@ def tool_select_node(
             error_message="Model returned an invalid tool plan.",
             graph_node="tool_select",
         )
-        tool_plan = validate_tool_plan(raw_result)
         planned_calls = list(tool_plan.tool_calls)
         sanitized_calls = _sanitize_tool_calls(
             plan=tool_plan.model_dump(mode="json"),
@@ -335,8 +338,10 @@ def validate_result_node(
     run_type: RunType,
     context: MatchContext,
     snapshot: CatalogSnapshot,
+    toolset: CatalogToolset,
 ) -> Callable[[dict[str, Any]], dict[str, Any]]:
     def _node(state: dict[str, Any]) -> dict[str, Any]:
+        provider_usage_payloads = list(state.get("provider_usage_payloads", []))
         try:
             validated = validate_run_result(
                 run_type=run_type,
@@ -344,6 +349,8 @@ def validate_result_node(
                 context=context,
                 operation_context=state.get("operation_context", {}),
                 snapshot=snapshot,
+                slug_resolution_toolset=toolset,
+                provider_usage_payloads=provider_usage_payloads,
             )
         except ApiError as exc:
             if (
@@ -352,17 +359,19 @@ def validate_result_node(
                 and state.get("repair_attempt_count", 0) < MAX_REPAIR_ATTEMPTS
             ):
                 return {
+                    "provider_usage_payloads": provider_usage_payloads,
                     "repair_requested": True,
                     "validation_errors": _extract_validation_errors(exc),
                 }
             raise
 
         validated["_provider_usage"] = _aggregate_provider_usage(
-            state.get("provider_usage_payloads", [])
+            provider_usage_payloads
         )
         return {
             "result": validated,
             "final_result": validated,
+            "provider_usage_payloads": provider_usage_payloads,
             "repair_requested": False,
             "validation_errors": [],
         }
@@ -517,6 +526,87 @@ def _call_json_model(
         "cost_usd": llm_result.usage.cost_usd,
     }
     return raw_result, usage_payload
+
+
+def _call_tool_plan_model(
+    *,
+    llm_client: BaseLLMClient,
+    prompt: str,
+    system_prompt: str,
+    response_schema: dict[str, Any],
+    temperature: float,
+    error_message: str,
+    graph_node: str,
+) -> tuple[ToolSelectionResult, dict[str, Any]]:
+    with llm_debug_scope(graph_node=graph_node):
+        llm_result = llm_client.generate_text(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            response_mime_type="application/json",
+            response_schema=response_schema,
+            temperature=temperature,
+        )
+
+    usage_payload = {
+        "provider_name": llm_result.provider_name,
+        "model_name": llm_result.model_name,
+        "tokens_input": llm_result.usage.input_tokens,
+        "tokens_output": llm_result.usage.output_tokens,
+        "latency_ms": llm_result.usage.latency_ms,
+        "cost_usd": llm_result.usage.cost_usd,
+    }
+
+    raw_text = llm_result.text.strip()
+    candidates = _extract_json_dict_candidates(raw_text)
+    if not candidates:
+        raise ApiError(
+            error_message,
+            code="provider_error",
+            status_code=502,
+        )
+
+    for candidate in candidates:
+        try:
+            return validate_tool_plan(candidate), usage_payload
+        except ApiError:
+            continue
+
+    raise ApiError(
+        error_message,
+        code="provider_error",
+        status_code=502,
+        details={"candidate_count": len(candidates)},
+    )
+
+
+def _extract_json_dict_candidates(text: str) -> list[dict[str, Any]]:
+    stripped = text.strip()
+    if not stripped:
+        return []
+
+    try:
+        parsed = json.loads(stripped)
+    except json.JSONDecodeError:
+        parsed = None
+    if isinstance(parsed, dict):
+        return [parsed]
+
+    decoder = json.JSONDecoder()
+    candidates: list[dict[str, Any]] = []
+    index = 0
+    while index < len(stripped):
+        while index < len(stripped) and stripped[index].isspace():
+            index += 1
+        if index >= len(stripped):
+            break
+        try:
+            parsed_candidate, next_index = decoder.raw_decode(stripped, index)
+        except json.JSONDecodeError:
+            break
+        if isinstance(parsed_candidate, dict):
+            candidates.append(parsed_candidate)
+        index = next_index
+    return candidates
 
 
 def _sanitize_tool_calls(

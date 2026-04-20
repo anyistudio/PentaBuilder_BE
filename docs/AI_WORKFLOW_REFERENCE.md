@@ -36,8 +36,8 @@
 
 说明：
 
-- 除 `chat_followup` 外，在线 run 默认都走 `primary_reasoning_provider/model`。
-- `chat_followup` 默认走 `fast_reasoning_provider/model`。
+- 除 `chat_followup` 外，在线 run 默认都走 `PRIMARY_REASONING_MODEL=provider:model_name`。
+- `chat_followup` 默认走 `FAST_REASONING_MODEL=provider:model_name`。
 - `provider_name_override` / `model_name_override` 只在内部 job、benchmark 或显式覆盖时使用。
 
 ### 1.2 离线 AI workflow

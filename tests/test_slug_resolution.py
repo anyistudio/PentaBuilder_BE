@@ -178,6 +178,27 @@ def test_list_item_ids_returns_real_ids_for_magic_items(configured_app) -> None:
     assert any(item["id"] == "wr-luden-s-echo" for item in result["items"])
 
 
+def test_list_item_ids_returns_union_for_multiple_categories(configured_app) -> None:
+    snapshot = _load_snapshot(configured_app)
+    toolset = CatalogToolset(
+        catalog_service=configured_app.state.catalog_service,
+        selector_llm_client=None,
+    )
+
+    result = toolset.list_item_ids(
+        snapshot,
+        game=Game.WILD_RIFT,
+        category=["magic", "boots", "enchant"],
+    )
+
+    returned_ids = {item["id"] for item in result["items"]}
+    assert result["requested_categories"] == ["magic", "boots", "enchant"]
+    assert result["item_count"] >= 3
+    assert "wr-luden-s-echo" in returned_ids
+    assert "wr-mercury-s-treads" in returned_ids
+    assert "wr-stasis-enchant" in returned_ids
+
+
 def test_validate_run_result_reports_field_level_slug_errors(configured_app) -> None:
     snapshot = _load_snapshot(configured_app)
     context = MatchContext(
@@ -194,11 +215,8 @@ def test_validate_run_result_reports_field_level_slug_errors(configured_app) -> 
         validate_run_result(
             run_type=RunType.RECOMMEND_FULL_BUILD,
             raw_result={
-                "recommended_build_order": ["wr-sorcerer-s-shoes", *WR_BUILD_TEMPLATE[1:]],
-                "recommended_runes": {
-                    "primary": ["wr-electrocute"],
-                    "secondary": ["wr-sudden-impact"],
-                },
+                "recommended_build_order": ["lol-zhonyas-hourglass", *WR_BUILD_TEMPLATE[1:]],
+                "recommended_runes": WR_RUNES_TEMPLATE,
                 "summary": "bad slugs",
                 "slot_notes": [],
             },
@@ -209,7 +227,45 @@ def test_validate_run_result_reports_field_level_slug_errors(configured_app) -> 
 
     issues = exc_info.value.details["issues"]
     assert issues[0]["loc"] == ["recommended_build_order", 0]
-    assert "Unknown item slug `wr-sorcerer-s-shoes`" in issues[0]["msg"]
+    assert "does not belong to game wild_rift" in issues[0]["msg"]
+
+
+def test_validate_run_result_autofixes_near_miss_item_slug_with_selector_model(
+    configured_app,
+) -> None:
+    snapshot = _load_snapshot(configured_app)
+    toolset = CatalogToolset(
+        catalog_service=configured_app.state.catalog_service,
+        selector_llm_client=FixedSelectorLLM(selected_slug="wr-luden-s-echo"),
+    )
+    provider_usage_payloads: list[dict[str, object]] = []
+    context = MatchContext(
+        game=Game.WILD_RIFT,
+        data_version=snapshot.data_version,
+        own_champion_slug="wr-ahri",
+        enemy_team=[],
+        own_build=[None, None, None, None, None, None, None],
+        own_runes={"primary": [], "secondary": []},
+        environment={"tags": [], "free_text": ""},
+    )
+
+    result = validate_run_result(
+        run_type=RunType.RECOMMEND_FULL_BUILD,
+        raw_result={
+            "recommended_build_order": ["wr-ludens-echo", *WR_BUILD_TEMPLATE[1:]],
+            "recommended_runes": WR_RUNES_TEMPLATE,
+            "summary": "auto fixed near miss item slug",
+            "slot_notes": [],
+        },
+        context=context,
+        operation_context={},
+        snapshot=snapshot,
+        slug_resolution_toolset=toolset,
+        provider_usage_payloads=provider_usage_payloads,
+    )
+
+    assert result["recommended_build_order"][0] == "wr-luden-s-echo"
+    assert provider_usage_payloads[0]["model_name"] == "gemini-selector-test"
 
 
 def test_validate_run_result_accepts_seven_step_build_order_with_boots_and_enchant(
@@ -243,6 +299,42 @@ def test_validate_run_result_accepts_seven_step_build_order_with_boots_and_encha
     assert result["recommended_build"] == WR_BUILD_ORDER_WITH_ENCHANT
     assert result["build"] == WR_BUILD_ORDER_WITH_ENCHANT
     assert result["explanations"][0]["target"] == "step:4"
+
+
+def test_validate_run_result_accepts_treads_as_wild_rift_boots(configured_app) -> None:
+    snapshot = _load_snapshot(configured_app)
+    context = MatchContext(
+        game=Game.WILD_RIFT,
+        data_version=snapshot.data_version,
+        own_champion_slug="wr-kayle",
+        enemy_team=[],
+        own_build=[None, None, None, None, None, None, None],
+        own_runes={"primary": [], "secondary": []},
+        environment={"tags": ["aram"], "free_text": ""},
+    )
+
+    result = validate_run_result(
+        run_type=RunType.RECOMMEND_FULL_BUILD,
+        raw_result={
+            "recommended_build_order": [
+                "wr-nashor-s-tooth",
+                "wr-mercury-s-treads",
+                "wr-stasis-enchant",
+                "wr-riftmaker-light",
+                "wr-rabadon-s-deathcap",
+                "wr-void-staff",
+                "wr-rabadon-s-deathcap-ruin",
+            ],
+            "recommended_runes": {"primary": [], "secondary": []},
+            "summary": "mercury treads should count as boots",
+            "slot_notes": [],
+        },
+        context=context,
+        operation_context={},
+        snapshot=snapshot,
+    )
+
+    assert result["recommended_build_order"][1] == "wr-mercury-s-treads"
 
 
 def test_validate_run_result_rejects_wild_rift_build_order_without_seven_steps(

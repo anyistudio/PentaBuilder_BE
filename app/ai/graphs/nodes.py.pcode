@@ -9,6 +9,7 @@ Function decide_tool_need_node:
 Function tool_select_node:
 - build a tool-planning prompt from injected context plus current tool facts
 - ask the model for the next bounded JSON tool plan
+- recover from concatenated multi-object JSON replies by selecting the first valid tool plan candidate
 - sanitize, dedupe, and capacity-limit tool calls before execution
 - tolerate common model slips such as omitted `game`, top-level filter fields, `tags` aliases, and `kind/category` aliases for `list_item_ids`
 
@@ -23,6 +24,7 @@ Function generate_result_node:
 
 Function validate_result_node:
 - run programmatic result validation against the documented output contracts
+- let validation reuse the selector-model slug-repair path and append any selector-model usage back into the run-level usage ledger
 - request one repair pass when the candidate is close but invalid
 
 Function repair_result_node:

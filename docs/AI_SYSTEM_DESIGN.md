@@ -1575,9 +1575,9 @@ For this batch:
 
 默认映射建议：
 
-- `primary_reasoning_model` 默认值：`google / gemini-3.1-pro`
-- `fast_reasoning_model` 默认值：`google / gemini-3.1-pro`
-- `calibration_model` 默认值：`google / gemini-3.1-pro`
+- `primary_reasoning_model` 默认值：`google:gemini-3.1-pro`
+- `fast_reasoning_model` 默认值：`google:gemini-3.1-pro`
+- `calibration_model` 默认值：`google:gemini-3.1-pro`
 - 这三个逻辑槽位都必须做成配置项，方便后续替换
 - `evaluate_build` -> `primary_reasoning_model`
 - `recommend_full_build` -> `primary_reasoning_model`

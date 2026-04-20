@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
 
 from app.core.errors import ApiError
 
@@ -19,8 +19,11 @@ ToolName = Literal[
 class ToolCallSpec(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    tool_name: ToolName
-    arguments: dict[str, Any] = Field(default_factory=dict)
+    tool_name: ToolName = Field(validation_alias=AliasChoices("tool_name", "tool"))
+    arguments: dict[str, Any] = Field(
+        default_factory=dict,
+        validation_alias=AliasChoices("arguments", "args"),
+    )
 
 
 class ToolSelectionResult(BaseModel):

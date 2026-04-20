@@ -3,6 +3,7 @@ from typing import Any, Literal
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
 
 from app.ai.orchestration.entity_appendix import build_involved_entity_parameter_appendix
+from app.ai.tools.catalog_tools import CatalogToolset, best_catalog_entity_fuzzy_match
 from app.catalog.registry import CatalogSnapshot
 from app.core.errors import ApiError
 from app.domain.enums import Game, RunType
@@ -224,7 +225,10 @@ def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> d
                     max_items=build_slot_count,
                 ),
                 "recommended_runes": _rune_selection_schema(
-                    description="The single best rune setup using canonical rune slugs."
+                    description=(
+                        "Temporary placeholder. Leave both arrays empty for this workflow: "
+                        "`primary=[]`, `secondary=[]`."
+                    )
                 ),
                 "summary": {
                     "type": "string",
@@ -571,6 +575,8 @@ def validate_run_result(
     context: MatchContext,
     operation_context: dict[str, Any],
     snapshot: CatalogSnapshot,
+    slug_resolution_toolset: CatalogToolset | None = None,
+    provider_usage_payloads: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     model_cls = CONTRACT_MODELS[run_type]
     try:
@@ -591,6 +597,8 @@ def validate_run_result(
             build=result["recommended_build"],
             allow_null=True,
             loc=["recommended_build"],
+            slug_resolution_toolset=slug_resolution_toolset,
+            provider_usage_payloads=provider_usage_payloads,
         )
         recommended_runes = _validate_rune_selection(
             context=context,
@@ -616,6 +624,8 @@ def validate_run_result(
             build=result["recommended_build_order"],
             allow_null=False,
             loc=["recommended_build_order"],
+            slug_resolution_toolset=slug_resolution_toolset,
+            provider_usage_payloads=provider_usage_payloads,
         )
         _ensure_filled_slots_preserved(
             current_build=context.own_build,
@@ -662,6 +672,8 @@ def validate_run_result(
             snapshot=snapshot,
             item_slug=result["recommended_item_slug"],
             loc=["recommended_item_slug"],
+            slug_resolution_toolset=slug_resolution_toolset,
+            provider_usage_payloads=provider_usage_payloads,
         )
         build = list(context.own_build)
         build[requested_slot_index] = recommended_item_slug
@@ -685,6 +697,8 @@ def validate_run_result(
                     snapshot=snapshot,
                     item_slug=alternative["item_slug"],
                     loc=["alternatives", index, "item_slug"],
+                    slug_resolution_toolset=slug_resolution_toolset,
+                    provider_usage_payloads=provider_usage_payloads,
                 ),
                 "reason": alternative["reason"],
             }
@@ -706,6 +720,8 @@ def validate_run_result(
                 snapshot=snapshot,
                 item_slug=result["current_item_slug"],
                 loc=["current_item_slug"],
+                slug_resolution_toolset=slug_resolution_toolset,
+                provider_usage_payloads=provider_usage_payloads,
             )
             if current_item_slug is not None and validated_current_item != current_item_slug:
                 _raise_invalid_ai_result(
@@ -721,6 +737,8 @@ def validate_run_result(
                 snapshot=snapshot,
                 item_slug=result["best_item_slug"],
                 loc=["best_item_slug"],
+                slug_resolution_toolset=slug_resolution_toolset,
+                provider_usage_payloads=provider_usage_payloads,
             )
         result["score"] = None
         result["build"] = list(context.own_build)
@@ -1002,17 +1020,58 @@ def _validate_item_slug(
     snapshot: CatalogSnapshot,
     item_slug: str,
     loc: list[str | int] | None = None,
+    slug_resolution_toolset: CatalogToolset | None = None,
+    provider_usage_payloads: list[dict[str, Any]] | None = None,
 ) -> str:
     try:
         validated_slug = validate_slug_for_game(context.game, item_slug)
     except ValueError as exc:
         _raise_invalid_ai_result(message=str(exc), loc=loc)
     if validated_slug not in snapshot.catalogs[context.game].items_by_slug:
-        _raise_invalid_ai_result(
-            message=f"Unknown item slug `{validated_slug}` for game `{context.game.value}`.",
-            loc=loc,
+        auto_fixed_slug = _autofix_unknown_item_slug(
+            context=context,
+            snapshot=snapshot,
+            item_slug=validated_slug,
+            slug_resolution_toolset=slug_resolution_toolset,
+            provider_usage_payloads=provider_usage_payloads,
         )
+        if auto_fixed_slug is None:
+            _raise_invalid_ai_result(
+                message=f"Unknown item slug `{validated_slug}` for game `{context.game.value}`.",
+                loc=loc,
+            )
+        validated_slug = auto_fixed_slug
     return validated_slug
+
+
+def _autofix_unknown_item_slug(
+    *,
+    context: MatchContext,
+    snapshot: CatalogSnapshot,
+    item_slug: str,
+    slug_resolution_toolset: CatalogToolset | None,
+    provider_usage_payloads: list[dict[str, Any]] | None,
+) -> str | None:
+    if slug_resolution_toolset is not None:
+        resolved_slug, usage_payloads = slug_resolution_toolset.resolve_catalog_slug_with_selector(
+            snapshot,
+            game=context.game,
+            entity_type="item",
+            raw_name=item_slug,
+            filters=None,
+        )
+        if provider_usage_payloads is not None and usage_payloads:
+            provider_usage_payloads.extend(usage_payloads)
+        if resolved_slug is not None:
+            return resolved_slug
+
+    top_match = best_catalog_entity_fuzzy_match(
+        raw_name=item_slug,
+        entities=list(snapshot.catalogs[context.game].items_by_slug.values()),
+    )
+    if top_match is None:
+        return None
+    return top_match.entity.slug
 
 
 def _validate_champion_slug(
@@ -1088,6 +1147,8 @@ def _validate_build_slots(
     loc: list[str | int] | None = None,
     min_slots: int | None = None,
     max_slots: int | None = None,
+    slug_resolution_toolset: CatalogToolset | None = None,
+    provider_usage_payloads: list[dict[str, Any]] | None = None,
 ) -> list[str | None]:
     expected_slot_count = build_slot_count_for_game(context.game)
     resolved_min_slots = expected_slot_count if min_slots is None else min_slots
@@ -1117,6 +1178,8 @@ def _validate_build_slots(
             snapshot=snapshot,
             item_slug=slot,
             loc=[*(loc or []), index],
+            slug_resolution_toolset=slug_resolution_toolset,
+            provider_usage_payloads=provider_usage_payloads,
         )
         validated_build.append(validated_slot)
     return validated_build
@@ -1255,12 +1318,17 @@ def _item_kind(
                 entity.source_slug,
                 entity.english_name,
                 str(entity.raw_payload.get("name") or ""),
+                *entity.display_names.values(),
+                *entity.aliases,
             ]
             if part
         )
     )
     if "enchant" in raw_tokens:
         return "enchant"
-    if any(token in raw_tokens for token in ("boots", "greaves", "shoes")):
+    if any(
+        token in raw_tokens
+        for token in ("boots", "greaves", "shoes", "treads", "steelcaps", "鞋", "靴")
+    ):
         return "boots"
     return None

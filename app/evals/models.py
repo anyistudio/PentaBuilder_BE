@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from app.core.config import Settings, get_settings
+from app.core.config import Settings
 from app.domain.enums import RunType
 from app.domain.match_context import MatchContext, ResponsePreferences
-
 
 # ---------------------------------------------------------------------------
 # Core data classes
@@ -67,8 +66,14 @@ def default_model_refs(settings: Settings) -> list[EvalModelRef]:
         return _parse_model_ref_strings(settings.all_models_list)
 
     ordered_refs = [
-        EvalModelRef(settings.primary_reasoning_provider, settings.primary_reasoning_model),
-        EvalModelRef(settings.fast_reasoning_provider, settings.fast_reasoning_model),
+        EvalModelRef(
+            settings.resolved_primary_reasoning_provider,
+            settings.resolved_primary_reasoning_model,
+        ),
+        EvalModelRef(
+            settings.resolved_fast_reasoning_provider,
+            settings.resolved_fast_reasoning_model,
+        ),
     ]
     if settings.openai_api_key.get_secret_value() not in {"", "replace-me"}:
         ordered_refs.extend(
