@@ -504,6 +504,7 @@ class AIRunService:
                 response_schema = get_result_response_schema(
                     run_type=RunType(run.run_type),
                     context=context,
+                    operation_context=operation_context,
                 )
                 preview_prompt = prepared.graph.build_prompt_package(
                     operation_context=operation_context,
@@ -669,6 +670,20 @@ class AIRunService:
         operation_context: dict[str, Any],
     ) -> None:
         build_slot_count = build_slot_count_for_game(context.game)
+        if run_type == RunType.RECOMMEND_FULL_BUILD:
+            recommendation_count = operation_context.get("recommendation_count")
+            remaining_slot_count = len([slot for slot in context.own_build if slot is None])
+            if recommendation_count is None:
+                operation_context["recommendation_count"] = None
+            else:
+                if (
+                    isinstance(recommendation_count, bool)
+                    or not isinstance(recommendation_count, int)
+                    or recommendation_count < 1
+                    or recommendation_count > remaining_slot_count
+                ):
+                    raise ApiError("Invalid payload.", code="invalid_payload", status_code=400)
+                operation_context["recommendation_count"] = recommendation_count
         if run_type in {RunType.RECOMMEND_SLOT, RunType.EXPLAIN_SLOT}:
             slot_index = operation_context.get("slot_index")
             if not isinstance(slot_index, int) or not 0 <= slot_index < build_slot_count:

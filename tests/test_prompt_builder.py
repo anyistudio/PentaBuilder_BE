@@ -94,8 +94,9 @@ def test_recommend_full_build_prompt_keeps_wild_rift_contract_in_task_context_on
     )
 
     assert prompt.system_prompt.count("Return exactly 7 steps.") == 0
-    assert prompt.user_prompt.count("Build order contract: return exactly 7 steps.") == 1
-    assert prompt.user_prompt.count("The boots step must appear before the enchant step.") == 1
+    assert prompt.user_prompt.count("Build order contract: return exactly 7 ordered slots.") == 1
+    assert prompt.user_prompt.count("Recommendation span: fill every remaining empty step.") == 1
+    assert prompt.user_prompt.count("Never place the enchant step before the boots step.") == 1
     assert "Keep `recommended_runes` empty for now" in prompt.system_prompt
     assert "`list_item_ids`" in prompt.user_prompt
 
@@ -125,9 +126,8 @@ def test_prioritized_workflow_schemas_are_compact(configured_app) -> None:
     assert (
         recommend_schema["properties"]["recommended_build_order"]["description"]
         == (
-            "Ordered purchase path using canonical item slugs. "
-            "Follow the current game's step count and boots/enchant contract "
-            "from the prompt."
+            "Ordered build array using canonical item slugs. "
+            "Keep current filled steps unchanged and fill every remaining empty step."
         )
     )
     assert (

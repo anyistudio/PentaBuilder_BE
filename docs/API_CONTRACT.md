@@ -715,9 +715,14 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
 #### `recommend_full_build`
 
 - `payload` 可为空
+- 可选 `payload.recommendation_count`
+  - 不传 / `null`：补全所有剩余空槽
+  - 正整数 `N`：只补全接下来的 `N` 个空槽
+  - `N` 不能超过当前剩余空槽数
 - 返回结果中的 `recommended_build_order` 表示有序出装步骤
 - LoL PC: 长度固定为 `6`
 - Wild Rift: 长度固定为 `7`
+- 当 `recommendation_count` 小于剩余空槽数时，后续未推荐的空槽保持为 `null`
 - Wild Rift 的 `7` 步必须是 `5` 件普通装备 + `1` 双鞋子 + `1` 个独立附魔
 - Wild Rift 中鞋子步骤必须早于附魔步骤
 

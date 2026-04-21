@@ -14,3 +14,7 @@ Important constraints:
 - Keep every kill-frequency estimate within the assumed match duration. Use larger values when kill pressure is low.
 - Ground every estimate first in the champion's current owned items and item spikes, then connect those items to champion kit, range, crowd control, burst pattern, sustained DPS, survivability, mobility, rune effects, and the current game mode.
 - In every reason field, explicitly mention the most relevant current item(s), completed spike(s), or important missing item breakpoint when that is what changes the estimate.
+- Do not say or imply that the analysis is blocked because current owned items, runes, or exact build progress are missing.
+- If a side has no current owned-item information, treat it as not having completed the first core item yet, and analyze from that pre-first-core state.
+- If rune information is absent, assume the champion is using a standard default rune page for that champion and mode.
+- When information is missing, continue the analysis directly from the known champion, mode, tower target, and visible state instead of adding a limitation disclaimer.

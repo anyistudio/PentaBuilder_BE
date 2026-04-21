@@ -1,5 +1,5 @@
 Class AIRunService:
-- validate operation_context by run_type
+- validate operation_context by run_type, including optional `recommendation_count` bounds for `recommend_full_build`
 - create run metadata with cache keys and optional bound session ownership checks
 - append debug log entries when an AI run is created, including cache resolution and explicit cache-hit records even when no provider LLM call is needed
 - derive one deterministic LLM debug filename from the run start timestamp plus the last four characters of run_id, then carry that file name together with session_id/run_id through every LLM debug scope so the full trace stays in one log file

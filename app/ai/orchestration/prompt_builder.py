@@ -327,22 +327,36 @@ def _operation_block(
 ) -> str:
     sections = ["## Task-Specific Context"]
     if run_type == RunType.RECOMMEND_FULL_BUILD:
+        recommendation_count = operation_context.get("recommendation_count")
+        filled_slot_count = len([slot for slot in context.own_build if slot is not None])
+        remaining_slot_count = len(context.own_build) - filled_slot_count
+        sections.append(f"- Current locked steps: {filled_slot_count}")
+        sections.append(f"- Remaining empty steps: {remaining_slot_count}")
+        if recommendation_count is None:
+            sections.append("- Recommendation span: fill every remaining empty step.")
+        else:
+            sections.append(
+                f"- Recommendation span: fill exactly the next {recommendation_count} empty step(s)."
+            )
+            sections.append(
+                "- After those recommended steps, keep all later empty steps as null."
+            )
         if context.game == Game.WILD_RIFT:
             sections.extend(
                 [
-                    "- Build order contract: return exactly 7 steps.",
+                    "- Build order contract: return exactly 7 ordered slots.",
                     (
                         "- Wild Rift build shape: 5 normal items + 1 boots item + "
-                        "1 separate enchant item."
+                        "1 separate enchant item when the remaining build is fully filled."
                     ),
                     "- In Wild Rift, boots and enchant are two separate ordered steps.",
-                    "- The boots step must appear before the enchant step.",
+                    "- Never place the enchant step before the boots step.",
                 ]
             )
         else:
             sections.extend(
                 [
-                    "- Build order contract: return exactly 6 item steps.",
+                    "- Build order contract: return exactly 6 ordered slots.",
                     "- League of Legends PC does not use a separate enchant step in this contract.",
                 ]
             )

@@ -20,7 +20,7 @@ Function tool_execute_node:
 
 Function generate_result_node:
 - build the final structured-generation prompt from injected context, tool facts, and optional streamed text
-- call the model with the run-type response schema and accumulate usage
+- call the model with the run-type response schema, including operation-context-shaped `recommend_full_build` arrays, and accumulate usage
 
 Function validate_result_node:
 - run programmatic result validation against the documented output contracts

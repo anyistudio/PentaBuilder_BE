@@ -72,7 +72,7 @@ class EvaluateBuildResult(BaseModel):
 class RecommendFullBuildResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    recommended_build_order: list[str] = Field(
+    recommended_build_order: list[str | None] = Field(
         min_length=RECOMMEND_FULL_BUILD_MIN_STEPS,
         max_length=RECOMMEND_FULL_BUILD_MAX_STEPS,
         validation_alias=AliasChoices("recommended_build_order", "recommended_build"),
@@ -163,7 +163,12 @@ CONTRACT_MODELS: dict[RunType, type[BaseModel]] = {
 }
 
 
-def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> dict[str, Any]:
+def get_result_response_schema(
+    *,
+    run_type: RunType,
+    context: MatchContext,
+    operation_context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     build_slot_count = build_slot_count_for_game(context.game)
     if run_type == RunType.EVALUATE_BUILD:
         return {
@@ -212,14 +217,22 @@ def get_result_response_schema(*, run_type: RunType, context: MatchContext) -> d
             "additionalProperties": False,
         }
     if run_type == RunType.RECOMMEND_FULL_BUILD:
-        build_description = (
-            "Ordered purchase path using canonical item slugs. Follow the current "
-            "game's step count and boots/enchant contract from the prompt."
-        )
+        recommendation_count = (operation_context or {}).get("recommendation_count")
+        if isinstance(recommendation_count, int):
+            build_description = (
+                "Ordered build array using canonical item slugs. Keep current filled steps unchanged, "
+                f"fill exactly the next {recommendation_count} empty step(s), and leave all later "
+                "empty steps as null."
+            )
+        else:
+            build_description = (
+                "Ordered build array using canonical item slugs. Keep current filled steps unchanged "
+                "and fill every remaining empty step."
+            )
         return {
             "type": "object",
             "properties": {
-                "recommended_build_order": _build_array_schema(
+                "recommended_build_order": _nullable_build_array_schema(
                     description=build_description,
                     min_items=build_slot_count,
                     max_items=build_slot_count,
@@ -622,24 +635,35 @@ def validate_run_result(
             context=context,
             snapshot=snapshot,
             build=result["recommended_build_order"],
-            allow_null=False,
+            allow_null=True,
             loc=["recommended_build_order"],
             slug_resolution_toolset=slug_resolution_toolset,
             provider_usage_payloads=provider_usage_payloads,
         )
+        resolved_recommendation_count = _resolve_recommend_full_build_target_count(
+            current_build=context.own_build,
+            recommendation_count=operation_context.get("recommendation_count"),
+        )
         _ensure_filled_slots_preserved(
             current_build=context.own_build,
             proposed_build=recommended_build_order,
+        )
+        _ensure_recommend_full_build_fills_target_span(
+            current_build=context.own_build,
+            proposed_build=recommended_build_order,
+            target_recommendation_count=resolved_recommendation_count,
         )
         _ensure_recommend_full_build_order_is_consistent(
             context=context,
             snapshot=snapshot,
             build_order=recommended_build_order,
             loc=["recommended_build_order"],
+            require_complete_shape=resolved_recommendation_count
+            >= len(_remaining_build_slot_indices(context.own_build)),
         )
         _ensure_slot_notes_fit_build_order(
             slot_notes=result["slot_notes"],
-            build_length=len(recommended_build_order),
+            build_order=recommended_build_order,
         )
         recommended_runes = _validate_rune_selection(
             context=context,
@@ -1198,6 +1222,46 @@ def _ensure_filled_slots_preserved(
             )
 
 
+def _remaining_build_slot_indices(build: list[str | None]) -> list[int]:
+    return [index for index, item_slug in enumerate(build) if item_slug is None]
+
+
+def _resolve_recommend_full_build_target_count(
+    *,
+    current_build: list[str | None],
+    recommendation_count: Any,
+) -> int:
+    remaining_slot_count = len(_remaining_build_slot_indices(current_build))
+    if recommendation_count is None:
+        return remaining_slot_count
+    return int(recommendation_count)
+
+
+def _ensure_recommend_full_build_fills_target_span(
+    *,
+    current_build: list[str | None],
+    proposed_build: list[str | None],
+    target_recommendation_count: int,
+) -> None:
+    remaining_slot_indices = _remaining_build_slot_indices(current_build)
+    target_indices = set(remaining_slot_indices[:target_recommendation_count])
+    trailing_indices = remaining_slot_indices[target_recommendation_count:]
+
+    for index in target_indices:
+        if proposed_build[index] is None:
+            _raise_invalid_ai_result(
+                message="The requested next recommendation steps must be filled.",
+                loc=["recommended_build_order", index],
+            )
+
+    for index in trailing_indices:
+        if proposed_build[index] is not None:
+            _raise_invalid_ai_result(
+                message="Later empty steps must remain null when recommendation_count is limited.",
+                loc=["recommended_build_order", index],
+            )
+
+
 def _ensure_only_target_slot_changed(
     *,
     current_build: list[str | None],
@@ -1217,13 +1281,19 @@ def _ensure_only_target_slot_changed(
 def _ensure_slot_notes_fit_build_order(
     *,
     slot_notes: list[dict[str, Any]],
-    build_length: int,
+    build_order: list[str | None],
 ) -> None:
+    build_length = len(build_order)
     for index, note in enumerate(slot_notes):
         slot_index = int(note["slot_index"])
         if not 0 <= slot_index < build_length:
             _raise_invalid_ai_result(
                 message=f"slot_notes.slot_index must be between 0 and {build_length - 1}.",
+                loc=["slot_notes", index, "slot_index"],
+            )
+        if build_order[slot_index] is None:
+            _raise_invalid_ai_result(
+                message="slot_notes can only reference populated build steps.",
                 loc=["slot_notes", index, "slot_index"],
             )
 
@@ -1234,6 +1304,7 @@ def _ensure_recommend_full_build_order_is_consistent(
     snapshot: CatalogSnapshot,
     build_order: list[str | None],
     loc: list[str | int] | None = None,
+    require_complete_shape: bool = True,
 ) -> None:
     boots_indices: list[int] = []
     enchant_indices: list[int] = []
@@ -1266,6 +1337,24 @@ def _ensure_recommend_full_build_order_is_consistent(
     has_enchant = bool(enchant_indices)
 
     if context.game == Game.WILD_RIFT:
+        if not require_complete_shape:
+            if has_enchant and not has_boots:
+                _raise_invalid_ai_result(
+                    message=(
+                        "In Wild Rift partial build recommendations, an enchant step cannot "
+                        "appear before a boots step exists."
+                    ),
+                    loc=loc,
+                )
+            if has_boots and has_enchant and boots_indices[0] > enchant_indices[0]:
+                _raise_invalid_ai_result(
+                    message=(
+                        "In Wild Rift partial build recommendations, the boots step must "
+                        "still appear before the enchant step."
+                    ),
+                    loc=[*(loc or []), enchant_indices[0]],
+                )
+            return
         if not has_boots:
             _raise_invalid_ai_result(
                 message=(
