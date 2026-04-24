@@ -1,0 +1,18 @@
+Class CatalogSlugNameRewriter:
+- build a current-game slug-to-display-name map from the loaded CatalogSnapshot and requested ResponsePreferences
+- compile one pattern for backticked canonical slugs and one for bare canonical slugs
+- rewrite user-visible text by replacing matched canonical slugs with the preferred localized catalog name
+- recursively rewrite AI result payload text while preserving structured identifier fields such as `*_slug`, `recommended_build_order`, build arrays, and rune arrays
+- create a streaming rewriter that buffers enough text to avoid splitting a slug across SSE chunks
+
+Class CatalogSlugNameStreamRewriter:
+- accept visible text deltas from the streaming parser
+- keep a short pending tail based on the longest known slug
+- emit only text that cannot be part of an incomplete slug token, after applying the same localized replacement
+- flush the remaining pending text when the stream display section is complete
+
+Function _is_structured_identifier_key:
+- classify result keys that must keep canonical machine-readable identifiers unchanged
+
+Function _rewind_to_slug_boundary:
+- move a streaming cutoff left until it is no longer inside a slug-like token

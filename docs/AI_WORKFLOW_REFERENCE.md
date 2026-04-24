@@ -148,7 +148,11 @@
 6. 工具阶段结束后，开始正式结构化生成结果。
 7. 对结果做 schema + slug + contract 校验。
 8. 如果只是 provider 输出结构轻微不合法，进入一次 repair。
-9. 校验通过后，写入结果、artifact、cache、metrics、session event。
+9. 校验通过后，服务层会做一次 catalog slug 展示名后处理：
+   - 只处理 `summary` / `answer` / `reason` / `text` 等用户可见自然语言字段里的 canonical slug。
+   - `recommended_build_order`、`recommended_item_slug`、`*_slug`、rune/build 数组等机器可读字段继续保留 canonical slug。
+   - 展示名按本次 `response_preferences.language` / `terminology_style` 从 catalog localization 里选择。
+10. 写入结果、artifact、cache、metrics、session event。
 
 ## 3. 在线 Graph 的每个节点在做什么
 
@@ -270,6 +274,7 @@ sanitize 的目的有两个：
 
 - 会把 provider usage 聚合成 `_provider_usage`
 - 写回 `final_result`
+- 服务层收尾前会把自然语言文本中的 catalog slug 改写成本次语言偏好的展示名，不改变结构化 slug 字段。
 
 如果校验失败：
 
@@ -614,8 +619,10 @@ prompt 侧额外注入：
    - `<display>用户可见文本</display>`
    - `<json>最终结构化 JSON</json>`
 4. SSE 过程中只把 `<display>` 里的可见文本增量发给前端
-5. 流式结束后，再用 `finalize_existing_result()` 对 JSON 结果做 validate / repair
-6. 如果分段流输出无法正确收尾：
+5. 流式预览文本会边发边通过 slug-safe buffer 改写 catalog slug，避免把 `wr-trinity-force` 这类 canonical slug 直接露给前端
+6. 流式结束后，再用 `finalize_existing_result()` 对 JSON 结果做 validate / repair
+7. 最终 `run_completed.result` 仍会经过同一套 catalog slug 展示名后处理，保证缓存、session transcript 和 artifact 一致
+8. 如果分段流输出无法正确收尾：
    - 后端发一个 `tool_event` 说明 fallback
    - 然后回退到普通 `execute_run()`
 

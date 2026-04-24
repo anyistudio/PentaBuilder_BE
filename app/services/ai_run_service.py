@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.graphs.online_run_graph import OnlineRunGraph
 from app.ai.orchestration.result_contracts import get_result_response_schema
+from app.ai.orchestration.slug_postprocess import CatalogSlugNameRewriter
 from app.ai.providers.base import BaseLLMClient, LLMUsage
 from app.ai.providers.factory import create_llm_client
 from app.ai.tools.catalog_tools import CatalogToolset
@@ -314,7 +315,7 @@ class AIRunService:
                     result_payload=cached_result,
                 )
         if cached_result is not None and not stream:
-            self._finalize_cached_run(
+            cached_result = self._finalize_cached_run(
                 session,
                 run=run,
                 context=context,
@@ -339,11 +340,19 @@ class AIRunService:
     ) -> dict[str, Any]:
         started_at = time.perf_counter()
         if run.cache_resolution == "strong_hit" and run.structured_result is not None:
+            result = self._post_process_result_catalog_names(
+                session,
+                context=context,
+                response_preferences=response_preferences,
+                result=run.structured_result,
+            )
             run.status = RunStatus.COMPLETED.value
+            run.structured_result = result
+            run.score_value = result.get("score")
             session.add(run)
             session.commit()
             session.refresh(run)
-            return run.structured_result
+            return result
 
         try:
             with llm_debug_scope(
@@ -385,6 +394,7 @@ class AIRunService:
                     response_preferences=response_preferences,
                     operation_context=operation_context,
                     result=result,
+                    snapshot=prepared.snapshot,
                     provider_usage=provider_usage,
                     tool_trace=graph_result.get("tool_trace") or [],
                     tool_facts=graph_result.get("tool_facts") or {},
@@ -517,6 +527,8 @@ class AIRunService:
                         run_id=run.id,
                         llm_client=prepared.llm_client,
                         prompt_package=preview_prompt,
+                        snapshot=prepared.snapshot,
+                        context=context,
                         response_preferences=response_preferences,
                     )
                     finalized_state = prepared.graph.finalize_existing_result(
@@ -575,6 +587,7 @@ class AIRunService:
                         response_preferences=response_preferences,
                         operation_context=operation_context,
                         result=result,
+                        snapshot=prepared.snapshot,
                         provider_usage=provider_usage,
                         tool_trace=finalized_state.get("tool_trace") or [],
                         tool_facts=finalized_state.get("tool_facts") or {},
@@ -1048,9 +1061,17 @@ class AIRunService:
         run_id: UUID,
         llm_client: BaseLLMClient,
         prompt_package,
+        snapshot: CatalogSnapshot,
+        context: MatchContext,
         response_preferences: ResponsePreferences,
     ) -> SectionedStreamResult:
         parser = _SectionedStreamParser()
+        slug_rewriter = CatalogSlugNameRewriter.from_snapshot(
+            snapshot=snapshot,
+            game=context.game,
+            response_preferences=response_preferences,
+        )
+        stream_rewriter = slug_rewriter.create_stream_rewriter()
         final_usage: LLMUsage | None = None
         with llm_debug_scope(graph_node="stream_sections"):
             for event in llm_client.stream_text(
@@ -1060,6 +1081,8 @@ class AIRunService:
             ):
                 if event.event_type == "text_delta" and event.delta:
                     visible_delta = parser.push(event.delta)
+                    if visible_delta:
+                        visible_delta = stream_rewriter.push(visible_delta)
                     if visible_delta:
                         self.event_stream_service.publish(
                             str(run_id),
@@ -1074,6 +1097,17 @@ class AIRunService:
                     final_usage = event.usage
 
         parser.finish()
+        final_visible_delta = stream_rewriter.flush()
+        if final_visible_delta:
+            self.event_stream_service.publish(
+                str(run_id),
+                "message_delta",
+                {
+                    "channel": prompt_package.stream_channel or "summary",
+                    "language": response_preferences.language.value,
+                    "delta": final_visible_delta,
+                },
+            )
         try:
             structured_result = json.loads(parser.json_text)
         except json.JSONDecodeError as exc:
@@ -1083,7 +1117,7 @@ class AIRunService:
                 status_code=502,
             ) from exc
         return SectionedStreamResult(
-            display_text=parser.display_text,
+            display_text=slug_rewriter.rewrite_text(parser.display_text),
             structured_result=structured_result,
             usage=final_usage,
         )
@@ -1096,8 +1130,16 @@ class AIRunService:
         context: MatchContext,
         response_preferences: ResponsePreferences,
         result: dict[str, Any],
-    ) -> None:
+    ) -> dict[str, Any]:
+        result = self._post_process_result_catalog_names(
+            session,
+            context=context,
+            response_preferences=response_preferences,
+            result=result,
+        )
         run.status = RunStatus.COMPLETED.value
+        run.structured_result = result
+        run.score_value = result.get("score")
         session.add(run)
         session.commit()
         session.refresh(run)
@@ -1108,6 +1150,7 @@ class AIRunService:
             response_preferences=response_preferences,
             result=result,
         )
+        return result
 
     def _complete_run(
         self,
@@ -1118,12 +1161,20 @@ class AIRunService:
         response_preferences: ResponsePreferences,
         operation_context: dict[str, Any],
         result: dict[str, Any],
+        snapshot: CatalogSnapshot | None,
         provider_usage: dict[str, Any],
         tool_trace: list[dict[str, Any]],
         tool_facts: dict[str, Any],
         prompt_artifact: dict[str, Any] | None,
         started_at: float | None,
     ) -> None:
+        result = self._post_process_result_catalog_names(
+            session,
+            context=context,
+            response_preferences=response_preferences,
+            result=result,
+            snapshot=snapshot,
+        )
         run.status = RunStatus.COMPLETED.value
         run.provider_name = provider_usage.get("provider_name") or run.provider_name
         run.model_name = provider_usage.get("model_name") or run.model_name
@@ -1234,6 +1285,37 @@ class AIRunService:
                 "cost_usd": float(run.cost_usd) if run.cost_usd is not None else None,
                 "cache_resolution": run.cache_resolution,
             },
+        )
+
+    def _post_process_result_catalog_names(
+        self,
+        session: Session,
+        *,
+        context: MatchContext,
+        response_preferences: ResponsePreferences,
+        result: dict[str, Any],
+        snapshot: CatalogSnapshot | None = None,
+    ) -> dict[str, Any]:
+        resolved_snapshot = snapshot or self._load_snapshot_for_context(session, context=context)
+        rewriter = CatalogSlugNameRewriter.from_snapshot(
+            snapshot=resolved_snapshot,
+            game=context.game,
+            response_preferences=response_preferences,
+        )
+        return rewriter.rewrite_result(result)
+
+    def _load_snapshot_for_context(
+        self,
+        session: Session,
+        *,
+        context: MatchContext,
+    ) -> CatalogSnapshot:
+        version = self.data_version_service.get_version(session, data_version=context.data_version)
+        if version is None:
+            raise ApiError("Unknown data version.", status_code=404, code="invalid_context")
+        return self.registry.get_or_load(
+            data_version=version.data_version,
+            source_root=version.source_root,
         )
 
     def _mark_run_failed(self, session: Session, *, run: AIRun, exc: Exception) -> None:
