@@ -1324,6 +1324,19 @@ game_localization/
 {
   "summary": "当前击杀节奏更取决于双方中期关键装完成后的爆发窗口。",
   "assumed_match_duration_minutes": 30,
+  "own_status": {
+    "champion_slug": "lol-ahri",
+    "base_stats": {
+      "health": 4.8,
+      "physical_attack": 2.2,
+      "magic_attack": 7.4,
+      "armor": 4.0,
+      "magic_resist": 4.3,
+      "armor_penetration": 1.0,
+      "magic_penetration": 6.2
+    },
+    "status_evaluation": "阿狸当前法术爆发和机动性较好，但身板仍偏脆，需要靠距离和关键保命装打窗口。"
+  },
   "own_kill_frequency_vs_enemies": [
     {
       "enemy_champion_slug": "lol-zed",
@@ -1336,6 +1349,16 @@ game_localization/
   "enemy_statuses": [
     {
       "champion_slug": "lol-zed",
+      "base_stats": {
+        "health": 4.6,
+        "physical_attack": 7.2,
+        "magic_attack": 1.6,
+        "armor": 4.2,
+        "magic_resist": 4.0,
+        "armor_penetration": 6.8,
+        "magic_penetration": 0.8
+      },
+      "status_evaluation": "劫当前物理爆发和穿甲压力高，但抗性和推塔持续性并不突出。",
       "estimated_minutes_per_kill_on_user": 4.4,
       "kill_reason": "劫的单点爆发和先手节奏更稳定，但仍受你当前位置与保命手段影响。",
       "tower_push_percent_per_minute": 2.9,
@@ -1349,6 +1372,8 @@ game_localization/
 
 - 后端会额外追加一个 deterministic `parameter_appendix`
 - 其中包含当前涉及英雄、装备、符文的详细参数快照，直接来自 catalog 数据，不依赖模型复述
+- `base_stats` 的所有字段范围都是 `0-10`，表示相对水平，不表示精确游戏面板数值
+- 模型必须先估算 `base_stats` 和 `status_evaluation`，再用这些估算支撑击杀频率与推塔速度
 - `own_tower_push_percent_per_minute` 不再表示整局统一推塔能力，而是“我方当前目标塔”的每分钟推进百分比
 - `enemy_statuses[*].tower_push_percent_per_minute` 表示“对应敌方英雄当前目标塔”的每分钟推进百分比
 - `payload` 可选传入：
@@ -1456,6 +1481,8 @@ game_localization/
 3. 进入 `OnlineRunGraph`
 4. 默认不主动开工具，直接基于注入的 appendix 做估计
 5. 输出：
+   - 用户英雄当前 0-10 基础数值和状态评价
+   - 每个敌方英雄当前 0-10 基础数值和状态评价
    - 用户英雄对每个敌方英雄的击杀频率
    - 每个敌方英雄对用户英雄的击杀频率
    - 用户英雄对“当前目标塔”的推塔速度
@@ -1464,6 +1491,7 @@ game_localization/
    - `ARAM -> 15` 分钟
    - 非 `ARAM -> 30` 分钟
    - 敌方英雄集合必须与输入完全一致
+   - 所有基础数值必须在 `0-10` 范围内
    - 频率与推塔速度数值范围合法
 7. 后端把 deterministic `parameter_appendix` 追加到最终返回结果
 

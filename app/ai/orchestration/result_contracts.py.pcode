@@ -2,7 +2,9 @@ Module result_contracts.py:
 - define the strict structured output contracts for every online run type
 - expose provider-side JSON schemas, with the most heavily used `recommend_full_build` and `game_status` descriptions kept intentionally compact
 - keep `recommend_full_build.recommended_runes` as a required placeholder field so strict OpenAI structured outputs stay schema-valid while the model still returns empty arrays
+- require `game_status` to return 0-10 current base-stat estimates and short status evaluations for the user's champion and every enemy champion
 - validate slugs, build-slot invariants, limited-span recommend-full-build rules, rune selections, and compare-build winner payloads before results leave the graph
+- validate `game_status` status subjects against the current match context and normalize base-stat values as floats
 - auto-correct near-miss item slugs by first letting the shared selector-model pipeline choose from heuristic-plus-fuzzy candidates, then falling back to raw fuzzy top-1 only when no selector toolset is available
 - detect Wild Rift boots/enchant steps using both English and localized item names so variants like `Mercury's Treads` still satisfy the build-order contract
 - normalize validated outputs into the backward-compatible API shape with score, build, runes, explanations, and alternatives

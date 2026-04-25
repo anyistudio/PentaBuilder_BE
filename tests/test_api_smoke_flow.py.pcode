@@ -1,0 +1,8 @@
+def test_api_smoke_flow(...):
+    Exercise the main API flow through auth, session creation, AI runs, session history, and leaderboard.
+
+    For `game_status`:
+    - send owned champion, enemy champion, item, rune, and tower-target context
+    - assert the result includes the expected match duration
+    - assert the result includes own/enemy hero stat-profile estimates
+    - assert the deterministic parameter appendix still includes catalog-backed item details

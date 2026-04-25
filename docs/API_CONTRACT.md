@@ -768,11 +768,26 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
 
 - 返回结果会包含：
   - `assumed_match_duration_minutes`
+  - `own_status`
+    - `champion_slug`
+    - `base_stats`
+      - `health`
+      - `physical_attack`
+      - `magic_attack`
+      - `armor`
+      - `magic_resist`
+      - `armor_penetration`
+      - `magic_penetration`
+    - `status_evaluation`
   - `own_kill_frequency_vs_enemies`
   - `own_tower_push_percent_per_minute`
   - `enemy_statuses`
+    - 每个条目同样包含 `base_stats` 和 `status_evaluation`
 - 若 `environment.tags` 包含 `aram`，`assumed_match_duration_minutes` 必须为 `15`
 - 否则 `assumed_match_duration_minutes` 必须为 `30`
+- `base_stats` 所有数值范围为 `0-10`
+- `base_stats` 表示当前英雄状态在所有英雄中的相对水平，不是精确游戏面板数值
+- 后端 prompt 会要求模型先估算 `base_stats`，再基于这些估算推导击杀速度和推塔速度
 - 后端会额外追加一个 deterministic `parameter_appendix`
   - 包含当前涉及英雄、装备、符文的详细参数快照
   - 该 appendix 直接来自 catalog 数据，不依赖模型回填

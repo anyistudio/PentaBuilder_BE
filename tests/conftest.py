@@ -123,6 +123,11 @@ def _extract_target_slot(prompt: str) -> int:
     return int(match.group(1)) if match else 0
 
 
+def _extract_own_champion(prompt: str) -> str:
+    match = re.search(r"- Own champion slug: ([^\n]+)", prompt)
+    return match.group(1).strip() if match else "lol-ahri"
+
+
 def _extract_enemy_slugs(prompt: str) -> list[str]:
     match = re.search(r"- Enemy champion slugs: ([^\n]+)", prompt)
     if not match:
@@ -246,9 +251,23 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
     if run_type == "game_status":
         enemy_slugs = _extract_enemy_slugs(prompt)
         assumed_duration = _extract_assumed_match_duration(prompt)
+        own_slug = _extract_own_champion(prompt)
         return {
             "summary": "当前击杀压力主要看双方中期成型后的爆发窗口，推塔速度整体中等。",
             "assumed_match_duration_minutes": assumed_duration,
+            "own_status": {
+                "champion_slug": own_slug,
+                "base_stats": {
+                    "health": 4.8,
+                    "physical_attack": 2.6,
+                    "magic_attack": 7.2,
+                    "armor": 4.1,
+                    "magic_resist": 4.4,
+                    "armor_penetration": 1.2,
+                    "magic_penetration": 6.4,
+                },
+                "status_evaluation": "我方当前法术爆发较强，但身板仍偏脆，需要靠距离和关键装容错。",
+            },
             "own_kill_frequency_vs_enemies": [
                 {
                     "enemy_champion_slug": slug,
@@ -270,6 +289,16 @@ def _build_structured_payload(*, prompt: str, run_type: str) -> dict:
             "enemy_statuses": [
                 {
                     "champion_slug": slug,
+                    "base_stats": {
+                        "health": round(4.6 + index * 0.4, 1),
+                        "physical_attack": round(7.1 - index * 0.2, 1),
+                        "magic_attack": round(2.4 + index * 0.3, 1),
+                        "armor": round(4.0 + index * 0.2, 1),
+                        "magic_resist": round(4.2 + index * 0.2, 1),
+                        "armor_penetration": round(6.5 - index * 0.2, 1),
+                        "magic_penetration": round(1.0 + index * 0.2, 1),
+                    },
+                    "status_evaluation": "敌方当前物理爆发和穿甲压力较高，但持续推塔能力中等。",
                     "estimated_minutes_per_kill_on_user": min(
                         float(assumed_duration), round(3.5 + index * 1.4, 1)
                     ),

@@ -18,6 +18,15 @@ from app.domain.match_context import (
 
 RECOMMEND_FULL_BUILD_MIN_STEPS = build_slot_count_for_game(Game.LOL)
 RECOMMEND_FULL_BUILD_MAX_STEPS = build_slot_count_for_game(Game.WILD_RIFT)
+HERO_BASE_STAT_KEYS = (
+    "health",
+    "physical_attack",
+    "magic_attack",
+    "armor",
+    "magic_resist",
+    "armor_penetration",
+    "magic_penetration",
+)
 
 
 class RuneSelectionResult(BaseModel):
@@ -131,10 +140,32 @@ class OwnKillEstimateResult(BaseModel):
     reason: str = Field(min_length=1)
 
 
+class HeroBaseStatsEstimateResult(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    health: float = Field(ge=0, le=10)
+    physical_attack: float = Field(ge=0, le=10)
+    magic_attack: float = Field(ge=0, le=10)
+    armor: float = Field(ge=0, le=10)
+    magic_resist: float = Field(ge=0, le=10)
+    armor_penetration: float = Field(ge=0, le=10)
+    magic_penetration: float = Field(ge=0, le=10)
+
+
+class HeroStatusEstimateResult(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    champion_slug: str = Field(min_length=1)
+    base_stats: HeroBaseStatsEstimateResult
+    status_evaluation: str = Field(min_length=1)
+
+
 class EnemyChampionStatusResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     champion_slug: str = Field(min_length=1)
+    base_stats: HeroBaseStatsEstimateResult
+    status_evaluation: str = Field(min_length=1)
     estimated_minutes_per_kill_on_user: float = Field(gt=0)
     kill_reason: str = Field(min_length=1)
     tower_push_percent_per_minute: float = Field(ge=0, le=100)
@@ -146,6 +177,7 @@ class GameStatusResult(BaseModel):
 
     summary: str = Field(min_length=1)
     assumed_match_duration_minutes: int = Field(ge=1, le=60)
+    own_status: HeroStatusEstimateResult
     own_kill_frequency_vs_enemies: list[OwnKillEstimateResult] = Field(default_factory=list)
     own_tower_push_percent_per_minute: float = Field(ge=0, le=100)
     own_tower_push_reason: str = Field(min_length=1)
@@ -220,13 +252,15 @@ def get_result_response_schema(
         recommendation_count = (operation_context or {}).get("recommendation_count")
         if isinstance(recommendation_count, int):
             build_description = (
-                "Ordered build array using canonical item slugs. Keep current filled steps unchanged, "
+                "Ordered build array using canonical item slugs. Keep current filled steps "
+                "unchanged, "
                 f"fill exactly the next {recommendation_count} empty step(s), and leave all later "
                 "empty steps as null."
             )
         else:
             build_description = (
-                "Ordered build array using canonical item slugs. Keep current filled steps unchanged "
+                "Ordered build array using canonical item slugs. Keep current filled steps "
+                "unchanged "
                 "and fill every remaining empty step."
             )
         return {
@@ -446,6 +480,11 @@ def get_result_response_schema(
             "additionalProperties": False,
         }
     if run_type == RunType.GAME_STATUS:
+        base_stats_description = (
+            "Relative 0-10 hero state estimate after considering the champion's normal baseline, "
+            "current owned items, and runes. These are comparative ratings across champions, "
+            "not exact game stats."
+        )
         return {
             "type": "object",
             "properties": {
@@ -457,6 +496,31 @@ def get_result_response_schema(
                     "type": "integer",
                     "enum": [15, 30],
                     "description": "15 for ARAM, otherwise 30.",
+                },
+                "own_status": {
+                    "type": "object",
+                    "description": (
+                        "User-side champion state estimate used as an input before estimating "
+                        "kill and tower pressure."
+                    ),
+                    "properties": {
+                        "champion_slug": {
+                            "type": "string",
+                            "description": "Own champion slug from the current context.",
+                        },
+                        "base_stats": _hero_base_stats_schema(
+                            description=base_stats_description
+                        ),
+                        "status_evaluation": {
+                            "type": "string",
+                            "description": (
+                                "One short status evaluation for the own champion's current "
+                                "state and item spikes."
+                            ),
+                        },
+                    },
+                    "required": ["champion_slug", "base_stats", "status_evaluation"],
+                    "additionalProperties": False,
                 },
                 "own_kill_frequency_vs_enemies": {
                     "type": "array",
@@ -512,6 +576,16 @@ def get_result_response_schema(
                                 "type": "string",
                                 "description": "Enemy champion slug from the current context.",
                             },
+                            "base_stats": _hero_base_stats_schema(
+                                description=base_stats_description
+                            ),
+                            "status_evaluation": {
+                                "type": "string",
+                                "description": (
+                                    "One short status evaluation for this enemy champion's "
+                                    "current state and item spikes."
+                                ),
+                            },
                             "estimated_minutes_per_kill_on_user": {
                                 "type": "number",
                                 "exclusiveMinimum": 0,
@@ -540,6 +614,8 @@ def get_result_response_schema(
                         },
                         "required": [
                             "champion_slug",
+                            "base_stats",
+                            "status_evaluation",
                             "estimated_minutes_per_kill_on_user",
                             "kill_reason",
                             "tower_push_percent_per_minute",
@@ -552,6 +628,7 @@ def get_result_response_schema(
             "required": [
                 "summary",
                 "assumed_match_duration_minutes",
+                "own_status",
                 "own_kill_frequency_vs_enemies",
                 "own_tower_push_percent_per_minute",
                 "own_tower_push_reason",
@@ -834,6 +911,13 @@ def validate_run_result(
                 loc=["assumed_match_duration_minutes"],
             )
 
+        normalized_own_status = _normalize_hero_status_estimate(
+            context=context,
+            snapshot=snapshot,
+            status=result["own_status"],
+            expected_champion_slug=context.own_champion_slug,
+            loc=["own_status"],
+        )
         enemy_slugs_in_order = [enemy.champion_slug for enemy in context.enemy_team]
         own_kill_by_enemy = {
             item["enemy_champion_slug"]: item for item in result["own_kill_frequency_vs_enemies"]
@@ -907,6 +991,14 @@ def validate_run_result(
             normalized_enemy_statuses.append(
                 {
                     "champion_slug": validated_enemy_slug,
+                    "base_stats": _normalize_hero_status_estimate(
+                        context=context,
+                        snapshot=snapshot,
+                        status=enemy_status,
+                        expected_champion_slug=enemy_slug,
+                        loc=["enemy_statuses", enemy_slug],
+                    )["base_stats"],
+                    "status_evaluation": enemy_status["status_evaluation"],
                     "estimated_minutes_per_kill_on_user": enemy_minutes,
                     "kill_reason": enemy_status["kill_reason"],
                     "tower_push_percent_per_minute": tower_push,
@@ -916,6 +1008,7 @@ def validate_run_result(
 
         result["assumed_match_duration_minutes"] = assumed_duration
         result["own_champion_slug"] = context.own_champion_slug
+        result["own_status"] = normalized_own_status
         result["own_kill_frequency_vs_enemies"] = normalized_own_kills
         result["enemy_statuses"] = normalized_enemy_statuses
         result["parameter_appendix"] = build_involved_entity_parameter_appendix(
@@ -927,6 +1020,10 @@ def validate_run_result(
         result["runes"] = context.own_runes.model_dump(mode="json")
         result["explanations"] = [
             {"target": "summary", "text": result["summary"]},
+            {
+                "target": "own_status",
+                "text": normalized_own_status["status_evaluation"],
+            },
             {
                 "target": "own_tower_push",
                 "text": result["own_tower_push_reason"],
@@ -942,6 +1039,13 @@ def validate_run_result(
                 {
                     "target": f"enemy_vs:{item['champion_slug']}",
                     "text": item["kill_reason"],
+                }
+                for item in normalized_enemy_statuses
+            ],
+            *[
+                {
+                    "target": f"enemy_status:{item['champion_slug']}",
+                    "text": item["status_evaluation"],
                 }
                 for item in normalized_enemy_statuses
             ],
@@ -1014,6 +1118,45 @@ def _rune_selection_schema(*, description: str) -> dict[str, Any]:
         },
         "required": ["primary", "secondary"],
         "additionalProperties": False,
+    }
+
+
+def _hero_base_stats_schema(*, description: str) -> dict[str, Any]:
+    return {
+        "type": "object",
+        "description": description,
+        "properties": {
+            "health": _ten_point_stat_schema("Relative health and raw durability."),
+            "physical_attack": _ten_point_stat_schema("Relative physical damage output."),
+            "magic_attack": _ten_point_stat_schema("Relative magic damage output."),
+            "armor": _ten_point_stat_schema("Relative resistance to physical damage."),
+            "magic_resist": _ten_point_stat_schema("Relative resistance to magic damage."),
+            "armor_penetration": _ten_point_stat_schema(
+                "Relative ability to bypass enemy armor."
+            ),
+            "magic_penetration": _ten_point_stat_schema(
+                "Relative ability to bypass enemy magic resistance."
+            ),
+        },
+        "required": [
+            "health",
+            "physical_attack",
+            "magic_attack",
+            "armor",
+            "magic_resist",
+            "armor_penetration",
+            "magic_penetration",
+        ],
+        "additionalProperties": False,
+    }
+
+
+def _ten_point_stat_schema(description: str) -> dict[str, Any]:
+    return {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 10,
+        "description": f"{description} Use a 0-10 relative scale.",
     }
 
 
@@ -1115,6 +1258,36 @@ def _validate_champion_slug(
             loc=loc,
         )
     return validated_slug
+
+
+def _normalize_hero_status_estimate(
+    *,
+    context: MatchContext,
+    snapshot: CatalogSnapshot,
+    status: dict[str, Any],
+    expected_champion_slug: str,
+    loc: list[str | int] | None = None,
+) -> dict[str, Any]:
+    validated_slug = _validate_champion_slug(
+        context=context,
+        snapshot=snapshot,
+        champion_slug=status["champion_slug"],
+        loc=[*(loc or []), "champion_slug"],
+    )
+    if validated_slug != expected_champion_slug:
+        _raise_invalid_ai_result(
+            message="champion_slug must match the current context subject.",
+            loc=[*(loc or []), "champion_slug"],
+        )
+    base_stats = status["base_stats"]
+    return {
+        "champion_slug": validated_slug,
+        "base_stats": {
+            stat_key: float(base_stats[stat_key])
+            for stat_key in HERO_BASE_STAT_KEYS
+        },
+        "status_evaluation": status["status_evaluation"],
+    }
 
 
 def _assumed_match_duration_minutes(context: MatchContext) -> int:

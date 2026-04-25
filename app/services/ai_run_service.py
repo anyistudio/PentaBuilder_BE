@@ -240,13 +240,18 @@ class AIRunService:
                     run_type=run_type.value,
                     response_variant_hash=response_variant_hash,
                 )
-                if cache_entry is not None:
+                if cache_entry is not None and self._is_cached_result_compatible(
+                    run_type=run_type,
+                    result=cache_entry.structured_result,
+                ):
                     cache_entry.hit_count += 1
                     cache_entry.last_hit_at = datetime.now(tz=timezone.utc)
                     session.add(cache_entry)
                     session.commit()
                     cache_resolution = "strong_hit"
                     cached_result = cache_entry.structured_result
+                else:
+                    cache_entry = None
             else:
                 cache_entry = self.cache_service.lookup_reference_cache(
                     session,
@@ -908,6 +913,28 @@ class AIRunService:
         return (
             self.settings.resolved_primary_reasoning_provider,
             self.settings.resolved_primary_reasoning_model,
+        )
+
+    def _is_cached_result_compatible(
+        self,
+        *,
+        run_type: RunType,
+        result: dict[str, Any] | None,
+    ) -> bool:
+        if not isinstance(result, dict):
+            return False
+        if run_type != RunType.GAME_STATUS:
+            return True
+        if not isinstance(result.get("own_status"), dict):
+            return False
+        enemy_statuses = result.get("enemy_statuses")
+        if not isinstance(enemy_statuses, list):
+            return False
+        return all(
+            isinstance(enemy_status, dict)
+            and isinstance(enemy_status.get("base_stats"), dict)
+            and isinstance(enemy_status.get("status_evaluation"), str)
+            for enemy_status in enemy_statuses
         )
 
     def _load_baseline(self, session: Session, *, context: MatchContext) -> dict[str, Any] | None:

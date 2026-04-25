@@ -336,7 +336,8 @@ def _operation_block(
             sections.append("- Recommendation span: fill every remaining empty step.")
         else:
             sections.append(
-                f"- Recommendation span: fill exactly the next {recommendation_count} empty step(s)."
+                "- Recommendation span: fill exactly the next "
+                f"{recommendation_count} empty step(s)."
             )
             sections.append(
                 "- After those recommended steps, keep all later empty steps as null."
@@ -447,11 +448,13 @@ def _operation_block(
                     )
                 ),
                 (
-                    "- Estimation contract: output the user's kill cadence versus each enemy, "
-                    "each enemy's kill cadence versus the user, each enemy's tower push rate, "
-                    "and the user's tower push rate against each subject's current tower target. "
-                    "Keep the reasons anchored in currently owned items first, then explain how "
-                    "those items interact with kit and matchup."
+                    "- Estimation contract: first output 0-10 current base-stat profiles for "
+                    "the user's champion and every enemy champion, then use those estimates to "
+                    "output the user's kill cadence versus each enemy, each enemy's kill cadence "
+                    "versus the user, each enemy's tower push rate, and the user's tower push "
+                    "rate against each subject's current tower target. Keep the reasons anchored "
+                    "in currently owned items first, then explain how those items interact with "
+                    "kit, matchup, and the estimated stat profile."
                 ),
             ]
         )

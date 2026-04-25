@@ -31,7 +31,7 @@
 | `recommend_slot` | 只推荐单个槽位的最佳装备 | primary reasoning model | 否 |
 | `explain_slot` | 解释当前槽位为什么好/不好，以及更优替代 | primary reasoning model | 是 |
 | `compare_builds` | 比较 Build A 和 Build B 谁更优 | primary reasoning model | 否 |
-| `game_status` | 估算击杀节奏、推塔节奏和原因 | primary reasoning model | 否 |
+| `game_status` | 估算英雄 0-10 状态面板，并据此估算击杀/推塔节奏 | primary reasoning model | 否 |
 | `chat_followup` | 基于当前上下文做追问回答 | fast reasoning model | 是 |
 
 说明：
@@ -509,6 +509,7 @@ repair 不是重新跑整条 workflow，而是用已经有的上下文做一次�
 用途：
 
 - 估算当前对局在后续一段时间里的：
+  - 我方与每个敌人的 0-10 当前基础数值
   - 我方对每个敌人的击杀频率
   - 敌方对我的击杀频率
   - 我方推塔速度
@@ -528,16 +529,31 @@ repair 不是重新跑整条 workflow，而是用已经有的上下文做一次�
 
 - `summary`
 - `assumed_match_duration_minutes`
+- `own_status`
+  - `champion_slug`
+  - `base_stats`
+    - `health`
+    - `physical_attack`
+    - `magic_attack`
+    - `armor`
+    - `magic_resist`
+    - `armor_penetration`
+    - `magic_penetration`
+  - `status_evaluation`
 - `own_kill_frequency_vs_enemies`
 - `own_tower_push_percent_per_minute`
 - `own_tower_push_reason`
 - `enemy_statuses`
+  - 每个敌方条目同样包含 `base_stats` 和 `status_evaluation`
 
 特殊约束：
 
 - `assumed_match_duration_minutes` 必须严格等于：
   - `15`：ARAM
   - `30`：普通/排位
+- 所有 `base_stats` 数值必须在 `0-10` 之间
+- `base_stats` 表示当前英雄在所有英雄中的相对水平，不是精确游戏面板数值
+- 基础数值估算必须同时考虑英雄自身基线、当前已拥有装备和符文
 - `own_kill_frequency_vs_enemies` 必须完整覆盖当前所有敌方英雄，且不能重复
 - `enemy_statuses` 也必须完整覆盖当前所有敌方英雄，且不能重复
 - 击杀频率不能超过假定对局时长
@@ -548,6 +564,7 @@ prompt 侧的额外上下文：
 - 当前我方塔目标
 - 当前每个敌方的塔目标
 - 面向 prompt 的 compact 参数附录
+- 明确要求模型先估算 0-10 基础数值，再用这些估计支撑击杀频率和推塔速度
 - 规则上强调“理由优先锚定当前已拥有装备，再解释装备与英雄机制、对线/团战关系”
 - 若当前装备信息缺失，按“尚未做出第一件核心装”处理
 - 若符文信息缺失，按该英雄在当前模式下的默认符文处理

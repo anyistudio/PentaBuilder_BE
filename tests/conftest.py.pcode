@@ -1,0 +1,29 @@
+Class FakeLLMClient:
+- provide deterministic fake provider responses for backend tests.
+- for `game_status`, return the current response shape including own/enemy 0-10 base-stat estimates, status evaluations, kill cadence, tower pressure, and reasons.
+
+def _extract_run_type(prompt):
+    Read the run type from the prompt overview and default to `recommend_full_build`.
+
+def _extract_game(prompt):
+    Read the game label from the prompt overview and normalize it to the backend game enum value.
+
+def _extract_target_slot(prompt):
+    Read the requested slot index from task-specific context.
+
+def _extract_own_champion(prompt):
+    Read the own champion slug from the prompt overview.
+
+def _extract_enemy_slugs(prompt):
+    Read enemy champion slugs from the prompt overview.
+
+def _build_structured_payload(*, prompt, run_type):
+    Return deterministic structured payloads that satisfy each workflow contract.
+
+    IF `run_type` is `game_status`:
+        Include `own_status`
+        Include every enemy's `base_stats` and `status_evaluation`
+        Include existing kill/tower estimates
+
+pytest fixtures:
+- configure the test app, database, storage, catalog data, fake LLM provider, and auth helpers.

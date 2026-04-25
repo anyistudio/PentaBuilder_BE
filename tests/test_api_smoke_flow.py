@@ -158,9 +158,20 @@ def test_end_to_end_smoke_flow(configured_client: TestClient) -> None:
     assert game_status_response.status_code == 200
     game_status_data = game_status_response.json()["data"]
     assert game_status_data["result"]["assumed_match_duration_minutes"] == 30
-    assert game_status_data["result"]["own_kill_frequency_vs_enemies"][0]["enemy_champion_slug"] == "lol-zed"
+    assert game_status_data["result"]["own_status"]["champion_slug"] == "lol-ahri"
+    assert 0 <= game_status_data["result"]["own_status"]["base_stats"]["magic_attack"] <= 10
+    assert (
+        game_status_data["result"]["own_kill_frequency_vs_enemies"][0]["enemy_champion_slug"]
+        == "lol-zed"
+    )
     assert game_status_data["result"]["enemy_statuses"][0]["champion_slug"] == "lol-zed"
-    assert game_status_data["result"]["parameter_appendix"]["enemy_team"][0]["build"][0]["item_slug"] == "lol-eclipse"
+    assert "base_stats" in game_status_data["result"]["enemy_statuses"][0]
+    assert (
+        game_status_data["result"]["parameter_appendix"]["enemy_team"][0]["build"][0][
+            "item_slug"
+        ]
+        == "lol-eclipse"
+    )
 
     session_list_response = configured_client.get("/api/v1/sessions", headers=headers)
     assert session_list_response.status_code == 200

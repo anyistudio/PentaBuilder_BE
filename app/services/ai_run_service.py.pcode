@@ -3,7 +3,8 @@ Class AIRunService:
 - create run metadata with cache keys and optional bound session ownership checks
 - append debug log entries when an AI run is created, including cache resolution and explicit cache-hit records even when no provider LLM call is needed
 - derive one deterministic LLM debug filename from the run start timestamp plus the last four characters of run_id, then carry that file name together with session_id/run_id through every LLM debug scope so the full trace stays in one log file
-- short-circuit strong cache hits while still updating transcripts, leaderboard, and metrics
+- short-circuit compatible strong cache hits while still updating transcripts, leaderboard, and metrics
+- bypass stale `game_status` cache payloads that do not contain the current hero stat-profile fields
 - execute the LangGraph pipeline with model selection derived from combined `provider:model_name` config refs, injected baseline/reference/calibration/session context, optional precomputed tool state, and a dedicated slug-selector model when configured
 - post-process completed AI text with the current catalog and response preferences so canonical slugs inside user-visible strings become localized names while machine-readable slug fields stay unchanged
 - write ai_runs metadata and artifacts including prompt payloads plus tool traces/facts
