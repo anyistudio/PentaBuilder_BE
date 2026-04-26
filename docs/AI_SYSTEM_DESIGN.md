@@ -1335,7 +1335,7 @@ game_localization/
       "armor_penetration": 1.0,
       "magic_penetration": 6.2
     },
-    "status_evaluation": "阿狸当前法术爆发和机动性较好，但身板仍偏脆，需要靠距离和关键保命装打窗口。"
+    "status_evaluation": "阿狸的魔法攻击优势主要来自法师本身的爆发定位和当前法强装备，防御偏低则更多是英雄底子与尚未补防装造成的。"
   },
   "own_kill_frequency_vs_enemies": [
     {
@@ -1358,7 +1358,7 @@ game_localization/
         "armor_penetration": 6.8,
         "magic_penetration": 0.8
       },
-      "status_evaluation": "劫当前物理爆发和穿甲压力高，但抗性和推塔持续性并不突出。",
+      "status_evaluation": "劫的物理攻击和穿甲优势主要来自刺客本身的 AD 爆发画像与当前穿甲装，抗性没有明显装备支撑所以仍接近中低水平。",
       "estimated_minutes_per_kill_on_user": 4.4,
       "kill_reason": "劫的单点爆发和先手节奏更稳定，但仍受你当前位置与保命手段影响。",
       "tower_push_percent_per_minute": 2.9,
@@ -1374,6 +1374,7 @@ game_localization/
 - 其中包含当前涉及英雄、装备、符文的详细参数快照，直接来自 catalog 数据，不依赖模型复述
 - `base_stats` 的所有字段范围都是 `0-10`，表示相对水平，不表示精确游戏面板数值
 - 模型必须先估算 `base_stats` 和 `status_evaluation`，再用这些估算支撑击杀频率与推塔速度
+- `status_evaluation` 必须说明基础数值差异来自英雄自然属性 / 当前状态 / 具体已拥有装备中的哪些因素，例如某件装备拉高魔法攻击、护甲、穿透或生命值
 - `own_tower_push_percent_per_minute` 不再表示整局统一推塔能力，而是“我方当前目标塔”的每分钟推进百分比
 - `enemy_statuses[*].tower_push_percent_per_minute` 表示“对应敌方英雄当前目标塔”的每分钟推进百分比
 - `payload` 可选传入：

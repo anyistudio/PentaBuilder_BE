@@ -514,8 +514,10 @@ def get_result_response_schema(
                         "status_evaluation": {
                             "type": "string",
                             "description": (
-                                "One short status evaluation for the own champion's current "
-                                "state and item spikes."
+                                "One short causal status evaluation for the own champion. "
+                                "Explain which champion baseline traits, current state signals, "
+                                "and specific owned items most affect the 0-10 stat comparison "
+                                "against the relevant enemy profile."
                             ),
                         },
                     },
@@ -582,8 +584,12 @@ def get_result_response_schema(
                             "status_evaluation": {
                                 "type": "string",
                                 "description": (
-                                    "One short status evaluation for this enemy champion's "
-                                    "current state and item spikes."
+                                    "One short causal status evaluation for this enemy "
+                                    "champion. "
+                                    "Explain which champion baseline traits, current state "
+                                    "signals, "
+                                    "and specific owned items most affect the 0-10 stat comparison "
+                                    "against the user's current profile."
                                 ),
                             },
                             "estimated_minutes_per_kill_on_user": {

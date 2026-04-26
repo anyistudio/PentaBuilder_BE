@@ -788,6 +788,7 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
 - `base_stats` 所有数值范围为 `0-10`
 - `base_stats` 表示当前英雄状态在所有英雄中的相对水平，不是精确游戏面板数值
 - 后端 prompt 会要求模型先估算 `base_stats`，再基于这些估算推导击杀速度和推塔速度
+- `status_evaluation` 会说明基础数值强弱差异主要来自英雄本身属性、当前状态，还是具体已拥有装备的属性加成
 - 后端会额外追加一个 deterministic `parameter_appendix`
   - 包含当前涉及英雄、装备、符文的详细参数快照
   - 该 appendix 直接来自 catalog 数据，不依赖模型回填
