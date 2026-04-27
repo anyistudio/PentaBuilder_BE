@@ -9,8 +9,8 @@ You must:
 6. Then use those estimated base stats as an explicit input for kill cadence and tower pressure.
 7. For each enemy champion, estimate how often they can kill the user's champion, expressed as minutes per kill.
 8. For the user's champion, estimate how often they can kill each enemy champion, expressed as minutes per kill.
-9. For each enemy champion, estimate tower push speed as percent of that champion's current target objective per minute.
-10. For the user's champion, estimate tower push speed as percent of the user's current target objective per minute.
+9. For each enemy champion, estimate tower push speed as net percent of that champion's current target objective per minute.
+10. For the user's champion, estimate tower push speed as net percent of the user's current target objective per minute.
 11. Keep the summary short and focused on the biggest current item-spike and stat-profile signals.
 12. Write user-facing text in direct, easy-to-understand gamer language.
 13. For the user's build-facing comments, focus first on the user's latest owned item:
@@ -25,7 +25,13 @@ Important constraints:
 - The 0-10 base-stat values are relative rankings across all champions in the current game, not exact raw game numbers.
 - Make the user's and enemy's stat profiles comparable: if one side has clearly stronger current items for a stat, reflect that difference in the 0-10 values.
 - Let high health/armor/magic_resist lower incoming kill pressure, and let high physical_attack/magic_attack/penetration raise outgoing kill pressure.
-- Let tower pressure follow the current damage profile and item spikes; basic attack and sustained damage usually matter more than one-shot burst.
+- Treat tower pressure as practical net tower progress, not raw turret DPS. Start from the champion's tower-hitting profile, but then adjust for whether their current items and stat profile let them actually stand near the wave and hit the tower.
+- Let tower pressure follow the current damage profile and item spikes; basic attack speed, sustained physical/AP damage, spellblade effects, ranged uptime, waveclear, and minion access usually matter more than one-shot burst.
+- Before writing any tower_push_percent_per_minute, compare the user's current strength against the relevant enemy strength. If a champion's build is wrong, too greedy, too squishy, behind on damage/penetration, or likely to get killed/forced off wave, reduce their tower push even if their kit could hit towers quickly in a vacuum.
+- Conversely, if a champion has a clear combat/item advantage, strong survivability, good waveclear, or can safely zone the opponent, raise their practical tower pressure because they get more uncontested tower windows.
+- Explicitly account for push obstacles: dying before the wave crashes, being chunked out, lacking minions, losing side-lane control, poor waveclear, weak dueling into the visible enemy, or needing to respect enemy engage/CC.
+- Do not estimate tower pressure as if this were a pure 1v1 tower-hitting test. Assume a normal balanced 5v5 match: the visible champions are the focal matchup for this analysis, while the other eight players are present and broadly competent unless the provided context says otherwise.
+- Assume teammates on both sides are roughly evenly matched and not making major mistakes. Do not invent a solo-lane duel, isolated custom game, or permanent 1v1 split unless the environment explicitly says so.
 - Ground every estimate first in the champion's current owned items and item spikes, then connect those items to champion kit, range, crowd control, burst pattern, sustained DPS, survivability, mobility, rune effects, and the current game mode.
 - In every reason field, explicitly mention the most relevant current item(s), completed spike(s), or important missing item breakpoint when that is what changes the estimate.
 - In the user's `own_tower_push_reason` and each `own_kill_frequency_vs_enemies[*].reason`, make the latest owned item the main talking point whenever the user has at least one owned item.

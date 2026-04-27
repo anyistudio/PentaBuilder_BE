@@ -1378,6 +1378,8 @@ game_localization/
 - `status_evaluation` 必须说明基础数值差异来自英雄自然属性 / 当前状态 / 具体已拥有装备中的哪些因素，例如某件装备拉高魔法攻击、护甲、穿透或生命值
 - `own_tower_push_percent_per_minute` 不再表示整局统一推塔能力，而是“我方当前目标塔”的每分钟推进百分比
 - `enemy_statuses[*].tower_push_percent_per_minute` 表示“对应敌方英雄当前目标塔”的每分钟推进百分比
+- 推塔速度是实际 5v5 对局中的净推进速度，不是裸打塔 DPS；模型必须先看当前装备与 0-10 状态面板形成的实力对比，再根据是否容易被击杀、被消耗回城、缺兵线、丢线权、清线差、被控制先手或被迫离塔来修正
+- 即使输入里只显示一个敌方英雄，也默认这是匹配均衡的 5v5 对局；其他队友在场且没有重大失误，不能把场景当成 1v1 Solo 或无人干扰打塔测试
 - `payload` 可选传入：
   - `own_current_tower_target`
   - `enemy_current_tower_targets`

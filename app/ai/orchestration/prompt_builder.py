@@ -253,6 +253,12 @@ def _match_overview_block(
         f"- Own champion slug: {context.own_champion_slug}",
         f"- Enemy champion slugs: {enemy_labels}",
         f"- Environment tags: {environment_tags}",
+        (
+            "- Match environment assumption: treat this as a normal balanced 5v5 match, "
+            "not an isolated 1v1 or Solo test. The visible champions are the focal matchup, "
+            "while the other players on both teams are assumed present, broadly even, and not "
+            "making major mistakes unless the provided context explicitly says otherwise."
+        ),
     ]
     if context.environment.free_text:
         lines.append(f"- Environment free text: {context.environment.free_text}")
@@ -462,9 +468,13 @@ def _operation_block(
                     "the user's champion and every enemy champion, then use those estimates to "
                     "output the user's kill cadence versus each enemy, each enemy's kill cadence "
                     "versus the user, each enemy's tower push rate, and the user's tower push "
-                    "rate against each subject's current tower target. Keep the reasons anchored "
-                    "in currently owned items first, then explain how those items interact with "
-                    "kit, matchup, and the estimated stat profile."
+                    "rate against each subject's current tower target. Treat tower push as net "
+                    "practical progress in a 5v5 game, not raw tower-hitting DPS: adjust it by "
+                    "combat strength, item correctness, survivability, wave control, minion "
+                    "access, and the chance of being killed, chunked out, zoned, or forced off "
+                    "the tower. Keep the reasons anchored in currently owned items first, then "
+                    "explain how those items interact with kit, matchup, and the estimated stat "
+                    "profile."
                 ),
             ]
         )
