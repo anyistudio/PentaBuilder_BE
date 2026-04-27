@@ -2,6 +2,7 @@ Module result_contracts.py:
 - define the strict structured output contracts for every online run type
 - expose provider-side JSON schemas, with the most heavily used `recommend_full_build` and `game_status` descriptions kept intentionally compact
 - keep `recommend_full_build.recommended_runes` as a required placeholder field so strict OpenAI structured outputs stay schema-valid while the model still returns empty arrays
+- require `explain_slot` to return an S/A/B/C/F item rating plus a concise rating reason in addition to its slot explanation and alternative recommendation
 - require `game_status` to return 0-10 current base-stat estimates and short causal status evaluations that attribute stat differences to champion baseline, current state, and specific owned items
 - validate slugs, build-slot invariants, limited-span recommend-full-build rules, rune selections, and compare-build winner payloads before results leave the graph
 - validate `game_status` status subjects against the current match context and normalize base-stat values as floats

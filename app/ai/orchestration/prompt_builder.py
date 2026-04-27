@@ -374,6 +374,16 @@ def _operation_block(
                 snapshot,
             )
         )
+        if run_type == RunType.EXPLAIN_SLOT and "selected_item_owned" in operation_context:
+            ownership_state = (
+                "already bought"
+                if operation_context.get("selected_item_owned")
+                else "planned/not bought yet"
+            )
+            sections.append(
+                "- Current slot ownership state: "
+                + ownership_state
+            )
 
     if run_type == RunType.COMPARE_BUILDS:
         comparison_context = operation_context.get("comparison_context", {})

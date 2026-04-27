@@ -729,6 +729,13 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
 #### `explain_slot`
 
 - `payload.slot_index` required
+- 可选：`payload.selected_item_owned`
+  - boolean
+  - 前端在评价刚选择的装备时可传入，提示该装备是已购买还是仅排产
+- 返回结果会包含 `item_rating` 和 `item_rating_reason`
+  - `item_rating`: `"S" | "A" | "B" | "C" | "F"`
+  - `S` 表示针对性极强，`F` 表示方向完全错误
+  - `item_rating_reason` 是可直接展示在装备卡片附近的简短评级理由
 
 #### `compare_builds`
 

@@ -27,6 +27,8 @@ HERO_BASE_STAT_KEYS = (
     "armor_penetration",
     "magic_penetration",
 )
+ITEM_RATING_VALUES = ("S", "A", "B", "C", "F")
+ItemRating = Literal["S", "A", "B", "C", "F"]
 
 
 class RuneSelectionResult(BaseModel):
@@ -107,6 +109,8 @@ class ExplainSlotResult(BaseModel):
     slot_index: int = Field(ge=0, le=MAX_BUILD_SLOT_COUNT - 1)
     current_item_slug: str | None = None
     is_current_choice_good: bool
+    item_rating: ItemRating
+    item_rating_reason: str = Field(min_length=1)
     best_item_slug: str | None = None
     summary: str = Field(min_length=1)
     why_current_choice: str = Field(min_length=1)
@@ -376,6 +380,20 @@ def get_result_response_schema(
                     "type": "boolean",
                     "description": "Whether the current choice is good enough for this context.",
                 },
+                "item_rating": {
+                    "type": "string",
+                    "enum": list(ITEM_RATING_VALUES),
+                    "description": (
+                        "System item grade for the current choice: S, A, B, C, or F."
+                    ),
+                },
+                "item_rating_reason": {
+                    "type": "string",
+                    "description": (
+                        "One concise reason for the item grade, grounded in matchup, "
+                        "current build state, and better alternatives when relevant."
+                    ),
+                },
                 "best_item_slug": {
                     "type": ["string", "null"],
                     "description": "The best item for this slot if a better option exists.",
@@ -416,6 +434,8 @@ def get_result_response_schema(
                 "slot_index",
                 "current_item_slug",
                 "is_current_choice_good",
+                "item_rating",
+                "item_rating_reason",
                 "best_item_slug",
                 "summary",
                 "why_current_choice",
@@ -851,6 +871,10 @@ def validate_run_result(
         result["build"] = list(context.own_build)
         result["runes"] = None
         result["explanations"] = [
+            {
+                "target": f"slot:{requested_slot_index}:rating",
+                "text": result["item_rating_reason"],
+            },
             {
                 "target": f"slot:{requested_slot_index}",
                 "text": result["why_current_choice"],

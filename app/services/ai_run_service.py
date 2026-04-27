@@ -54,6 +54,8 @@ STREAMABLE_RUN_TYPES = {
     RunType.EXPLAIN_SLOT,
     RunType.CHAT_FOLLOWUP,
 }
+EXPLAIN_SLOT_MODEL_PROVIDER = "openai"
+EXPLAIN_SLOT_MODEL_NAME = "gpt-5.4"
 
 
 @dataclass
@@ -905,6 +907,8 @@ class AIRunService:
                 provider_name_override or self.settings.resolved_primary_reasoning_provider,
                 model_name_override or self.settings.resolved_primary_reasoning_model,
             )
+        if run_type == RunType.EXPLAIN_SLOT:
+            return (EXPLAIN_SLOT_MODEL_PROVIDER, EXPLAIN_SLOT_MODEL_NAME)
         if run_type == RunType.CHAT_FOLLOWUP:
             return (
                 self.settings.resolved_fast_reasoning_provider,
@@ -923,6 +927,12 @@ class AIRunService:
     ) -> bool:
         if not isinstance(result, dict):
             return False
+        if run_type == RunType.EXPLAIN_SLOT:
+            return (
+                result.get("item_rating") in {"S", "A", "B", "C", "F"}
+                and isinstance(result.get("item_rating_reason"), str)
+                and bool(result.get("item_rating_reason"))
+            )
         if run_type != RunType.GAME_STATUS:
             return True
         if not isinstance(result.get("own_status"), dict):

@@ -29,14 +29,14 @@
 | `evaluate_build` | 评价当前出装并给出更优方向 | primary reasoning model | 否 |
 | `recommend_full_build` | 生成完整 build order + runes | primary reasoning model | 是 |
 | `recommend_slot` | 只推荐单个槽位的最佳装备 | primary reasoning model | 否 |
-| `explain_slot` | 解释当前槽位为什么好/不好，以及更优替代 | primary reasoning model | 是 |
+| `explain_slot` | 解释当前槽位为什么好/不好，返回装备评级和更优替代 | `openai:gpt-5.4` | 是 |
 | `compare_builds` | 比较 Build A 和 Build B 谁更优 | primary reasoning model | 否 |
 | `game_status` | 估算英雄 0-10 状态面板，并据此估算击杀/推塔节奏 | primary reasoning model | 否 |
 | `chat_followup` | 基于当前上下文做追问回答 | fast reasoning model | 是 |
 
 说明：
 
-- 除 `chat_followup` 外，在线 run 默认都走 `PRIMARY_REASONING_MODEL=provider:model_name`。
+- 除 `chat_followup` 和固定走 `openai:gpt-5.4` 的 `explain_slot` 外，在线 run 默认都走 `PRIMARY_REASONING_MODEL=provider:model_name`。
 - `chat_followup` 默认走 `FAST_REASONING_MODEL=provider:model_name`。
 - `provider_name_override` / `model_name_override` 只在内部 job、benchmark 或显式覆盖时使用。
 
@@ -435,20 +435,25 @@ repair 不是重新跑整条 workflow，而是用已经有的上下文做一次�
 
 - 判断当前某个槽位的现有选择是否合理
 - 如有必要，指出更好的替代项
+- 给当前装备返回 `S/A/B/C/F` 系统评级和一句可展示的评级理由
 
 请求 payload：
 
 - `slot_index`
+- 可选 `selected_item_owned`，用于提示该装备是已购买还是仅排产
 
 默认工具策略：
 
 - 始终允许工具
+- 默认模型固定为 `openai:gpt-5.4`
 
 结果合同：
 
 - `slot_index`
 - `current_item_slug`
 - `is_current_choice_good`
+- `item_rating`
+- `item_rating_reason`
 - `best_item_slug`
 - `summary`
 - `why_current_choice`

@@ -2,6 +2,7 @@ Function build_prompt_package:
 - assemble shared prompts plus run-specific prompts for four modes, but only inject tool-planning blocks when the prompt is actually planning tools
 - inject only useful context blocks: match overview, context bundle, task-specific fields, baseline, calibration, reference summary, session memory, tool facts, and localization mappings
 - describe `recommend_full_build` as a fixed-slot array workflow whose filled span can be limited by `recommendation_count`
+- include the target slot ownership state for `explain_slot` when the frontend is rating a newly selected planned or purchased item
 - harden tool-planning instructions so the model must return exactly one top-level JSON object, use `tool_name`/`arguments`, and avoid leaking final-answer fields during planning
 - keep `game_status` prompts compact by stripping duplicated champion profiles from the context block and by transforming the appendix into a prompt-only compact snapshot
 - tell `game_status` to estimate 0-10 champion stat profiles before deriving kill cadence and tower pressure

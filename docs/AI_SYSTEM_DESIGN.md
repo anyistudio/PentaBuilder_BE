@@ -1099,10 +1099,11 @@ Task: Explain the current choice for slot {slot_index}.
 
 You must:
 1. Judge whether the current item is good or not under this context.
-2. If it is not the best choice, name the best item.
-3. Explain why the current choice works or fails.
-4. Explain why the best choice is better.
-5. You may mention linked earlier-slot adjustments if they materially matter.
+2. Return an S/A/B/C/F item rating and a concise rating reason.
+3. If it is not the best choice, name the best item.
+4. Explain why the current choice works or fails.
+5. Explain why the best choice is better.
+6. You may mention linked earlier-slot adjustments if they materially matter.
 ```
 
 ### E. `compare_builds`
@@ -1448,6 +1449,7 @@ game_localization/
    - `batch_get_entities(candidate items)`
 4. 输出：
    - 当前项是否好
+   - `S/A/B/C/F` 装备评级和一句评级理由
    - 最佳项是什么
    - 为什么
 
@@ -1611,7 +1613,7 @@ For this batch:
 - `evaluate_build` -> `primary_reasoning_model`
 - `recommend_full_build` -> `primary_reasoning_model`
 - `recommend_slot` -> `primary_reasoning_model`
-- `explain_slot` -> `primary_reasoning_model`
+- `explain_slot` -> fixed `openai:gpt-5.4`
 - `compare_builds` -> `primary_reasoning_model`
 - `game_status` -> `primary_reasoning_model`
 - `chat_followup` -> `fast_reasoning_model` 或 `primary_reasoning_model`
