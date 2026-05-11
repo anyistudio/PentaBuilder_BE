@@ -1,8 +1,11 @@
 Class CatalogEntityType:
 - enumerate champion/item/rune lookup scopes
 
+Class CatalogAbilitySummary:
+- minimal ability display payload including optional Chinese quick explanation
+
 Class CatalogEntitySummary:
-- minimal display payload for catalog lists
+- minimal display payload for catalog lists and detail panels
 
 Class CatalogLookupResult:
 - extend summary with entity_type and game for mixed lookup results

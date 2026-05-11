@@ -21,7 +21,14 @@ Function _resolve_version:
 - use the active version when query data_version is omitted
 
 Function _format_entity:
-- choose display name and aliases for one language/style
+- choose display name, aliases, localized descriptions, and quick explanations for one language/style
+
+Function _build_ability_summaries:
+- sort ability payloads into passive/Q/W/E/R order
+- preserve quick_zh so Chinese clients can show player-facing skill shorthand
+
+Function _localized_payload_text:
+- choose zh-CN or English text from the raw catalog payload with fallback
 
 Function _score_entity:
 - rank exact match above prefix match above substring match

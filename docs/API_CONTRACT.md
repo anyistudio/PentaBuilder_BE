@@ -431,17 +431,28 @@ admin 接口不依赖 Clerk role；v1 直接使用环境变量中的固定管理
   "data": {
     "game": "lol",
     "data_version": "full-20260412",
-    "items": [
+    "champions": [
       {
-        "slug": "lol-luden-s-echo",
-        "name": "卢登的回声",
-        "aliases": ["卢登"],
-        "icon_url": "https://..."
+        "slug": "lol-ashe",
+        "name": "艾希",
+        "description": "艾希是一名依靠减速和远程开团的射手。",
+        "quick_explanation": "W消耗，E看视野，大招远距离开人。",
+        "abilities": [
+          {
+            "skill": "Q",
+            "name": "射手的专注",
+            "blurb": "Ashe builds Focus by attacking.",
+            "quick_zh": "Q就是攒层后开强化普攻，站着输出更疼。"
+          }
+        ]
       }
     ]
   }
 }
 ```
+
+`items` 响应使用同一个 summary row 结构；装备行可包含 `description`、
+`quick_explanation`、`cost`、`stats` 和 `main_attributes`。
 
 ## 5.6 `GET /api/v1/catalog/{game}/lookup`
 

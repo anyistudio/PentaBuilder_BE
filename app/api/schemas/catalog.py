@@ -18,6 +18,7 @@ class CatalogAbilitySummary(BaseModel):
     name: str
     blurb: str | None = None
     damage_type: str | None = None
+    quick_zh: str | None = None
 
 
 class CatalogEntitySummary(BaseModel):
@@ -35,6 +36,7 @@ class CatalogEntitySummary(BaseModel):
     abilities: list[CatalogAbilitySummary] = Field(default_factory=list)
     cost: str | None = None
     description: str | None = None
+    quick_explanation: str | None = None
     stats: list[str] = Field(default_factory=list)
     main_attributes: list[str] = Field(default_factory=list)
 

@@ -219,6 +219,18 @@ class CatalogService:
                 range_type=range_type,
                 resource=resource,
                 abilities=abilities,
+                description=self._localized_payload_text(
+                    raw_payload,
+                    language=language,
+                    zh_key="description_zh",
+                    en_key="description",
+                ),
+                quick_explanation=self._localized_payload_text(
+                    raw_payload,
+                    language=language,
+                    zh_key="quick_explanation",
+                    en_key="quick_explanation_en",
+                ),
             )
 
         if entity.entity_type == CatalogEntityType.ITEM.value:
@@ -227,7 +239,18 @@ class CatalogService:
             return CatalogEntitySummary(
                 **base_payload,
                 cost=self._text_or_none(attributes.get("Cost")),
-                description=self._text_or_none(raw_payload.get("description")),
+                description=self._localized_payload_text(
+                    raw_payload,
+                    language=language,
+                    zh_key="description_zh",
+                    en_key="description",
+                ),
+                quick_explanation=self._localized_payload_text(
+                    raw_payload,
+                    language=language,
+                    zh_key="quick_explanation",
+                    en_key="quick_explanation_en",
+                ),
                 stats=stats,
                 main_attributes=self._build_item_main_attributes(
                     attributes=attributes,
@@ -386,9 +409,26 @@ class CatalogService:
                     or self._text_or_none(ability.get("description"))
                 ),
                 damage_type=self._text_or_none(ability.get("damage_type")),
+                quick_zh=self._text_or_none(ability.get("quick_zh")),
             )
             for ability in ordered[:5]
         ]
+
+    def _localized_payload_text(
+        self,
+        raw_payload: dict[str, Any],
+        *,
+        language: Language,
+        zh_key: str,
+        en_key: str,
+    ) -> str | None:
+        if language == Language.ZH_CN:
+            return self._text_or_none(raw_payload.get(zh_key)) or self._text_or_none(
+                raw_payload.get(en_key)
+            )
+        return self._text_or_none(raw_payload.get(en_key)) or self._text_or_none(
+            raw_payload.get(zh_key)
+        )
 
     def _build_champion_summary(
         self,
